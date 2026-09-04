@@ -9,6 +9,7 @@ import {
   Check,
   Code2,
   Dumbbell,
+  Flame,
   HeartPulse,
   Plus,
   Scale,
