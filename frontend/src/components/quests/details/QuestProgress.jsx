@@ -1,0 +1,4 @@
+import Card from '../../common/Card.jsx'
+import ProgressBar from '../../common/ProgressBar.jsx'
+function QuestProgress({ quest }) { if (!quest.target) return <Card variant="glass"><p className="label-caps text-cyan-300/70">QUEST PROGRESS</p><div className="mt-4 flex items-center justify-between"><span className="text-sm text-slate-400">COMPLETION TYPE</span><span className="font-mono text-sm text-white">Manual</span></div></Card>; const percentage = Math.round((quest.progress / quest.target) * 100); return <Card variant="glass"><div className="flex items-center justify-between"><p className="label-caps text-cyan-300/70">QUEST PROGRESS</p><span className="font-mono text-sm text-cyan-200">{percentage}%</span></div><p className="mt-4 font-mono text-xl text-white">{quest.progress} / {quest.target} {quest.unit}</p><ProgressBar value={quest.progress} max={quest.target} tone="quest" className="mt-4" /></Card> }
+export default QuestProgress

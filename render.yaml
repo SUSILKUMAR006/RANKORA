@@ -1,0 +1,28 @@
+# ==============================================================================
+# RANKORA - Render Infrastructure as Code (Blueprint)
+# Documentation: https://render.com/docs/blueprint-spec
+# ==============================================================================
+
+services:
+  # ----------------------------------------------------------------------------
+  # Option 1: Unified Fullstack Web Service (Single Service - Recommended)
+  # Builds both React frontend and Node.js backend into a single Web Service
+  # ----------------------------------------------------------------------------
+  - type: web
+    name: rankora
+    runtime: node
+    plan: free
+    region: oregon
+    buildCommand: npm run render-build
+    startCommand: npm run start
+    healthCheckPath: /api/health
+    autoDeploy: true
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: MONGODB_URI
+        sync: false # User must provide their MongoDB Atlas connection string in Render Dashboard
+      - key: JWT_SECRET
+        generateValue: true # Render automatically generates a secure random 32-character secret
+      - key: JWT_EXPIRES_IN
+        value: 30d

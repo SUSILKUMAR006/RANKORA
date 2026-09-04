@@ -1,0 +1,5 @@
+import { BadgeCheck, CalendarDays, Clock3, Gauge, Layers3, ShieldCheck, Tag } from 'lucide-react'
+import Badge from '../../common/Badge.jsx'
+import Card from '../../common/Card.jsx'
+function QuestInformation({ quest }) { const items = [[Tag, 'Category', quest.category], [Gauge, 'Difficulty', quest.difficulty], [Layers3, 'Type', quest.type], [ShieldCheck, 'Verification', quest.verification], [Clock3, 'Estimated time', quest.estimatedTime], [CalendarDays, 'Available', quest.available], [BadgeCheck, 'Status', quest.status]]; return <Card variant="glass"><p className="label-caps text-cyan-300/70">QUEST INFORMATION</p><div className="mt-5 space-y-1">{items.map(([Icon, label, value]) => <div key={label} className="flex items-center justify-between gap-4 border-b border-white/5 py-3 last:border-0"><span className="flex items-center gap-2 text-sm text-slate-500"><Icon size={15} />{label}</span><span className="text-right text-sm text-slate-200">{value}</span></div>)}</div><Badge tone="category" className="mt-4">{quest.type} objective</Badge></Card> }
+export default QuestInformation
