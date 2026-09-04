@@ -5,6 +5,7 @@ import {
   Bell,
   BookOpen,
   CircleUserRound,
+  Coins,
   Flame,
   LayoutDashboard,
   LogOut,
@@ -30,6 +31,7 @@ import { requiredXpForLevel } from '../../utils/xpUtils.js'
 const navigation = [
   { label: 'Dashboard', path: '/dashboard', icon: LayoutDashboard },
   { label: 'Daily Quests', path: '/quests', icon: Swords },
+  { label: 'Expenses', path: '/expenses', icon: Coins },
   { label: 'Analytics', path: '/analytics', icon: BarChart3 },
   { label: 'Diary', path: '/diary', icon: BookOpen },
   { label: 'Progress', path: '/progress', icon: Sparkles },

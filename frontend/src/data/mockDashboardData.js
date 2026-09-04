@@ -1,4 +1,4 @@
-import { Activity, BookOpen, Camera, Droplets, Dumbbell, Plus } from 'lucide-react'
+import { Activity, BookOpen, Camera, Coins, Droplets, Dumbbell, Plus } from 'lucide-react'
 
 export const fallbackPlayer = {
   playerName: 'PLAYER',
@@ -42,6 +42,7 @@ export const dashboardData = {
 
 export const quickActions = [
   { label: 'Add Quest', detail: 'Set a new objective', icon: Plus, path: '/quests/create' },
+  { label: 'Track Expenses', detail: 'Manage treasury telemetry', icon: Coins, path: '/expenses' },
   { label: 'Write Diary', detail: "Capture today's reflection", icon: BookOpen, path: '/diary' },
   { label: 'Add Progress', detail: 'Record a milestone', icon: Camera, path: '/progress' },
   { label: 'View Analytics', detail: 'Inspect your patterns', icon: Activity, path: '/analytics' },

@@ -13,6 +13,7 @@ import analyticsRoutes from './routes/analyticsRoutes.js'
 import authRoutes from './routes/authRoutes.js'
 import bossRoutes from './routes/bossRoutes.js'
 import diaryRoutes from './routes/diaryRoutes.js'
+import expenseRoutes from './routes/expenseRoutes.js'
 import notificationRoutes from './routes/notificationRoutes.js'
 import progressRoutes from './routes/progressRoutes.js'
 import questRoutes from './routes/questRoutes.js'
@@ -75,6 +76,7 @@ app.use('/api/users', userRoutes)
 app.use('/api/quests', questRoutes)
 app.use('/api/boss', bossRoutes)
 app.use('/api/diary', diaryRoutes)
+app.use('/api/expenses', expenseRoutes)
 app.use('/api/progress', progressRoutes)
 app.use('/api/achievements', achievementRoutes)
 app.use('/api/notifications', notificationRoutes)

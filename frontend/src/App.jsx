@@ -12,6 +12,7 @@ import CreateQuestPage from './pages/CreateQuestPage.jsx'
 import DashboardPage from './pages/DashboardPage.jsx'
 import DesignSystemPage from './pages/DesignSystemPage.jsx'
 import DiaryPage from './pages/DiaryPage.jsx'
+import ExpenseTrackerPage from './pages/ExpenseTrackerPage.jsx'
 import ProfilePage from './pages/ProfilePage.jsx'
 import ProgressPage from './pages/ProgressPage.jsx'
 import QuestDetailsPage from './pages/QuestDetailsPage.jsx'
@@ -71,11 +72,12 @@ function App() {
                     <Route path="/quests" element={<QuestsPage />} />
                     <Route path="/quests/create" element={<CreateQuestPage />} />
                     <Route path="/quests/:id" element={<QuestDetailsPage />} />
-                    <Route path="/progress" element={<ProgressPage />} />
+                    <Route path="/expenses" element={<ExpenseTrackerPage />} />
+                    <Route path="/analytics" element={<AnalyticsPage />} />
                     <Route path="/diary" element={<DiaryPage />} />
+                    <Route path="/progress" element={<ProgressPage />} />
                     <Route path="/achievements" element={<AchievementsPage />} />
                     <Route path="/boss" element={<BossPage />} />
-                    <Route path="/analytics" element={<AnalyticsPage />} />
                     <Route path="/profile" element={<ProfilePage />} />
                     <Route path="/settings" element={<SettingsPage />} />
                     <Route path="/design-system" element={<DesignSystemPage />} />
