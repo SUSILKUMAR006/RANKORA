@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { fallbackPlayer, getStoredPlayer } from '../data/mockDashboardData.js'
 import { defaultRoutineQuests, getQuestIcon } from '../data/mockQuests.js'
-import { applyXpReward, parseStatReward } from '../utils/xpUtils.js'
+import { applyXpReward, applyStreakUpdate, parseStatReward } from '../utils/xpUtils.js'
 import { evaluateAchievements } from '../utils/achievementUtils.js'
 import { applyQuestDamageToBoss } from '../utils/bossUtils.js'
 import { addNotification } from '../utils/notificationUtils.js'
@@ -192,7 +192,7 @@ export function completeQuest(questId, options = {}) {
   Object.entries(reward).forEach(([stat, amount]) => {
     stats[stat] = (Number(stats[stat]) || 0) + amount
   })
-  const player = { ...xpResult.player, stats }
+  let player = { ...xpResult.player, stats }
   const completedQuest = {
     ...quest,
     status: 'completed',
@@ -223,6 +223,12 @@ export function completeQuest(questId, options = {}) {
   })
 
   persistQuests(updatedQuests)
+
+  const allDailyQuestsCompleted = updatedQuests.every((item) => item.status === 'completed')
+  if (allDailyQuestsCompleted) {
+    player = applyStreakUpdate(player, now)
+  }
+
   localStorage.setItem(PLAYER_STORAGE_KEY, JSON.stringify(player))
   const bossDamageResult = applyQuestDamageToBoss(completedQuest, `${quest.id || 'quest'}-${completedQuest.completedAt}`)
   const achievementResult = evaluateAchievements()

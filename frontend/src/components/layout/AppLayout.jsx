@@ -26,7 +26,7 @@ import RankBadge from '../player/RankBadge.jsx'
 import { fallbackPlayer, getStoredPlayer } from '../../data/mockDashboardData.js'
 import { useNotifications } from '../../hooks/useNotifications.js'
 import { authService } from '../../services/authService.js'
-import { requiredXpForLevel } from '../../utils/xpUtils.js'
+import { getEffectiveStreak, requiredXpForLevel } from '../../utils/xpUtils.js'
 
 const navigation = [
   { label: 'Dashboard', path: '/dashboard', icon: LayoutDashboard },
@@ -102,7 +102,7 @@ function AppLayout({ children }) {
 
   const level = Number(player.level) || 1
   const rank = player.rank || 'E'
-  const streak = Number(player.currentStreak) || 0
+  const streak = getEffectiveStreak(player)
   const currentXp = Number(player.xp) || 0
   const requiredXp = requiredXpForLevel(level)
   const xpPercentage = Math.min(100, Math.round((currentXp / requiredXp) * 100))

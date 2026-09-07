@@ -16,6 +16,7 @@ import {
   Zap,
 } from 'lucide-react'
 import { fallbackPlayer, getStoredPlayer } from '../data/mockDashboardData.js'
+import { getEffectiveStreak } from './xpUtils.js'
 import { getStoredQuests } from '../hooks/useQuestCompletion.js'
 import { evaluateAchievements, calculateLifetimeXp } from './achievementUtils.js'
 import { getStoredWeeklyBoss } from './bossUtils.js'
@@ -206,7 +207,7 @@ export function getFullProfileData() {
       remainingXp,
       xpPercentage,
       rank: player.rank || 'E',
-      currentStreak: Number(player.currentStreak) || 0,
+      currentStreak: getEffectiveStreak(player),
       bestStreak: Number(player.bestStreak) || 0,
       primaryPath: player.primaryPath || 'Discipline',
     },

@@ -19,6 +19,7 @@ import {
 import { getStoredQuests } from '../hooks/useQuestCompletion.js'
 import { getLatestUnlockedAchievement } from '../utils/achievementUtils.js'
 import { getStoredWeeklyBoss } from '../utils/bossUtils.js'
+import { getEffectiveStreak } from '../utils/xpUtils.js'
 
 function DashboardPage() {
   const [player, setPlayer] = useState(getStoredPlayer)
@@ -60,7 +61,7 @@ function DashboardPage() {
 
       <div className="grid gap-5 lg:grid-cols-[1.05fr_0.95fr]">
         <TodayProgress quests={quests} />
-        <WeeklyOverview weekly={dashboardData.weekly} streak={player.currentStreak} />
+        <WeeklyOverview weekly={dashboardData.weekly} streak={getEffectiveStreak(player)} />
       </div>
 
       <QuestPreview quests={quests.slice(0, 6)} />

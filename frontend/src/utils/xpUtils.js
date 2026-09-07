@@ -19,6 +19,51 @@ export function applyXpReward(player, gainedXp) {
   return { player: { ...player, level, xp }, previousLevel, newLevel: level, leveledUp: level > previousLevel }
 }
 
+function toDateKey(date) {
+  return date.toISOString().slice(0, 10)
+}
+
+export function applyStreakUpdate(player, now = new Date()) {
+  const todayKey = toDateKey(now)
+  const lastDate = player.lastStreakDate || null
+
+  if (lastDate === todayKey) {
+    // Streak for today was already counted.
+    return { ...player }
+  }
+
+  let currentStreak = Number(player.currentStreak) || 0
+
+  if (lastDate) {
+    const yesterday = new Date(now)
+    yesterday.setDate(yesterday.getDate() - 1)
+    const yesterdayKey = toDateKey(yesterday)
+
+    currentStreak = lastDate === yesterdayKey ? currentStreak + 1 : 1
+  } else {
+    currentStreak = 1
+  }
+
+  const bestStreak = Math.max(Number(player.bestStreak) || 0, currentStreak)
+
+  return { ...player, currentStreak, bestStreak, lastStreakDate: todayKey }
+}
+
+export function getEffectiveStreak(player, now = new Date()) {
+  const currentStreak = Number(player?.currentStreak) || 0
+  const lastDate = player?.lastStreakDate || null
+  if (!lastDate || currentStreak === 0) return 0
+
+  const todayKey = toDateKey(now)
+  if (lastDate === todayKey) return currentStreak
+
+  const yesterday = new Date(now)
+  yesterday.setDate(yesterday.getDate() - 1)
+  const yesterdayKey = toDateKey(yesterday)
+
+  return lastDate === yesterdayKey ? currentStreak : 0
+}
+
 export function parseStatReward(statReward) {
   if (!statReward || statReward === 'NONE') return {}
   if (typeof statReward === 'object') return statReward

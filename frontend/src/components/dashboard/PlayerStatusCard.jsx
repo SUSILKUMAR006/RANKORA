@@ -2,6 +2,7 @@ import { Flame, Sparkles, Target } from 'lucide-react'
 import Card from '../common/Card.jsx'
 import ProgressBar from '../common/ProgressBar.jsx'
 import RankBadge from '../player/RankBadge.jsx'
+import { getEffectiveStreak } from '../../utils/xpUtils.js'
 
 function PlayerStatusCard({ player }) {
   const current = player || {}
@@ -11,7 +12,7 @@ function PlayerStatusCard({ player }) {
   const playerName = current.playerName || 'PLAYER'
   const level = current.level || 1
   const rank = current.rank || 'E'
-  const streak = current.currentStreak || 0
+  const streak = getEffectiveStreak(current)
   const bestStreak = current.bestStreak || streak
 
   return (

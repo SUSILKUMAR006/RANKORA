@@ -8,6 +8,7 @@ export const fallbackPlayer = {
   rank: 'E',
   currentStreak: 0,
   bestStreak: 0,
+  lastStreakDate: null,
   stats: { str: 0, vit: 0, int: 0, agi: 0, disc: 0 },
 }
 
