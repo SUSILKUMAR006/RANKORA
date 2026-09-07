@@ -161,6 +161,25 @@ function getPlayer() {
   return { ...fallbackPlayer, ...stored, stats: { ...fallbackPlayer.stats, ...(stored.stats || {}) } }
 }
 
+export function syncStreakForToday() {
+  const quests = getStoredQuests()
+  if (quests.length === 0 || !quests.every((item) => item.status === 'completed')) {
+    return getPlayer()
+  }
+
+  const player = getPlayer()
+  const now = new Date()
+  const todayKey = now.toISOString().slice(0, 10)
+  if (player.lastStreakDate === todayKey) {
+    return player
+  }
+
+  const updatedPlayer = applyStreakUpdate(player, now)
+  localStorage.setItem(PLAYER_STORAGE_KEY, JSON.stringify(updatedPlayer))
+  window.dispatchEvent(new Event('rankora-player-updated'))
+  return updatedPlayer
+}
+
 export function completeQuest(questId, options = {}) {
   const quests = getStoredQuests()
   const targetId = String(questId || '').trim()

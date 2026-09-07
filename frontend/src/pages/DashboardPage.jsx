@@ -16,7 +16,7 @@ import {
   getStoredPlayer,
   quickActions,
 } from '../data/mockDashboardData.js'
-import { getStoredQuests } from '../hooks/useQuestCompletion.js'
+import { getStoredQuests, syncStreakForToday } from '../hooks/useQuestCompletion.js'
 import { getLatestUnlockedAchievement } from '../utils/achievementUtils.js'
 import { getStoredWeeklyBoss } from '../utils/bossUtils.js'
 import { getEffectiveStreak } from '../utils/xpUtils.js'
@@ -39,6 +39,9 @@ function DashboardPage() {
   }
 
   useEffect(() => {
+    const updatedPlayer = syncStreakForToday()
+    setPlayer(updatedPlayer)
+
     window.addEventListener('storage', handleRefresh)
     window.addEventListener('rankora-player-updated', handleRefresh)
     window.addEventListener('rankora-workout-updated', handleRefresh)
