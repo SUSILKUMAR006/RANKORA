@@ -31,6 +31,7 @@ import QuestVerificationModal from '../components/quests/QuestVerificationModal.
 import XPRewardAnimation from '../components/quests/XPRewardAnimation.jsx'
 import DailyWorkoutCard from '../components/workout/DailyWorkoutCard.jsx'
 import { completeQuest, getStoredQuests } from '../hooks/useQuestCompletion.js'
+import { getQuestIcon } from '../data/mockQuests.js'
 import { isToday } from '../utils/failureUtils.js'
 
 const categories = ['All', 'Fitness', 'Knowledge', 'Health', 'Mind', 'Habit']
@@ -273,7 +274,7 @@ function QuestsPage() {
           {filteredQuests.map((quest, index) => {
             const isCompleted = quest.status === 'completed'
             const isFailed = quest.status === 'failed' && isToday(quest.failedAt)
-            const Icon = categoryIcons[quest.category] || Swords
+            const Icon = getQuestIcon(quest) || categoryIcons[quest.category] || Swords
 
             return (
               <motion.div

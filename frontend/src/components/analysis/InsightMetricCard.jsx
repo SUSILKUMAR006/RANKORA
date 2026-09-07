@@ -1,6 +1,8 @@
+import { Sparkles } from 'lucide-react'
 import Card from '../common/Card.jsx'
 
-function InsightMetricCard({ icon: Icon, label, value, subtext, tone = 'cyan' }) {
+function InsightMetricCard({ icon, label, value, subtext, tone = 'cyan' }) {
+  const Icon = icon || Sparkles
   const toneMap = {
     emerald: 'text-emerald-300 bg-emerald-400/10 border-emerald-400/25',
     rose: 'text-rose-300 bg-rose-400/10 border-rose-400/25',

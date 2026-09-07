@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { fallbackPlayer, getStoredPlayer } from '../data/mockDashboardData.js'
-import { mockQuests } from '../data/mockQuests.js'
+import { defaultRoutineQuests, getQuestIcon, mockQuests } from '../data/mockQuests.js'
 import { applyXpReward, parseStatReward } from '../utils/xpUtils.js'
 import { isToday } from '../utils/failureUtils.js'
 import { evaluateAchievements } from '../utils/achievementUtils.js'
@@ -8,18 +8,27 @@ import { applyQuestDamageToBoss } from '../utils/bossUtils.js'
 import { addNotification } from '../utils/notificationUtils.js'
 import { formatStatReward } from '../utils/xpUtils.js'
 
-import { defaultRoutineQuests } from '../data/mockQuests.js'
-
 export const QUEST_STORAGE_KEY = 'rankora_mock_quests'
 export const PLAYER_STORAGE_KEY = 'rankora_player'
 
 export function getStoredQuests() {
   try {
     const saved = JSON.parse(localStorage.getItem(QUEST_STORAGE_KEY))
-    if (Array.isArray(saved) && saved.length > 0) return saved
-    return defaultRoutineQuests
+    if (Array.isArray(saved) && saved.length > 0) {
+      return saved.map((quest) => ({
+        ...quest,
+        icon: getQuestIcon(quest),
+      }))
+    }
+    return defaultRoutineQuests.map((quest) => ({
+      ...quest,
+      icon: getQuestIcon(quest),
+    }))
   } catch {
-    return defaultRoutineQuests
+    return defaultRoutineQuests.map((quest) => ({
+      ...quest,
+      icon: getQuestIcon(quest),
+    }))
   }
 }
 

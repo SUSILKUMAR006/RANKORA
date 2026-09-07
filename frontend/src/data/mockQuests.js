@@ -1,4 +1,44 @@
-import { BookOpen, Brain, Droplets, Dumbbell, Flame, HeartPulse, Moon, Sun } from 'lucide-react'
+import {
+  BookOpen,
+  Brain,
+  BriefcaseBusiness,
+  Droplets,
+  Dumbbell,
+  Flame,
+  HeartPulse,
+  Moon,
+  Scale,
+  Sun,
+  Swords,
+} from 'lucide-react'
+
+export const questIconMap = {
+  'wakeup-530': Sun,
+  'drink-3l-water': Droplets,
+  'no-junk-food': HeartPulse,
+  'gym-workout': Dumbbell,
+  'read-book-daily': BookOpen,
+  'no-fap': Flame,
+  'sleep-before-11pm': Moon,
+}
+
+export const categoryIconMap = {
+  Fitness: Dumbbell,
+  Habit: Flame,
+  Knowledge: BookOpen,
+  Health: HeartPulse,
+  Mind: Brain,
+  Career: BriefcaseBusiness,
+  Discipline: Scale,
+}
+
+export function getQuestIcon(quest) {
+  if (!quest) return Swords
+  if (quest.icon && typeof quest.icon === 'function') return quest.icon
+  if (quest.id && questIconMap[quest.id]) return questIconMap[quest.id]
+  if (quest.category && categoryIconMap[quest.category]) return categoryIconMap[quest.category]
+  return Swords
+}
 
 export const defaultRoutineQuests = [
   {
@@ -149,8 +189,15 @@ export function getQuestById(id) {
   try {
     const raw = localStorage.getItem('rankora_mock_quests')
     const quests = raw ? JSON.parse(raw) : defaultRoutineQuests
-    return quests.find((quest) => quest.id === id || quest._id === id || quest.questKey === id) || null
+    const match = quests.find((quest) => quest.id === id || quest._id === id || quest.questKey === id)
+    if (match) {
+      return { ...match, icon: getQuestIcon(match) }
+    }
+    const defaultMatch = defaultRoutineQuests.find((q) => q.id === id || q.questKey === id) || null
+    return defaultMatch ? { ...defaultMatch, icon: getQuestIcon(defaultMatch) } : null
   } catch {
-    return defaultRoutineQuests.find((q) => q.id === id || q.questKey === id) || null
+    const defaultMatch = defaultRoutineQuests.find((q) => q.id === id || q.questKey === id) || null
+    return defaultMatch ? { ...defaultMatch, icon: getQuestIcon(defaultMatch) } : null
   }
 }
+
