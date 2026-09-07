@@ -6,15 +6,19 @@ import {
   Download,
   FileJson,
   HardDrive,
+  RotateCcw,
+  Swords,
   Trash2,
 } from 'lucide-react'
 import Button from '../common/Button.jsx'
 import Card from '../common/Card.jsx'
 import Modal from '../common/Modal.jsx'
 import { clearAllRankoraData, exportAllRankoraData } from '../../utils/settingsUtils.js'
+import { restoreDefaultQuests } from '../../hooks/useQuestCompletion.js'
 
 function DataManagementSection({ onDataCleared }) {
   const [exportSuccess, setExportSuccess] = useState(false)
+  const [restoreSuccess, setRestoreSuccess] = useState(false)
   const [clearModalOpen, setClearModalOpen] = useState(false)
 
   const handleExport = () => {
@@ -23,6 +27,12 @@ function DataManagementSection({ onDataCleared }) {
       setExportSuccess(true)
       setTimeout(() => setExportSuccess(false), 3000)
     }
+  }
+
+  const handleRestoreQuests = () => {
+    restoreDefaultQuests()
+    setRestoreSuccess(true)
+    setTimeout(() => setRestoreSuccess(false), 3000)
   }
 
   const handleConfirmClear = () => {
@@ -52,7 +62,42 @@ function DataManagementSection({ onDataCleared }) {
           </div>
         </div>
 
-        <div className="grid gap-4 sm:grid-cols-2">
+        <div className="grid gap-4 sm:grid-cols-3">
+          {/* Restore Defaults Card */}
+          <div className="flex flex-col justify-between rounded-xl border border-cyan-400/20 bg-cyan-950/10 p-4 transition hover:border-cyan-400/30">
+            <div>
+              <div className="flex items-center gap-2 text-cyan-200">
+                <Swords size={18} />
+                <h3 className="font-display text-xs font-semibold text-white uppercase tracking-wider">
+                  Restore Default Quests
+                </h3>
+              </div>
+              <p className="mt-2 text-[0.72rem] leading-relaxed text-slate-400">
+                Restore the 7 standard daily discipline routine quests to their default configuration
+                without wiping your player stats.
+              </p>
+            </div>
+
+            <div className="mt-4">
+              <Button
+                type="button"
+                variant="secondary"
+                onClick={handleRestoreQuests}
+                className="w-full text-xs"
+              >
+                {restoreSuccess ? (
+                  <>
+                    <Check size={14} className="text-emerald-300" /> RESTORED
+                  </>
+                ) : (
+                  <>
+                    <RotateCcw size={14} /> RESTORE DEFAULTS
+                  </>
+                )}
+              </Button>
+            </div>
+          </div>
+
           {/* Export JSON Card */}
           <div className="flex flex-col justify-between rounded-xl border border-white/10 bg-white/[0.02] p-4 transition hover:border-white/20">
             <div>

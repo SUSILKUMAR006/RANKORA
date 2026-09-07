@@ -1,8 +1,7 @@
 import { useState } from 'react'
 import { fallbackPlayer, getStoredPlayer } from '../data/mockDashboardData.js'
-import { defaultRoutineQuests, getQuestIcon, mockQuests } from '../data/mockQuests.js'
+import { defaultRoutineQuests, getQuestIcon } from '../data/mockQuests.js'
 import { applyXpReward, parseStatReward } from '../utils/xpUtils.js'
-import { isToday } from '../utils/failureUtils.js'
 import { evaluateAchievements } from '../utils/achievementUtils.js'
 import { applyQuestDamageToBoss } from '../utils/bossUtils.js'
 import { addNotification } from '../utils/notificationUtils.js'
@@ -11,19 +10,129 @@ import { formatStatReward } from '../utils/xpUtils.js'
 export const QUEST_STORAGE_KEY = 'rankora_mock_quests'
 export const PLAYER_STORAGE_KEY = 'rankora_player'
 
-export function getStoredQuests() {
+function persistQuests(quests) {
   try {
-    const saved = JSON.parse(localStorage.getItem(QUEST_STORAGE_KEY))
-    if (Array.isArray(saved) && saved.length > 0) {
-      return saved.map((quest) => ({
-        ...quest,
-        icon: getQuestIcon(quest),
-      }))
-    }
+    localStorage.setItem(
+      QUEST_STORAGE_KEY,
+      JSON.stringify(
+        quests.map((quest) => {
+          const storedQuest = { ...quest }
+          delete storedQuest.icon
+          return storedQuest
+        })
+      )
+    )
+  } catch {
+    // ignore
+  }
+}
+
+export function sanitizeAndRestoreQuests(savedQuests) {
+  if (!Array.isArray(savedQuests) || savedQuests.length === 0) {
+    persistQuests(defaultRoutineQuests)
     return defaultRoutineQuests.map((quest) => ({
       ...quest,
       icon: getQuestIcon(quest),
     }))
+  }
+
+  // Count how many copies of gym-workout or identically titled quests exist
+  const gymCopies = savedQuests.filter(
+    (q) =>
+      q?.id === 'gym-workout' ||
+      q?.questKey === 'gym-workout' ||
+      String(q?.title || '').trim().toLowerCase() === 'gym workout'
+  )
+  const hasDuplicateGyms = gymCopies.length > 1
+
+  // Check unique IDs/titles
+  const uniqueKeys = new Set(
+    savedQuests.map((q) => q?.id || q?._id || q?.questKey || q?.title).filter(Boolean)
+  )
+  const isCorrupted = hasDuplicateGyms || uniqueKeys.size < Math.min(savedQuests.length, 3)
+
+  if (isCorrupted) {
+    // Preserve any legitimate custom quests created by the user
+    const customUserQuests = savedQuests.filter((q) => {
+      const qId = String(q?.id || q?._id || q?.questKey || '')
+      const isDefault = defaultRoutineQuests.some(
+        (def) => def.id === qId || def.questKey === qId || def.title === q?.title
+      )
+      return !isDefault && qId.startsWith('custom-quest-')
+    })
+
+    // Find if gym workout was completed so we retain that progress
+    const gymCompletedItem = gymCopies.find((q) => q.status === 'completed')
+    const completedProof = gymCompletedItem?.verificationProof || null
+    const gymHistory = gymCompletedItem?.history || []
+
+    const healedDefaults = defaultRoutineQuests.map((def) => {
+      if (def.id === 'gym-workout' && gymCompletedItem) {
+        return {
+          ...def,
+          status: 'completed',
+          completedAt: gymCompletedItem.completedAt || new Date().toISOString(),
+          verificationProof: completedProof,
+          history: gymHistory,
+        }
+      }
+      return { ...def }
+    })
+
+    const healedList = [...customUserQuests, ...healedDefaults]
+    persistQuests(healedList)
+    return healedList.map((quest) => ({
+      ...quest,
+      icon: getQuestIcon(quest),
+    }))
+  }
+
+  // Deduplicate list in case of any duplicate keys
+  const seen = new Set()
+  const deduped = []
+  for (const q of savedQuests) {
+    const key = q?.id || q?._id || q?.questKey || q?.title
+    if (key && !seen.has(key)) {
+      seen.add(key)
+      deduped.push(q)
+    }
+  }
+
+  // Ensure all standard default routine quests exist in the roster
+  let modified = false
+  const completeList = [...deduped]
+  for (const def of defaultRoutineQuests) {
+    const exists = completeList.some(
+      (q) => q.id === def.id || q.questKey === def.id || q.title === def.title
+    )
+    if (!exists) {
+      completeList.push({ ...def })
+      modified = true
+    }
+  }
+
+  if (modified) {
+    persistQuests(completeList)
+  }
+
+  return completeList.map((quest) => ({
+    ...quest,
+    icon: getQuestIcon(quest),
+  }))
+}
+
+export function getStoredQuests() {
+  try {
+    const raw = localStorage.getItem(QUEST_STORAGE_KEY)
+    if (!raw) {
+      persistQuests(defaultRoutineQuests)
+      return defaultRoutineQuests.map((quest) => ({
+        ...quest,
+        icon: getQuestIcon(quest),
+      }))
+    }
+    const saved = JSON.parse(raw)
+    return sanitizeAndRestoreQuests(saved)
   } catch {
     return defaultRoutineQuests.map((quest) => ({
       ...quest,
@@ -32,12 +141,19 @@ export function getStoredQuests() {
   }
 }
 
-function persistQuests(quests) {
-  localStorage.setItem(QUEST_STORAGE_KEY, JSON.stringify(quests.map((quest) => {
-    const storedQuest = { ...quest }
-    delete storedQuest.icon
-    return storedQuest
-  })))
+export function restoreDefaultQuests() {
+  const freshDefaults = defaultRoutineQuests.map((q) => ({
+    ...q,
+    status: 'pending',
+    progress: 0,
+    history: [],
+    verificationProof: null,
+  }))
+  persistQuests(freshDefaults)
+  window.dispatchEvent(new Event('storage'))
+  window.dispatchEvent(new Event('rankora-player-updated'))
+  window.dispatchEvent(new Event('rankora-workout-updated'))
+  return freshDefaults.map((q) => ({ ...q, icon: getQuestIcon(q) }))
 }
 
 function getPlayer() {
@@ -47,12 +163,21 @@ function getPlayer() {
 
 export function completeQuest(questId, options = {}) {
   const quests = getStoredQuests()
+  const targetId = String(questId || '').trim()
+
   let quest = quests.find(
-    (item) => item.id === questId || item._id === questId || item.questKey === questId
+    (item) =>
+      (item.id && item.id === targetId) ||
+      (item._id && item._id === targetId) ||
+      (item.questKey && item.questKey === targetId)
   )
-  if (!quest && (questId === 'gym-workout' || String(questId).toLowerCase().includes('gym'))) {
-    quest = quests.find((item) => item.id === 'gym-workout' || item.title?.toLowerCase().includes('gym'))
+
+  if (!quest && (targetId === 'gym-workout' || targetId.toLowerCase().includes('gym'))) {
+    quest = quests.find(
+      (item) => item.id === 'gym-workout' || item.title?.toLowerCase().includes('gym')
+    )
   }
+
   if (!quest) return { error: 'Quest data could not be located.' }
   if (quest.status === 'completed') return { quest, player: getPlayer(), alreadyCompleted: true }
   if (!options.bypassVerification && String(quest.verification).toLowerCase() !== 'none') {
@@ -64,7 +189,9 @@ export function completeQuest(questId, options = {}) {
   const currentPlayer = getPlayer()
   const xpResult = applyXpReward(currentPlayer, quest.xp)
   const stats = { ...currentPlayer.stats }
-  Object.entries(reward).forEach(([stat, amount]) => { stats[stat] = (Number(stats[stat]) || 0) + amount })
+  Object.entries(reward).forEach(([stat, amount]) => {
+    stats[stat] = (Number(stats[stat]) || 0) + amount
+  })
   const player = { ...xpResult.player, stats }
   const completedQuest = {
     ...quest,
@@ -82,25 +209,33 @@ export function completeQuest(questId, options = {}) {
       ...(quest.history || []),
     ],
   }
-  const updatedQuests = quests.map((item) =>
-    (item.id === quest.id || item._id === quest._id || (item.questKey && item.questKey === quest.questKey))
-      ? completedQuest
-      : item
-  )
+
+  // Strictly match only the specific quest being completed
+  const matchedKey = String(quest.id || quest._id || quest.questKey || '').trim()
+  const updatedQuests = quests.map((item) => {
+    const isExactMatch =
+      Boolean(quest.id && item.id && item.id === quest.id) ||
+      Boolean(quest._id && item._id && item._id === quest._id) ||
+      Boolean(quest.questKey && item.questKey && item.questKey === quest.questKey) ||
+      Boolean(matchedKey && (item.id === matchedKey || item._id === matchedKey || item.questKey === matchedKey))
+
+    return isExactMatch ? completedQuest : item
+  })
+
   persistQuests(updatedQuests)
   localStorage.setItem(PLAYER_STORAGE_KEY, JSON.stringify(player))
-  const bossDamageResult = applyQuestDamageToBoss(completedQuest, `${quest.id}-${completedQuest.completedAt}`)
+  const bossDamageResult = applyQuestDamageToBoss(completedQuest, `${quest.id || 'quest'}-${completedQuest.completedAt}`)
   const achievementResult = evaluateAchievements()
 
   // Trigger Notifications
   addNotification({
     type: 'quest_completed',
-    eventKey: `quest-completed-${quest.id}-${completedQuest.completedAt}`,
+    eventKey: `quest-completed-${quest.id || 'q'}-${completedQuest.completedAt}`,
     title: 'MISSION COMPLETED',
     message: `${completedQuest.title} finished. +${quest.xp} XP & ${formatStatReward(quest.statReward)} applied.`,
     tone: 'emerald',
     iconName: 'CheckCircle2',
-    link: `/quests/${quest.id}`,
+    link: `/quests/${quest.id || ''}`,
   })
 
   if (xpResult.leveledUp) {
@@ -154,10 +289,17 @@ export function completeQuest(questId, options = {}) {
 }
 
 export function useQuestCompletion(questId) {
+  const targetId = String(questId || '').trim()
   const [state, setState] = useState(() => ({
-    quest: getStoredQuests().find((item) => item.id === questId || item._id === questId || item.questKey === questId),
+    quest: getStoredQuests().find(
+      (item) =>
+        (item.id && item.id === targetId) ||
+        (item._id && item._id === targetId) ||
+        (item.questKey && item.questKey === targetId)
+    ),
     player: getPlayer(),
   }))
+
   const complete = (options = {}) => {
     const result = completeQuest(questId, options)
     if (!result.error && !result.requiresVerification && !result.alreadyCompleted) {
@@ -165,13 +307,20 @@ export function useQuestCompletion(questId) {
     }
     return result
   }
+
   return {
     ...state,
     complete,
     refresh: () =>
       setState({
-        quest: getStoredQuests().find((item) => item.id === questId || item._id === questId || item.questKey === questId),
+        quest: getStoredQuests().find(
+          (item) =>
+            (item.id && item.id === targetId) ||
+            (item._id && item._id === targetId) ||
+            (item.questKey && item.questKey === targetId)
+        ),
         player: getPlayer(),
       }),
   }
 }
+

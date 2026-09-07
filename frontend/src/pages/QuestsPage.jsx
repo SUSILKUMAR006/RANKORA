@@ -15,6 +15,7 @@ import {
   Flame,
   HeartPulse,
   Plus,
+  RotateCcw,
   Search,
   Shield,
   Sparkles,
@@ -30,7 +31,7 @@ import QuestFailureModal from '../components/quests/QuestFailureModal.jsx'
 import QuestVerificationModal from '../components/quests/QuestVerificationModal.jsx'
 import XPRewardAnimation from '../components/quests/XPRewardAnimation.jsx'
 import DailyWorkoutCard from '../components/workout/DailyWorkoutCard.jsx'
-import { completeQuest, getStoredQuests } from '../hooks/useQuestCompletion.js'
+import { completeQuest, getStoredQuests, restoreDefaultQuests } from '../hooks/useQuestCompletion.js'
 import { questService } from '../services/questService.js'
 import { getQuestIcon } from '../data/mockQuests.js'
 import { isToday } from '../utils/failureUtils.js'
@@ -108,6 +109,11 @@ function QuestsPage() {
     refreshQuests()
   }
 
+  const handleRestoreDefaults = () => {
+    const restored = restoreDefaultQuests()
+    setQuests(restored)
+  }
+
   const completedCount = quests.filter((q) => q.status === 'completed').length
   const pendingCount = quests.filter((q) => q.status !== 'completed' && q.status !== 'failed').length
   const failedCount = quests.filter((q) => q.status === 'failed' && isToday(q.failedAt)).length
@@ -161,11 +167,22 @@ function QuestsPage() {
           </p>
         </div>
 
-        <Link to="/quests/create">
-          <Button variant="primary">
-            <Plus size={16} /> CREATE QUEST
+        <div className="flex flex-wrap items-center gap-2.5">
+          <Button
+            type="button"
+            variant="ghost"
+            onClick={handleRestoreDefaults}
+            className="border border-white/10 hover:border-cyan-300/30 text-xs text-slate-300 hover:text-white"
+            title="Restore all default routine quests"
+          >
+            <RotateCcw size={14} /> RESTORE DEFAULTS
           </Button>
-        </Link>
+          <Link to="/quests/create">
+            <Button variant="primary">
+              <Plus size={16} /> CREATE QUEST
+            </Button>
+          </Link>
+        </div>
       </motion.header>
 
       {/* Sunday Rest Day Banner */}

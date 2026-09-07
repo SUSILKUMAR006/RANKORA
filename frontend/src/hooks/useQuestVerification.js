@@ -4,13 +4,31 @@ import { normalizeVerificationType, saveVerificationMetadata } from '../utils/ve
 
 export function submitQuestVerification(questId, payload) {
   const quests = getStoredQuests()
-  const quest = quests.find((item) => item.id === questId)
+  const targetId = String(questId || '').trim()
+  const quest = quests.find(
+    (item) =>
+      (item.id && item.id === targetId) ||
+      (item._id && item._id === targetId) ||
+      (item.questKey && item.questKey === targetId)
+  )
   if (!quest) return { error: 'Quest data could not be located.' }
   if (quest.status === 'pending_verification') return { alreadyPending: true, quest }
   if (normalizeVerificationType(quest.verification) === 'none') return { error: 'This quest does not require verification.' }
   const submittedAt = new Date().toISOString()
   const updatedQuest = { ...quest, status: 'pending_verification', verificationStatus: 'pending', verificationSubmittedAt: submittedAt, verificationNote: payload.note || '' }
-  localStorage.setItem(QUEST_STORAGE_KEY, JSON.stringify(quests.map((item) => { const storedQuest = { ...(item.id === questId ? updatedQuest : item) }; delete storedQuest.icon; return storedQuest })))
+  
+  const matchedKey = String(quest.id || quest._id || quest.questKey || '').trim()
+  const updatedQuests = quests.map((item) => {
+    const isExactMatch =
+      Boolean(quest.id && item.id && item.id === quest.id) ||
+      Boolean(quest._id && item._id && item._id === quest._id) ||
+      Boolean(quest.questKey && item.questKey && item.questKey === quest.questKey) ||
+      Boolean(matchedKey && (item.id === matchedKey || item._id === matchedKey || item.questKey === matchedKey))
+    const storedQuest = { ...(isExactMatch ? updatedQuest : item) }
+    delete storedQuest.icon
+    return storedQuest
+  })
+  localStorage.setItem(QUEST_STORAGE_KEY, JSON.stringify(updatedQuests))
   const metadata = saveVerificationMetadata(quest, { ...payload, submittedAt })
   return { quest: updatedQuest, metadata }
 }

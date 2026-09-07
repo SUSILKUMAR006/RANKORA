@@ -43,6 +43,7 @@ export function getQuestIcon(quest) {
 export const defaultRoutineQuests = [
   {
     id: 'wakeup-530',
+    questKey: 'wakeup-530',
     title: 'WAKE UP AT 5:30 AM',
     shortDescription: 'Rise early at 05:30 AM without snooze to seize morning discipline.',
     description: 'Awaken promptly at 05:30 AM to establish unbroken morning momentum before the day begins.',
@@ -63,6 +64,7 @@ export const defaultRoutineQuests = [
   },
   {
     id: 'drink-3l-water',
+    questKey: 'drink-3l-water',
     title: 'DRINK 3L WATER',
     shortDescription: 'Maintain peak cellular and neural hydration throughout the day.',
     description: 'Consume a minimum of 3 full liters of clean water distributed across the day.',
@@ -83,6 +85,7 @@ export const defaultRoutineQuests = [
   },
   {
     id: 'no-junk-food',
+    questKey: 'no-junk-food',
     title: 'NO JUNK FOOD',
     shortDescription: 'Eliminate ultra-processed foods, refined sugar, and fast food.',
     description: 'Fuel the mind and physique with whole, nutritious foods. Strictly zero junk food or sugary snacks.',
@@ -103,6 +106,7 @@ export const defaultRoutineQuests = [
   },
   {
     id: 'gym-workout',
+    questKey: 'gym-workout',
     title: 'GYM WORKOUT',
     shortDescription: 'Execute a dedicated strength and physical training workout.',
     description: 'Complete a focused 45-60 minute resistance training or workout session with progressive overload.',
@@ -123,6 +127,7 @@ export const defaultRoutineQuests = [
   },
   {
     id: 'read-book-daily',
+    questKey: 'read-book-daily',
     title: 'READ BOOK DAILY',
     shortDescription: 'Read at least 10 pages of a book for daily mental expansion.',
     description: 'Dedicate focused, uninterrupted time to expand knowledge, wisdom, and focus by reading a minimum of 10 pages daily.',
@@ -143,6 +148,7 @@ export const defaultRoutineQuests = [
   },
   {
     id: 'no-fap',
+    questKey: 'no-fap',
     title: 'NO FAP (SELF-MASTERY)',
     shortDescription: 'Practice strict self-control, protect vital energy, and build mental clarity.',
     description: 'Preserve vital physical and mental energy through unbroken discipline and self-mastery.',
@@ -163,6 +169,7 @@ export const defaultRoutineQuests = [
   },
   {
     id: 'sleep-before-11pm',
+    questKey: 'sleep-before-11pm',
     title: 'SLEEP BEFORE 11:00 PM',
     shortDescription: 'Protect restorative sleep by getting in bed before 23:00.',
     description: 'Power down devices and be in bed before 11:00 PM to ensure optimal neural recovery for the 5:30 AM wake up.',
@@ -186,17 +193,32 @@ export const defaultRoutineQuests = [
 export const mockQuests = defaultRoutineQuests
 
 export function getQuestById(id) {
+  if (!id) return null
+  const targetId = String(id).trim()
   try {
     const raw = localStorage.getItem('rankora_mock_quests')
     const quests = raw ? JSON.parse(raw) : defaultRoutineQuests
-    const match = quests.find((quest) => quest.id === id || quest._id === id || quest.questKey === id)
-    if (match) {
-      return { ...match, icon: getQuestIcon(match) }
+    if (Array.isArray(quests)) {
+      const match = quests.find(
+        (quest) =>
+          (quest.id && quest.id === targetId) ||
+          (quest._id && quest._id === targetId) ||
+          (quest.questKey && quest.questKey === targetId)
+      )
+      if (match) {
+        return { ...match, icon: getQuestIcon(match) }
+      }
     }
-    const defaultMatch = defaultRoutineQuests.find((q) => q.id === id || q.questKey === id) || null
+    const defaultMatch =
+      defaultRoutineQuests.find(
+        (q) => q.id === targetId || q.questKey === targetId
+      ) || null
     return defaultMatch ? { ...defaultMatch, icon: getQuestIcon(defaultMatch) } : null
   } catch {
-    const defaultMatch = defaultRoutineQuests.find((q) => q.id === id || q.questKey === id) || null
+    const defaultMatch =
+      defaultRoutineQuests.find(
+        (q) => q.id === targetId || q.questKey === targetId
+      ) || null
     return defaultMatch ? { ...defaultMatch, icon: getQuestIcon(defaultMatch) } : null
   }
 }

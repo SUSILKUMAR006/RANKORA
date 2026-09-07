@@ -9,16 +9,32 @@ function persistQuests(quests) {
 
 export function recordQuestFailure(questId, { reason, note = '' }) {
   const quests = getStoredQuests()
-  const quest = quests.find((item) => item.id === questId)
+  const targetId = String(questId || '').trim()
+  const quest = quests.find(
+    (item) =>
+      (item.id && item.id === targetId) ||
+      (item._id && item._id === targetId) ||
+      (item.questKey && item.questKey === targetId)
+  )
   if (!quest) return { error: 'Quest data could not be located.' }
   if (quest.status === 'completed') return { error: 'Completed quests cannot be marked as failed.', alreadyFinal: true }
   if (quest.status === 'pending_verification') return { error: 'Verification is still in progress.', blocked: true }
   if (quest.status === 'failed' && quest.failureDate === new Date().toISOString().slice(0, 10)) return { quest, alreadyFailed: true }
 
   const failedAt = new Date()
-  const failure = { id: `failure-${Date.now()}`, questId, reason, note, failedAt: failedAt.toISOString(), date: failedAt.toISOString().slice(0, 10) }
+  const failure = { id: `failure-${Date.now()}`, questId: quest.id || targetId, reason, note, failedAt: failedAt.toISOString(), date: failedAt.toISOString().slice(0, 10) }
   const failedQuest = { ...quest, status: 'failed', failureReason: reason, failureNote: note, failedAt: failure.failedAt, failureDate: failure.date, history: [{ date: 'Today', time: failedAt.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' }), status: 'FAILED', reason, note, xp: 0 }, ...quest.history] }
-  persistQuests(quests.map((item) => item.id === questId ? failedQuest : item))
+  
+  const matchedKey = String(quest.id || quest._id || quest.questKey || '').trim()
+  const updatedQuests = quests.map((item) => {
+    const isExactMatch =
+      Boolean(quest.id && item.id && item.id === quest.id) ||
+      Boolean(quest._id && item._id && item._id === quest._id) ||
+      Boolean(quest.questKey && item.questKey && item.questKey === quest.questKey) ||
+      Boolean(matchedKey && (item.id === matchedKey || item._id === matchedKey || item.questKey === matchedKey))
+    return isExactMatch ? failedQuest : item
+  })
+  persistQuests(updatedQuests)
   localStorage.setItem(FAILURE_STORAGE_KEY, JSON.stringify([...getStoredFailures(), failure]))
 
   // Trigger Notification
