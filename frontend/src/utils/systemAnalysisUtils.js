@@ -91,21 +91,32 @@ export function generateSystemAnalysis() {
 
   // If 0 completions and 0 failures
   if (totalCompletions === 0 && failures.length === 0) {
-    return {
-      hasSufficientData: false,
-      emptyMessage: 'INSUFFICIENT DATA — COMPLETE YOUR DAILY ROUTINE MISSIONS TO GENERATE SYSTEM TELEMETRY.',
+    const emptyMetrics = {
       strongestCategory: 'None',
       weakestCategory: 'None',
+      mostCompletedCategory: 'None',
       mostCommonFailureReason: 'None',
       bestPerformingDay: 'None',
       weakestDay: 'None',
       completionRate: '0%',
       currentStreakStatus: `${player.currentStreak || 0} Days`,
       frequentlyFailedQuest: 'None',
+    }
+    return {
+      hasSufficientData: false,
+      emptyMessage: 'INSUFFICIENT DATA — COMPLETE YOUR DAILY ROUTINE MISSIONS TO GENERATE SYSTEM TELEMETRY.',
+      confidenceScore: 0,
+      primaryInsight: 'INSUFFICIENT DATA — COMPLETE YOUR DAILY ROUTINE MISSIONS TO GENERATE SYSTEM TELEMETRY.',
+      metrics: emptyMetrics,
+      ...emptyMetrics,
       recommendations: [
         {
+          tag: 'INITIALIZATION',
           title: 'INITIALIZE DAILY ROUTINE',
+          insight: 'No mission telemetry recorded yet.',
+          recommendation: 'Execute your 6 core daily routine quests to establish your baseline discipline momentum.',
           description: 'Execute your 6 core daily routine quests to establish your baseline discipline momentum.',
+          impact: 'HIGH IMPACT',
           tone: 'cyan',
         },
       ],
@@ -180,36 +191,63 @@ export function generateSystemAnalysis() {
   const recommendations = []
   if (mostCommonReason !== 'None') {
     recommendations.push({
+      tag: 'FRICTION REDUCTION',
       title: `OVERCOME "${mostCommonReason.toUpperCase()}"`,
-      description: `Your most common resistance is "${mostCommonReason}". Schedule and execute high-priority quests earlier in the day to prevent friction.`,
+      insight: `Repeated friction logged under "${mostCommonReason}".`,
+      recommendation: `Schedule and execute high-priority quests earlier in the day to eliminate friction.`,
+      description: `Schedule and execute high-priority quests earlier in the day to eliminate friction.`,
+      impact: 'HIGH IMPACT',
       tone: 'amber',
     })
   }
 
   if (bestDay !== 'None') {
     recommendations.push({
+      tag: 'PEAK PERFORMANCE',
       title: `CAPITALIZE ON ${bestDay.toUpperCase()}`,
-      description: `Your peak consistency occurs on ${bestDay}. Use this momentum to tackle higher difficulty boss challenges.`,
+      insight: `Peak execution volume recorded on ${bestDay}.`,
+      recommendation: `Schedule high-difficulty boss battles and intensive milestones on ${bestDay} to leverage momentum.`,
+      description: `Schedule high-difficulty boss battles and intensive milestones on ${bestDay} to leverage momentum.`,
+      impact: 'HIGH IMPACT',
       tone: 'cyan',
     })
   } else {
     recommendations.push({
+      tag: 'MOMENTUM PROTOCOL',
       title: 'CONSISTENCY PROTOCOL',
+      insight: 'Baseline momentum established.',
+      recommendation: 'Maintain your morning wake-up and workout anchors daily to solidify momentum.',
       description: 'Maintain your morning wake-up and workout anchors daily to solidify momentum.',
+      impact: 'MEDIUM IMPACT',
       tone: 'cyan',
     })
   }
 
-  return {
-    hasSufficientData: true,
+  const confidenceScore = Math.min(98, Math.max(65, Math.round(50 + totalAssigned * 4)))
+
+  let primaryInsight = `Telemetry indicates peak consistency on ${bestDay !== 'None' ? bestDay : 'weekdays'} with high execution volume in ${mostCompletedCategory !== 'None' ? mostCompletedCategory : 'core routine'}.`
+  if (mostCommonReason !== 'None') {
+    primaryInsight += ` Primary friction recorded: ${mostCommonReason}.`
+  }
+
+  const metricsObj = {
     strongestCategory: mostCompletedCategory,
     weakestCategory: mostFailedCategory,
+    mostCompletedCategory,
     mostCommonFailureReason: mostCommonReason,
     bestPerformingDay: bestDay,
     weakestDay: weakestDay,
     completionRate,
     currentStreakStatus: `${player.currentStreak || 0} Days Active`,
     frequentlyFailedQuest,
+  }
+
+  return {
+    hasSufficientData: true,
+    confidenceScore,
+    primaryInsight,
+    metrics: metricsObj,
+    ...metricsObj,
     recommendations,
   }
 }

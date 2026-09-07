@@ -13,20 +13,21 @@ import {
 import Card from '../common/Card.jsx'
 import SystemMessage from '../common/SystemMessage.jsx'
 
-function AnalyticsInsights({ insights }) {
+function AnalyticsInsights({ insights = {} }) {
+  const safe = insights || {}
   const insightCards = [
     {
       id: 'top-cat',
       label: 'MOST COMPLETED DISCIPLINE',
-      value: insights.mostCompletedCategory,
-      detail: `${insights.mostCompletedShare}% of all successful quests`,
+      value: safe.mostCompletedCategory || 'None',
+      detail: `${safe.mostCompletedShare || 0}% of all successful quests`,
       icon: Award,
       tone: 'text-cyan-300 bg-cyan-400/10 border-cyan-400/20',
     },
     {
       id: 'best-day',
       label: 'BEST PERFORMING DAY',
-      value: insights.bestPerformingDay,
+      value: safe.bestPerformingDay || 'None',
       detail: 'Highest completion rate and XP volume',
       icon: Calendar,
       tone: 'text-emerald-300 bg-emerald-400/10 border-emerald-400/20',
@@ -34,7 +35,7 @@ function AnalyticsInsights({ insights }) {
     {
       id: 'failed-cat',
       label: 'GREATEST RESISTANCE',
-      value: insights.mostFailedCategory,
+      value: safe.mostFailedCategory || 'None',
       detail: 'Category with most recorded misses',
       icon: AlertTriangle,
       tone: 'text-rose-300 bg-rose-400/10 border-rose-400/20',
@@ -42,7 +43,7 @@ function AnalyticsInsights({ insights }) {
     {
       id: 'failure-reason',
       label: 'PRIMARY OBSTACLE',
-      value: insights.mostCommonFailureReason,
+      value: safe.mostCommonFailureReason || 'None',
       detail: 'Most frequent failure reason recorded',
       icon: TrendingUp,
       tone: 'text-amber-300 bg-amber-400/10 border-amber-400/20',
@@ -50,7 +51,7 @@ function AnalyticsInsights({ insights }) {
     {
       id: 'streak-status',
       label: 'MOMENTUM STATUS',
-      value: insights.streakStatus,
+      value: safe.streakStatus || '0 Days Active',
       detail: 'Daily discipline rhythm',
       icon: Flame,
       tone: 'text-orange-300 bg-orange-400/10 border-orange-400/20',
@@ -63,7 +64,10 @@ function AnalyticsInsights({ insights }) {
       <SystemMessage
         eyebrow="RANKORA TELEMETRY & SYSTEM ANALYSIS"
         title="WEEKLY PERFORMANCE DIAGNOSTIC"
-        message={insights.systemAnalysis}
+        message={
+          safe.systemAnalysis ||
+          'Complete routine quests to generate performance telemetry.'
+        }
       />
 
       {/* Grid of 5 Computed Insights */}

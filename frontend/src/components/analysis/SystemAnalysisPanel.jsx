@@ -22,8 +22,14 @@ import InsightMetricCard from './InsightMetricCard.jsx'
 import RecommendationBanner from './RecommendationBanner.jsx'
 import { generateSystemAnalysis } from '../../utils/systemAnalysisUtils.js'
 
-function SystemAnalysisPanel({ className = '' }) {
-  const [analysis, setAnalysis] = useState(() => generateSystemAnalysis())
+function SystemAnalysisPanel({ className = '', analysis: initialAnalysis }) {
+  const [analysis, setAnalysis] = useState(() => initialAnalysis || generateSystemAnalysis())
+
+  useEffect(() => {
+    if (initialAnalysis) {
+      setAnalysis(initialAnalysis)
+    }
+  }, [initialAnalysis])
 
   useEffect(() => {
     const handleUpdate = () => {
@@ -58,8 +64,22 @@ function SystemAnalysisPanel({ className = '' }) {
     )
   }
 
-  const { metrics, recommendations = [] } = analysis
+  const rawMetrics = analysis.metrics || analysis
+  const metrics = {
+    bestPerformingDay: rawMetrics.bestPerformingDay || 'None',
+    weakestDay: rawMetrics.weakestDay || 'None',
+    mostCommonFailureReason: rawMetrics.mostCommonFailureReason || 'None',
+    mostCompletedCategory:
+      rawMetrics.mostCompletedCategory || rawMetrics.strongestCategory || 'None',
+    completionRate: rawMetrics.completionRate || '0%',
+    currentStreakStatus: rawMetrics.currentStreakStatus || '0 Days',
+  }
+  const recommendations = Array.isArray(analysis.recommendations) ? analysis.recommendations : []
   const primaryRec = recommendations[0]
+  const confidenceScore = analysis.confidenceScore ?? 85
+  const primaryInsight =
+    analysis.primaryInsight ||
+    `Telemetry active. Strongest execution observed on ${metrics.bestPerformingDay}.`
 
   return (
     <Card variant="glass" className={`space-y-6 ${className}`}>
@@ -79,7 +99,7 @@ function SystemAnalysisPanel({ className = '' }) {
 
         <Badge tone="category" className="gap-1.5 font-mono text-[0.62rem]">
           <span className="h-1.5 w-1.5 rounded-full bg-cyan-300 animate-pulse" />
-          {analysis.confidenceScore}% CONFIDENCE
+          {confidenceScore}% CONFIDENCE
         </Badge>
       </div>
 
@@ -87,7 +107,7 @@ function SystemAnalysisPanel({ className = '' }) {
       <div className="rounded-xl border border-white/10 bg-white/[0.02] p-4 font-mono text-xs leading-relaxed text-slate-300">
         <p className="label-caps text-[0.6rem] text-violet-300">SYSTEM ANALYSIS</p>
         <p className="mt-1 text-slate-200 font-sans text-sm">
-          {analysis.primaryInsight}
+          {primaryInsight}
         </p>
       </div>
 
@@ -111,14 +131,14 @@ function SystemAnalysisPanel({ className = '' }) {
           icon={ShieldAlert}
           label="PRIMARY RESISTANCE"
           value={metrics.mostCommonFailureReason}
-          subtext={`Most logged friction in mission records`}
+          subtext="Most logged friction in mission records"
           tone="amber"
         />
         <InsightMetricCard
           icon={Award}
           label="DOMINANT DISCIPLINE"
           value={metrics.mostCompletedCategory}
-          subtext={`Highest level of discipline momentum`}
+          subtext="Highest level of discipline momentum"
           tone="cyan"
         />
       </div>
@@ -126,12 +146,12 @@ function SystemAnalysisPanel({ className = '' }) {
       {/* Primary Tactical Recommendation Callout */}
       {primaryRec && (
         <RecommendationBanner
-          tag={primaryRec.tag}
-          title={primaryRec.title}
-          insight={primaryRec.insight}
-          recommendation={primaryRec.recommendation}
-          impact={primaryRec.impact}
-          tone={primaryRec.tone}
+          tag={primaryRec.tag || 'SYSTEM RECOMMENDATION'}
+          title={primaryRec.title || 'TACTICAL ADJUSTMENT'}
+          insight={primaryRec.insight || primaryRec.description}
+          recommendation={primaryRec.recommendation || primaryRec.description}
+          impact={primaryRec.impact || 'HIGH IMPACT'}
+          tone={primaryRec.tone || 'cyan'}
         />
       )}
     </Card>

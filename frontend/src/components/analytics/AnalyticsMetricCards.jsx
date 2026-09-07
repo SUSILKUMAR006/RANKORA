@@ -11,12 +11,21 @@ import {
 } from 'lucide-react'
 import Card from '../common/Card.jsx'
 
-function AnalyticsMetricCards({ metrics }) {
+function AnalyticsMetricCards({ metrics = {} }) {
+  const safe = metrics || {}
+  const totalQuests = safe.totalQuests ?? 0
+  const completedQuests = safe.completedQuests ?? 0
+  const failedQuests = safe.failedQuests ?? 0
+  const successRate = safe.successRate ?? 0
+  const totalXp = safe.totalXp ?? 0
+  const currentStreak = safe.currentStreak ?? 0
+  const bestStreak = safe.bestStreak ?? 0
+
   const cards = [
     {
       id: 'total-quests',
       label: 'TOTAL QUESTS',
-      value: metrics.totalQuests.toLocaleString(),
+      value: totalQuests.toLocaleString(),
       subtext: 'Assigned in period',
       icon: Swords,
       tone: 'text-cyan-300 bg-cyan-400/10 border-cyan-400/20',
@@ -25,7 +34,7 @@ function AnalyticsMetricCards({ metrics }) {
     {
       id: 'completed-quests',
       label: 'COMPLETED',
-      value: metrics.completedQuests.toLocaleString(),
+      value: completedQuests.toLocaleString(),
       subtext: 'Executed successfully',
       icon: CheckCircle2,
       tone: 'text-emerald-300 bg-emerald-400/10 border-emerald-400/20',
@@ -34,7 +43,7 @@ function AnalyticsMetricCards({ metrics }) {
     {
       id: 'failed-quests',
       label: 'FAILED',
-      value: metrics.failedQuests.toLocaleString(),
+      value: failedQuests.toLocaleString(),
       subtext: 'Resistance encounters',
       icon: XCircle,
       tone: 'text-rose-300 bg-rose-400/10 border-rose-400/20',
@@ -43,7 +52,7 @@ function AnalyticsMetricCards({ metrics }) {
     {
       id: 'success-rate',
       label: 'SUCCESS RATE',
-      value: `${metrics.successRate}%`,
+      value: `${successRate}%`,
       subtext: 'Completion ratio',
       icon: Percent,
       tone: 'text-violet-300 bg-violet-400/10 border-violet-400/20',
@@ -52,7 +61,7 @@ function AnalyticsMetricCards({ metrics }) {
     {
       id: 'total-xp',
       label: 'TOTAL XP',
-      value: `+${metrics.totalXp.toLocaleString()}`,
+      value: `+${totalXp.toLocaleString()}`,
       subtext: 'Lifetime experience',
       icon: Zap,
       tone: 'text-amber-300 bg-amber-400/10 border-amber-400/20',
@@ -61,7 +70,7 @@ function AnalyticsMetricCards({ metrics }) {
     {
       id: 'current-streak',
       label: 'CURRENT STREAK',
-      value: `${metrics.currentStreak} Days`,
+      value: `${currentStreak} Days`,
       subtext: 'Active discipline',
       icon: Flame,
       tone: 'text-orange-300 bg-orange-400/10 border-orange-400/20',
@@ -70,7 +79,7 @@ function AnalyticsMetricCards({ metrics }) {
     {
       id: 'best-streak',
       label: 'BEST STREAK',
-      value: `${metrics.bestStreak} Days`,
+      value: `${bestStreak} Days`,
       subtext: 'Personal record',
       icon: Crown,
       tone: 'text-amber-200 bg-amber-400/10 border-amber-400/20',
