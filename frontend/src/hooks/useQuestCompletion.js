@@ -45,12 +45,19 @@ function getPlayer() {
   return { ...fallbackPlayer, ...stored, stats: { ...fallbackPlayer.stats, ...(stored.stats || {}) } }
 }
 
-export function completeQuest(questId) {
+export function completeQuest(questId, options = {}) {
   const quests = getStoredQuests()
-  const quest = quests.find((item) => item.id === questId)
+  let quest = quests.find(
+    (item) => item.id === questId || item._id === questId || item.questKey === questId
+  )
+  if (!quest && (questId === 'gym-workout' || String(questId).toLowerCase().includes('gym'))) {
+    quest = quests.find((item) => item.id === 'gym-workout' || item.title?.toLowerCase().includes('gym'))
+  }
   if (!quest) return { error: 'Quest data could not be located.' }
   if (quest.status === 'completed') return { quest, player: getPlayer(), alreadyCompleted: true }
-  if (String(quest.verification).toLowerCase() !== 'none') return { quest, requiresVerification: true }
+  if (!options.bypassVerification && String(quest.verification).toLowerCase() !== 'none') {
+    return { quest, requiresVerification: true }
+  }
 
   const now = new Date()
   const reward = parseStatReward(quest.statReward)
@@ -59,22 +66,41 @@ export function completeQuest(questId) {
   const stats = { ...currentPlayer.stats }
   Object.entries(reward).forEach(([stat, amount]) => { stats[stat] = (Number(stats[stat]) || 0) + amount })
   const player = { ...xpResult.player, stats }
-  const completedQuest = { ...quest, status: 'completed', completedAt: now.toISOString(), progress: quest.target || quest.progress, history: [{ date: 'Today', time: now.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' }), status: 'COMPLETED', xp: quest.xp }, ...quest.history] }
-  const updatedQuests = quests.map((item) => item.id === questId ? completedQuest : item)
+  const completedQuest = {
+    ...quest,
+    status: 'completed',
+    completedAt: now.toISOString(),
+    progress: quest.target || quest.progress || 1,
+    verificationProof: options.proof || quest.verificationProof || null,
+    history: [
+      {
+        date: 'Today',
+        time: now.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' }),
+        status: 'COMPLETED',
+        xp: quest.xp,
+      },
+      ...(quest.history || []),
+    ],
+  }
+  const updatedQuests = quests.map((item) =>
+    (item.id === quest.id || item._id === quest._id || (item.questKey && item.questKey === quest.questKey))
+      ? completedQuest
+      : item
+  )
   persistQuests(updatedQuests)
   localStorage.setItem(PLAYER_STORAGE_KEY, JSON.stringify(player))
-  const bossDamageResult = applyQuestDamageToBoss(completedQuest, `${questId}-${completedQuest.completedAt}`)
+  const bossDamageResult = applyQuestDamageToBoss(completedQuest, `${quest.id}-${completedQuest.completedAt}`)
   const achievementResult = evaluateAchievements()
 
   // Trigger Notifications
   addNotification({
     type: 'quest_completed',
-    eventKey: `quest-completed-${questId}-${completedQuest.completedAt}`,
+    eventKey: `quest-completed-${quest.id}-${completedQuest.completedAt}`,
     title: 'MISSION COMPLETED',
     message: `${completedQuest.title} finished. +${quest.xp} XP & ${formatStatReward(quest.statReward)} applied.`,
     tone: 'emerald',
     iconName: 'CheckCircle2',
-    link: `/quests/${questId}`,
+    link: `/quests/${quest.id}`,
   })
 
   if (xpResult.leveledUp) {
@@ -113,6 +139,9 @@ export function completeQuest(questId) {
     })
   })
 
+  window.dispatchEvent(new Event('rankora-player-updated'))
+  window.dispatchEvent(new Event('rankora-workout-updated'))
+
   return {
     quest: completedQuest,
     player,
@@ -125,11 +154,24 @@ export function completeQuest(questId) {
 }
 
 export function useQuestCompletion(questId) {
-  const [state, setState] = useState(() => ({ quest: getStoredQuests().find((item) => item.id === questId), player: getPlayer() }))
-  const complete = () => {
-    const result = completeQuest(questId)
-    if (!result.error && !result.requiresVerification && !result.alreadyCompleted) setState({ quest: result.quest, player: result.player })
+  const [state, setState] = useState(() => ({
+    quest: getStoredQuests().find((item) => item.id === questId || item._id === questId || item.questKey === questId),
+    player: getPlayer(),
+  }))
+  const complete = (options = {}) => {
+    const result = completeQuest(questId, options)
+    if (!result.error && !result.requiresVerification && !result.alreadyCompleted) {
+      setState({ quest: result.quest, player: result.player })
+    }
     return result
   }
-  return { ...state, complete, refresh: () => setState({ quest: getStoredQuests().find((item) => item.id === questId), player: getPlayer() }) }
+  return {
+    ...state,
+    complete,
+    refresh: () =>
+      setState({
+        quest: getStoredQuests().find((item) => item.id === questId || item._id === questId || item.questKey === questId),
+        player: getPlayer(),
+      }),
+  }
 }

@@ -28,6 +28,7 @@ import { mockQuests } from '../data/mockQuests.js'
 import { useQuestCompletion } from '../hooks/useQuestCompletion.js'
 import { useQuestFailure } from '../hooks/useQuestFailure.js'
 import { useQuestVerification } from '../hooks/useQuestVerification.js'
+import { questService } from '../services/questService.js'
 
 function QuestDetailsPage() {
   const { id } = useParams()
@@ -120,7 +121,8 @@ function QuestDetailsPage() {
   }
 
   const handleVerificationSubmitted = (payload) => {
-    const result = complete()
+    const result = complete({ bypassVerification: true, proof: payload })
+    questService.verifyQuest(quest.id || quest._id, payload).catch(() => {})
     if (result && !result.error) {
       setRewardVisible(true)
       window.setTimeout(() => setRewardVisible(false), 1200)
@@ -249,7 +251,10 @@ function QuestDetailsPage() {
         key={verificationOpen ? 'verification-open' : 'verification-closed'}
         quest={quest}
         open={verificationOpen}
-        onClose={() => setVerificationOpen(false)}
+        onClose={() => {
+          setVerificationOpen(false)
+          refresh()
+        }}
         onVerified={handleVerificationSubmitted}
         onSubmitted={handleVerificationSubmitted}
       />

@@ -70,14 +70,15 @@ export const questService = {
   /**
    * Complete quest in MongoDB and receive XP/stat rewards
    * @param {string} id
+   * @param {Object} [options]
    */
-  async completeQuest(id) {
+  async completeQuest(id, options = {}) {
     try {
-      const res = await api.post(`/quests/${id}/complete`)
-      localCompleteQuest(id)
+      const res = await api.post(`/quests/${id}/complete`, options)
+      localCompleteQuest(id, options)
       return res
     } catch {
-      return localCompleteQuest(id)
+      return localCompleteQuest(id, options)
     }
   },
 
@@ -101,13 +102,13 @@ export const questService = {
    * @param {string} id
    * @param {Object} proofPayload
    */
-  async verifyQuest(id, proofPayload) {
+  async verifyQuest(id, proofPayload = {}) {
     try {
       const res = await api.post(`/quests/${id}/complete`, proofPayload)
-      localCompleteQuest(id)
+      localCompleteQuest(id, { bypassVerification: true, proof: proofPayload })
       return res
     } catch {
-      return localCompleteQuest(id)
+      return localCompleteQuest(id, { bypassVerification: true, proof: proofPayload })
     }
   },
 }

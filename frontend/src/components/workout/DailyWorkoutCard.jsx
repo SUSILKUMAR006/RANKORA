@@ -24,6 +24,8 @@ import {
   toggleExerciseCompleted,
 } from '../../data/workoutSplit.js'
 import { completeQuest, getStoredQuests } from '../../hooks/useQuestCompletion.js'
+import { questService } from '../../services/questService.js'
+import { defaultRoutineQuests } from '../../data/mockQuests.js'
 
 function DailyWorkoutCard({ onQuestCompleted }) {
   const currentDayIndex = new Date().getDay()
@@ -40,10 +42,24 @@ function DailyWorkoutCard({ onQuestCompleted }) {
   const refreshWorkoutProgress = () => {
     setCompletedExercises(getStoredExerciseStatus(selectedDay))
     const quests = getStoredQuests()
-    const gym = quests.find(
-      (q) => q.id === 'gym-workout' || q.title?.toLowerCase().includes('gym')
-    )
-    setGymQuest(gym || null)
+    const gym =
+      quests.find(
+        (q) =>
+          q.id === 'gym-workout' ||
+          q.questKey === 'gym-workout' ||
+          q.title?.toLowerCase().includes('gym')
+      ) ||
+      defaultRoutineQuests.find((q) => q.id === 'gym-workout') || {
+        id: 'gym-workout',
+        title: 'GYM WORKOUT',
+        category: 'Fitness',
+        xp: 50,
+        statReward: '+2 STR',
+        verification: 'Photo Required',
+        status: 'pending',
+        history: [],
+      }
+    setGymQuest(gym)
   }
 
   useEffect(() => {
@@ -52,9 +68,11 @@ function DailyWorkoutCard({ onQuestCompleted }) {
 
   useEffect(() => {
     window.addEventListener('rankora-workout-updated', refreshWorkoutProgress)
+    window.addEventListener('rankora-player-updated', refreshWorkoutProgress)
     window.addEventListener('storage', refreshWorkoutProgress)
     return () => {
       window.removeEventListener('rankora-workout-updated', refreshWorkoutProgress)
+      window.removeEventListener('rankora-player-updated', refreshWorkoutProgress)
       window.removeEventListener('storage', refreshWorkoutProgress)
     }
   }, [selectedDay])
@@ -73,11 +91,10 @@ function DailyWorkoutCard({ onQuestCompleted }) {
   const allCompleted = totalExercises > 0 && completedCount === totalExercises
   const gymQuestCompleted = gymQuest?.status === 'completed'
 
-  const handleVerificationSuccess = () => {
-    setVerificationOpen(false)
-    if (gymQuest) {
-      completeQuest(gymQuest.id)
-    }
+  const handleVerificationSuccess = (payload) => {
+    const targetQuestId = gymQuest?.id || gymQuest?._id || 'gym-workout'
+    completeQuest(targetQuestId, { bypassVerification: true, proof: payload })
+    questService.verifyQuest(targetQuestId, payload).catch(() => {})
     refreshWorkoutProgress()
     if (onQuestCompleted) onQuestCompleted()
   }

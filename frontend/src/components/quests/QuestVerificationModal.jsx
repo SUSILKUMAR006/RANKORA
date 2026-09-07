@@ -32,6 +32,18 @@ function QuestVerificationModal({ quest, open, onClose, onVerified, onSubmitted 
   const [submitted, setSubmitted] = useState(false)
 
   useEffect(() => {
+    if (open) {
+      setFile(null)
+      setPreviewUrl('')
+      setBase64Data('')
+      setNote('')
+      setError('')
+      setProcessing(false)
+      setSubmitted(false)
+    }
+  }, [open, quest?.id])
+
+  useEffect(() => {
     return () => {
       if (previewUrl && previewUrl.startsWith('blob:')) {
         URL.revokeObjectURL(previewUrl)
@@ -64,7 +76,9 @@ function QuestVerificationModal({ quest, open, onClose, onVerified, onSubmitted 
     // Read to Base64 for persistent storage in Progress Photos
     const reader = new FileReader()
     reader.onload = () => {
-      setBase64Data(reader.result)
+      if (typeof reader.result === 'string') {
+        setBase64Data(reader.result)
+      }
     }
     reader.readAsDataURL(selected)
   }
@@ -88,15 +102,28 @@ function QuestVerificationModal({ quest, open, onClose, onVerified, onSubmitted 
     }
 
     setProcessing(true)
+    setError('')
 
-    const photoUrl = base64Data || previewUrl
+    let photoUrl = base64Data || previewUrl
+    if (!base64Data && file) {
+      try {
+        photoUrl = await new Promise((resolve, reject) => {
+          const reader = new FileReader()
+          reader.onload = () => resolve(reader.result)
+          reader.onerror = reject
+          reader.readAsDataURL(file)
+        })
+      } catch {
+        photoUrl = previewUrl
+      }
+    }
 
-    // If this is a Gym workout, automatically save the proof to the Progress Photos timeline!
-    if (isGymQuest && photoUrl) {
+    // If this is a Gym workout or photo quest, automatically save proof to Progress Photos timeline
+    if (photoUrl) {
       try {
         await progressService.uploadProgressPhoto({
           photoUrl,
-          note: note.trim() || 'Gym Workout Proof Checkpoint',
+          note: note.trim() || `${quest?.title || 'Gym Workout'} Evidence Checkpoint`,
           date: new Date().toISOString().slice(0, 10),
           dayNumber: 1,
         })
@@ -105,25 +132,21 @@ function QuestVerificationModal({ quest, open, onClose, onVerified, onSubmitted 
       }
     }
 
-    setTimeout(() => {
-      if (onVerified) {
-        onVerified({
-          file,
-          photoUrl,
-          note: note.trim(),
-          fileName: file.name,
-        })
-      } else if (onSubmitted) {
-        onSubmitted({
-          file,
-          photoUrl,
-          note: note.trim(),
-          fileName: file.name,
-        })
-      }
-      setProcessing(false)
-      setSubmitted(true)
-    }, 450)
+    const payload = {
+      file,
+      photoUrl,
+      note: note.trim(),
+      fileName: file?.name || 'workout-proof.jpg',
+    }
+
+    if (onVerified) {
+      onVerified(payload)
+    } else if (onSubmitted) {
+      onSubmitted(payload)
+    }
+
+    setProcessing(false)
+    setSubmitted(true)
   }
 
   return (

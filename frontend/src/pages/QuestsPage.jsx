@@ -31,6 +31,7 @@ import QuestVerificationModal from '../components/quests/QuestVerificationModal.
 import XPRewardAnimation from '../components/quests/XPRewardAnimation.jsx'
 import DailyWorkoutCard from '../components/workout/DailyWorkoutCard.jsx'
 import { completeQuest, getStoredQuests } from '../hooks/useQuestCompletion.js'
+import { questService } from '../services/questService.js'
 import { getQuestIcon } from '../data/mockQuests.js'
 import { isToday } from '../utils/failureUtils.js'
 
@@ -63,9 +64,11 @@ function QuestsPage() {
   useEffect(() => {
     window.addEventListener('storage', refreshQuests)
     window.addEventListener('rankora-player-updated', refreshQuests)
+    window.addEventListener('rankora-workout-updated', refreshQuests)
     return () => {
       window.removeEventListener('storage', refreshQuests)
       window.removeEventListener('rankora-player-updated', refreshQuests)
+      window.removeEventListener('rankora-workout-updated', refreshQuests)
     }
   }, [])
 
@@ -87,8 +90,16 @@ function QuestsPage() {
     }
   }
 
-  const handleVerificationSuccess = () => {
-    setVerificationQuest(null)
+  const handleVerificationSuccess = (payload) => {
+    if (verificationQuest) {
+      const targetId = verificationQuest.id || verificationQuest._id
+      const result = completeQuest(targetId, { bypassVerification: true, proof: payload })
+      questService.verifyQuest(targetId, payload).catch(() => {})
+      if (result && !result.error) {
+        setXpAnimation({ xp: result.gainedXp || verificationQuest.xp, title: verificationQuest.title })
+        setTimeout(() => setXpAnimation(null), 2500)
+      }
+    }
     refreshQuests()
   }
 
@@ -400,8 +411,12 @@ function QuestsPage() {
         <QuestVerificationModal
           open={Boolean(verificationQuest)}
           quest={verificationQuest}
-          onClose={() => setVerificationQuest(null)}
+          onClose={() => {
+            setVerificationQuest(null)
+            refreshQuests()
+          }}
           onVerified={handleVerificationSuccess}
+          onSubmitted={handleVerificationSuccess}
         />
       )}
 
