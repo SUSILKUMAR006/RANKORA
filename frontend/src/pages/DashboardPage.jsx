@@ -16,7 +16,8 @@ import {
   getStoredPlayer,
   quickActions,
 } from '../data/mockDashboardData.js'
-import { getStoredQuests, syncStreakForToday } from '../hooks/useQuestCompletion.js'
+import { getStoredQuests } from '../hooks/useQuestCompletion.js'
+import { syncQuestsFromServer } from '../services/questSync.js'
 import { getLatestUnlockedAchievement } from '../utils/achievementUtils.js'
 import { getStoredWeeklyBoss } from '../utils/bossUtils.js'
 import { getWeeklyOverview } from '../utils/dailyLogUtils.js'
@@ -42,8 +43,15 @@ function DashboardPage() {
   }
 
   useEffect(() => {
-    const updatedPlayer = syncStreakForToday()
-    setPlayer(updatedPlayer)
+    // Server is authoritative for "what day is it" and streak/history —
+    // reconcile the local mirror against it so a stale browser clock or
+    // localStorage never leaves quests/streak stuck on yesterday. If the
+    // network/backend is unavailable, the existing local snapshot is kept.
+    syncQuestsFromServer().then(({ quests: serverQuests, player: serverPlayer }) => {
+      if (serverQuests) setQuests(serverQuests)
+      if (serverPlayer) setPlayer(serverPlayer)
+      setWeekly(getWeeklyOverview())
+    })
 
     window.addEventListener('storage', handleRefresh)
     window.addEventListener('rankora-player-updated', handleRefresh)

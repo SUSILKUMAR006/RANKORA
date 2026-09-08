@@ -82,9 +82,10 @@ function QuestsPage() {
       return
     }
 
-    // Direct Complete
+    // Direct Complete (local mirror updates UI instantly, backend write happens in the background)
     const result = completeQuest(quest.id)
     if (result && !result.error) {
+      questService.completeQuest(quest.id).catch(() => {})
       setXpAnimation({ xp: result.gainedXp || quest.xp, title: quest.title })
       refreshQuests()
       setTimeout(() => setXpAnimation(null), 2500)

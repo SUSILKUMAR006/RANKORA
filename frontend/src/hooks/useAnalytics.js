@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
 import { PERIODS, getAnalyticsData } from '../utils/analyticsUtils.js'
+import { syncQuestsFromServer } from '../services/questSync.js'
 
 export function useAnalytics(initialPeriod = '7d') {
   const [period, setPeriod] = useState(initialPeriod)
@@ -17,6 +18,11 @@ export function useAnalytics(initialPeriod = '7d') {
   useEffect(() => {
     refresh(period)
   }, [period, refresh])
+
+  useEffect(() => {
+    syncQuestsFromServer().then(() => refresh(period))
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   useEffect(() => {
     const handleStorage = (e) => {

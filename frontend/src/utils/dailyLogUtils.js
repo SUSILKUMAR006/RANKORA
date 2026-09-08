@@ -32,6 +32,37 @@ export function recordDailyCompletion(quests, now = new Date()) {
   return log
 }
 
+export function mergeServerDailyLog(serverLogs = []) {
+  if (!Array.isArray(serverLogs) || serverLogs.length === 0) return getDailyLog()
+
+  const log = getDailyLog()
+  serverLogs.forEach((entry) => {
+    if (!entry?.dateKey) return
+    log[entry.dateKey] = {
+      total: entry.total || 0,
+      completed: entry.completed || 0,
+      percentage: entry.percentage || 0,
+      xpEarned: entry.xpEarned || 0,
+      failed: entry.failed || 0,
+    }
+  })
+  saveDailyLog(log)
+  return log
+}
+
+export function getDailyLogEntries(days = 30, now = new Date()) {
+  const log = getDailyLog()
+  const entries = []
+  for (let i = days - 1; i >= 0; i -= 1) {
+    const date = new Date(now)
+    date.setDate(date.getDate() - i)
+    const key = toDateKey(date)
+    const entry = log[key] || { total: 0, completed: 0, percentage: 0, xpEarned: 0, failed: 0 }
+    entries.push({ dateKey: key, ...entry })
+  }
+  return entries
+}
+
 export function getWeeklyOverview(now = new Date()) {
   const log = getDailyLog()
   const dayLabels = ['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN']

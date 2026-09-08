@@ -2,6 +2,7 @@ import { fallbackPlayer, getStoredPlayer } from '../data/mockDashboardData.js'
 import { getStoredQuests } from '../hooks/useQuestCompletion.js'
 import { getStoredFailures } from './failureUtils.js'
 import { calculateLifetimeXp } from './achievementUtils.js'
+import { getDailyLog } from './dailyLogUtils.js'
 
 export const PERIODS = [
   { id: '7d', label: '7 Days', days: 7 },
@@ -72,6 +73,26 @@ export function getAnalyticsData(periodId = '7d') {
   // Process Live Quests and their real history
   const todayKey = now.toISOString().slice(0, 10)
   const todayDayName = now.toLocaleDateString('en-US', { weekday: 'short' })
+
+  // Backfill past days from the persisted daily-completion log (server-synced),
+  // since a completed quest's own history is cleared on the next day's reset.
+  const dailyLog = getDailyLog()
+  dateMap.forEach((entry, key) => {
+    if (key === todayKey) return
+    const logEntry = dailyLog[key]
+    if (!logEntry) return
+    entry.completed = logEntry.completed || 0
+    entry.failed = logEntry.failed || 0
+    entry.xp = logEntry.xpEarned || 0
+    totalCompletedCount += entry.completed
+    totalFailedCount += entry.failed
+    const dayName = new Date(`${key}T00:00:00`).toLocaleDateString('en-US', { weekday: 'short' })
+    if (dayOfWeekCounts[dayName]) {
+      dayOfWeekCounts[dayName].completed += entry.completed
+      dayOfWeekCounts[dayName].failed += entry.failed
+      dayOfWeekCounts[dayName].xp += entry.xp
+    }
+  })
 
   quests.forEach((q) => {
     const cat = q.category && categoryStats[q.category] ? q.category : 'General'

@@ -4,6 +4,7 @@ import {
   createQuest,
   deleteQuest,
   failQuest,
+  getDailyLogHistory,
   getQuestById,
   getQuests,
 } from '../controllers/questController.js'
@@ -14,6 +15,7 @@ const router = express.Router()
 router.use(protect)
 router.get('/', getQuests)
 router.post('/', createQuest)
+router.get('/history', getDailyLogHistory)
 router.get('/:id', getQuestById)
 router.post('/:id/complete', completeQuest)
 router.post('/:id/fail', failQuest)

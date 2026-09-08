@@ -68,17 +68,20 @@ export const questService = {
   },
 
   /**
-   * Complete quest in MongoDB and receive XP/stat rewards
+   * Complete quest in MongoDB and receive XP/stat rewards.
+   * The local mirror (XP animation, boss damage, achievements, notifications)
+   * still runs so the UI's existing feedback effects keep working, but the
+   * server response is the source of truth for streak/XP once it lands.
    * @param {string} id
    * @param {Object} [options]
    */
   async completeQuest(id, options = {}) {
+    const localResult = localCompleteQuest(id, options)
     try {
       const res = await api.post(`/quests/${id}/complete`, options)
-      localCompleteQuest(id, options)
-      return res
+      return { ...localResult, server: res }
     } catch {
-      return localCompleteQuest(id, options)
+      return localResult
     }
   },
 
@@ -88,12 +91,12 @@ export const questService = {
    * @param {{ reason: string, note?: string }} payload
    */
   async failQuest(id, payload) {
+    const localResult = recordQuestFailure(id, payload)
     try {
       const res = await api.post(`/quests/${id}/fail`, payload)
-      recordQuestFailure(id, payload)
-      return res
+      return { ...localResult, server: res }
     } catch {
-      return recordQuestFailure(id, payload)
+      return localResult
     }
   },
 
@@ -103,12 +106,12 @@ export const questService = {
    * @param {Object} proofPayload
    */
   async verifyQuest(id, proofPayload = {}) {
+    const localResult = localCompleteQuest(id, { bypassVerification: true, proof: proofPayload })
     try {
       const res = await api.post(`/quests/${id}/complete`, proofPayload)
-      localCompleteQuest(id, { bypassVerification: true, proof: proofPayload })
-      return res
+      return { ...localResult, server: res }
     } catch {
-      return localCompleteQuest(id, { bypassVerification: true, proof: proofPayload })
+      return localResult
     }
   },
 }

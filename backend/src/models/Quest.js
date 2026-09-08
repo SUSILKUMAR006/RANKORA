@@ -101,6 +101,14 @@ const questSchema = new mongoose.Schema(
     failureNote: {
       type: String,
     },
+    verificationProof: {
+      type: String,
+      default: null,
+    },
+    dayKey: {
+      type: String,
+      default: '',
+    },
     history: [questHistorySchema],
   },
   {

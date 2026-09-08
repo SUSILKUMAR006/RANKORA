@@ -94,6 +94,7 @@ function QuestDetailsPage() {
         return
       }
       if (result.alreadyCompleted || result.requiresVerification) return
+      questService.completeQuest(quest.id || quest._id).catch(() => {})
       setRewardVisible(true)
       window.setTimeout(() => setRewardVisible(false), 1200)
       if (result.leveledUp)
@@ -115,6 +116,7 @@ function QuestDetailsPage() {
         setActionState('error')
         return
       }
+      questService.failQuest(quest.id || quest._id, payload).catch(() => {})
       refresh()
       setFailureRecorded(true)
     }, 300)

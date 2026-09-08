@@ -52,6 +52,10 @@ const userSchema = new mongoose.Schema(
       type: Number,
       default: 0,
     },
+    lastStreakDate: {
+      type: String,
+      default: null,
+    },
     primaryPath: {
       type: String,
       default: 'balanced',

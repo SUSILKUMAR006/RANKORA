@@ -1,4 +1,5 @@
 import Boss from '../models/Boss.js'
+import DailyLog from '../models/DailyLog.js'
 import Notification from '../models/Notification.js'
 import Quest from '../models/Quest.js'
 import User from '../models/User.js'
@@ -21,9 +22,95 @@ function calculateRank(level) {
   return 'E'
 }
 
+function todayKey(now = new Date()) {
+  return now.toISOString().slice(0, 10)
+}
+
+function addDaysKey(dateKey, days) {
+  const date = new Date(`${dateKey}T00:00:00.000Z`)
+  date.setUTCDate(date.getUTCDate() + days)
+  return todayKey(date)
+}
+
+async function recordDailyLog(userId, dateKey, quests, xpEarned = 0) {
+  const total = quests.length
+  const completed = quests.filter((q) => q.status === 'completed').length
+  const failed = quests.filter((q) => q.status === 'failed').length
+  const percentage = total > 0 ? Math.round((completed / total) * 100) : 0
+
+  return DailyLog.findOneAndUpdate(
+    { userId, dateKey },
+    {
+      $set: { total, completed, failed, percentage },
+      $inc: { xpEarned },
+    },
+    { upsert: true, new: true, setDefaultsOnInsert: true }
+  )
+}
+
+// Ensures the user's persistent daily-quest roster reflects "today". If the
+// stored quests belong to a previous day, archive that day's results into
+// DailyLog and reset the roster to pending for today.
+async function ensureQuestsForToday(userId) {
+  const quests = await Quest.find({ userId }).sort({ createdAt: 1 })
+  if (quests.length === 0) return quests
+
+  const now = new Date()
+  const currentKey = todayKey(now)
+  const staleQuests = quests.filter((q) => q.dayKey && q.dayKey !== currentKey)
+
+  if (staleQuests.length === 0) {
+    // Backfill dayKey for legacy documents created before this field existed.
+    const missingDayKey = quests.filter((q) => !q.dayKey)
+    if (missingDayKey.length > 0) {
+      await Promise.all(
+        missingDayKey.map((q) => Quest.updateOne({ _id: q._id }, { $set: { dayKey: currentKey } }))
+      )
+    }
+    return quests
+  }
+
+  const previousDayKey = staleQuests[0].dayKey
+  await recordDailyLog(userId, previousDayKey, staleQuests)
+
+  await Promise.all(
+    staleQuests.map((q) =>
+      Quest.updateOne(
+        { _id: q._id },
+        {
+          $set: {
+            status: 'pending',
+            progress: 0,
+            history: [],
+            verificationProof: null,
+            completedAt: null,
+            failedAt: null,
+            failureReason: null,
+            failureNote: null,
+            dayKey: currentKey,
+          },
+        }
+      )
+    )
+  )
+
+  return Quest.find({ userId }).sort({ createdAt: 1 })
+}
+
+function applyStreakUpdate(user, now = new Date()) {
+  const currentKey = todayKey(now)
+  if (user.lastStreakDate === currentKey) return false
+
+  const yesterdayKey = addDaysKey(currentKey, -1)
+  user.currentStreak = user.lastStreakDate === yesterdayKey ? (user.currentStreak || 0) + 1 : 1
+  user.bestStreak = Math.max(user.bestStreak || 0, user.currentStreak)
+  user.lastStreakDate = currentKey
+  return true
+}
+
 export async function getQuests(req, res, next) {
   try {
-    let quests = await Quest.find({ userId: req.user._id }).sort({ createdAt: 1 })
+    const quests = await ensureQuestsForToday(req.user._id)
     res.json({ success: true, quests })
   } catch (error) {
     next(error)
@@ -50,6 +137,7 @@ export async function createQuest(req, res, next) {
     const quest = await Quest.create({
       ...req.body,
       userId: req.user._id,
+      dayKey: todayKey(),
     })
     res.status(201).json({ success: true, quest })
   } catch (error) {
@@ -59,6 +147,8 @@ export async function createQuest(req, res, next) {
 
 export async function completeQuest(req, res, next) {
   try {
+    await ensureQuestsForToday(req.user._id)
+
     const quest = await Quest.findOne({
       $or: [{ _id: req.params.id }, { questKey: req.params.id }],
       userId: req.user._id,
@@ -66,10 +156,15 @@ export async function completeQuest(req, res, next) {
     if (!quest) {
       return res.status(404).json({ success: false, message: 'Quest not found.' })
     }
+    if (quest.status === 'completed') {
+      const user = await User.findById(req.user._id).select('-passwordHash')
+      return res.json({ success: true, quest, user, alreadyCompleted: true })
+    }
 
     const now = new Date()
     quest.status = 'completed'
     quest.completedAt = now
+    quest.verificationProof = req.body?.proof || quest.verificationProof || null
     quest.history.unshift({
       date: 'Today',
       time: now.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' }),
@@ -106,11 +201,17 @@ export async function completeQuest(req, res, next) {
       user.rank = calculateRank(user.level)
       newLevel = user.level
 
-      // Streaks
-      user.currentStreak = Math.max(1, (user.currentStreak || 0) + 1)
-      user.bestStreak = Math.max(user.bestStreak || 0, user.currentStreak)
+      // Streak only advances once per day, and only once every quest for
+      // today is completed.
+      const allQuests = await Quest.find({ userId: req.user._id, dayKey: quest.dayKey })
+      const allCompletedToday = allQuests.length > 0 && allQuests.every((q) => q.status === 'completed')
+      if (allCompletedToday) {
+        applyStreakUpdate(user, now)
+      }
 
       await user.save()
+
+      await recordDailyLog(req.user._id, quest.dayKey || todayKey(now), allQuests, quest.xp || 0)
     }
 
     // 2. Deal Damage to Active Boss in MongoDB
@@ -163,6 +264,8 @@ export async function completeQuest(req, res, next) {
 
 export async function failQuest(req, res, next) {
   try {
+    await ensureQuestsForToday(req.user._id)
+
     const { reason, note } = req.body
     const quest = await Quest.findOne({
       $or: [{ _id: req.params.id }, { questKey: req.params.id }],
@@ -187,6 +290,9 @@ export async function failQuest(req, res, next) {
     })
     await quest.save()
 
+    const allQuests = await Quest.find({ userId: req.user._id, dayKey: quest.dayKey })
+    await recordDailyLog(req.user._id, quest.dayKey || todayKey(now), allQuests)
+
     res.json({ success: true, quest })
   } catch (error) {
     next(error)
@@ -200,6 +306,23 @@ export async function deleteQuest(req, res, next) {
       userId: req.user._id,
     })
     res.json({ success: true, message: 'Quest deleted successfully.' })
+  } catch (error) {
+    next(error)
+  }
+}
+
+export async function getDailyLogHistory(req, res, next) {
+  try {
+    const days = Math.min(Math.max(Number(req.query.days) || 30, 1), 365)
+    const now = new Date()
+    const sinceKey = addDaysKey(todayKey(now), -(days - 1))
+
+    const logs = await DailyLog.find({
+      userId: req.user._id,
+      dateKey: { $gte: sinceKey },
+    }).sort({ dateKey: 1 })
+
+    res.json({ success: true, logs })
   } catch (error) {
     next(error)
   }

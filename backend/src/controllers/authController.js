@@ -149,10 +149,12 @@ export async function register(req, res, next) {
       onboardingCompleted: false,
     })
 
-    // Seed the 6 Default Routine Quests in MongoDB for this User
+    // Seed the 7 Default Routine Quests in MongoDB for this User
+    const todayKey = new Date().toISOString().slice(0, 10)
     const questsToInsert = DEFAULT_ROUTINE_QUESTS.map((q) => ({
       ...q,
       userId: user._id,
+      dayKey: todayKey,
     }))
     await Quest.insertMany(questsToInsert)
 
