@@ -26,16 +26,14 @@ import QuestReward from '../components/quests/details/QuestReward.jsx'
 import RelatedQuests from '../components/quests/details/RelatedQuests.jsx'
 import { mockQuests } from '../data/mockQuests.js'
 import { useQuestCompletion } from '../hooks/useQuestCompletion.js'
-import { useQuestFailure } from '../hooks/useQuestFailure.js'
 import { useQuestVerification } from '../hooks/useQuestVerification.js'
 import { questService } from '../services/questService.js'
 
 function QuestDetailsPage() {
   const { id } = useParams()
   const navigate = useNavigate()
-  const { quest, complete, refresh } = useQuestCompletion(id)
+  const { quest, refresh } = useQuestCompletion(id)
   const { submit: submitVerification } = useQuestVerification(id)
-  const { record: recordFailure } = useQuestFailure(id)
   const [actionState, setActionState] = useState('idle')
   const [confirmationOpen, setConfirmationOpen] = useState(false)
   const [verificationOpen, setVerificationOpen] = useState(false)
@@ -45,6 +43,7 @@ function QuestDetailsPage() {
   const [rewardVisible, setRewardVisible] = useState(false)
   const [levelUp, setLevelUp] = useState(null)
   const [failureRecorded, setFailureRecorded] = useState(false)
+  const [syncError, setSyncError] = useState('')
 
   if (!quest)
     return (
@@ -85,57 +84,67 @@ function QuestDetailsPage() {
 
   const confirmCompletion = () => {
     setProcessing(true)
-    window.setTimeout(() => {
-      const result = complete()
-      setProcessing(false)
-      setConfirmationOpen(false)
-      if (result.error) {
+    setSyncError('')
+    window.setTimeout(async () => {
+      try {
+        const result = await questService.completeQuest(quest.id || quest._id)
+        setProcessing(false)
+        setConfirmationOpen(false)
+        if (result.alreadyCompleted || result.requiresVerification) return
+        setRewardVisible(true)
+        window.setTimeout(() => setRewardVisible(false), 1200)
+        if (result.leveledUp)
+          setLevelUp({
+            previousLevel: result.previousLevel,
+            newLevel: result.newLevel,
+            gainedXp: result.gainedXp,
+            statReward: result.reward,
+          })
+      } catch (error) {
+        setProcessing(false)
+        setConfirmationOpen(false)
         setActionState('error')
-        return
+        setSyncError(error?.message || 'Failed to save quest completion.')
       }
-      if (result.alreadyCompleted || result.requiresVerification) return
-      questService.completeQuest(quest.id || quest._id).catch(() => {})
-      setRewardVisible(true)
-      window.setTimeout(() => setRewardVisible(false), 1200)
-      if (result.leveledUp)
-        setLevelUp({
-          previousLevel: result.previousLevel,
-          newLevel: result.newLevel,
-          gainedXp: result.gainedXp,
-          statReward: result.reward,
-        })
     }, 300)
   }
 
   const confirmFailure = (payload) => {
     setFailureProcessing(true)
-    window.setTimeout(() => {
-      const result = recordFailure(payload)
-      setFailureProcessing(false)
-      if (result.error) {
+    setSyncError('')
+    window.setTimeout(async () => {
+      try {
+        await questService.failQuest(quest.id || quest._id, payload)
+        setFailureProcessing(false)
+        refresh()
+        setFailureRecorded(true)
+      } catch (error) {
+        setFailureProcessing(false)
         setActionState('error')
-        return
+        setSyncError(error?.message || 'Failed to save quest failure.')
       }
-      questService.failQuest(quest.id || quest._id, payload).catch(() => {})
-      refresh()
-      setFailureRecorded(true)
     }, 300)
   }
 
-  const handleVerificationSubmitted = (payload) => {
-    const result = complete({ bypassVerification: true, proof: payload })
-    questService.verifyQuest(quest.id || quest._id, payload).catch(() => {})
-    if (result && !result.error) {
-      setRewardVisible(true)
-      window.setTimeout(() => setRewardVisible(false), 1200)
-      if (result.leveledUp) {
-        setLevelUp({
-          previousLevel: result.previousLevel,
-          newLevel: result.newLevel,
-          gainedXp: result.gainedXp,
-          statReward: result.reward,
-        })
+  const handleVerificationSubmitted = async (payload) => {
+    setSyncError('')
+    try {
+      const result = await questService.verifyQuest(quest.id || quest._id, payload)
+      if (result && !result.error) {
+        setRewardVisible(true)
+        window.setTimeout(() => setRewardVisible(false), 1200)
+        if (result.leveledUp) {
+          setLevelUp({
+            previousLevel: result.previousLevel,
+            newLevel: result.newLevel,
+            gainedXp: result.gainedXp,
+            statReward: result.reward,
+          })
+        }
       }
+    } catch (error) {
+      setActionState('error')
+      setSyncError(error?.message || 'Failed to save quest completion.')
     }
     refresh()
   }
@@ -168,7 +177,7 @@ function QuestDetailsPage() {
             >
               <p className="label-caps text-rose-200/80">SYSTEM ERROR</p>
               <p className="mt-2 text-sm text-slate-400">
-                Quest data could not be located.
+                {syncError || 'Quest data could not be located.'}
               </p>
             </Card>
           )}

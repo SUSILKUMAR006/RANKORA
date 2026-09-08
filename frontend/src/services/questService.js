@@ -1,4 +1,4 @@
-import api from './api.js'
+import api, { formatApiError } from './api.js'
 import {
   completeQuest as localCompleteQuest,
   getStoredQuests,
@@ -8,20 +8,15 @@ import { recordQuestFailure } from '../hooks/useQuestFailure.js'
 
 export const questService = {
   /**
-   * Fetch all daily quests from real MongoDB
+   * Fetch all daily quests from real MongoDB. Throws on failure — callers
+   * decide how to surface it, no silent local fallback.
    * @param {Object} [params]
    */
   async getQuests(params = {}) {
-    try {
-      const res = await api.get('/quests', { params })
-      if (res?.quests && Array.isArray(res.quests)) {
-        localStorage.setItem(QUEST_STORAGE_KEY, JSON.stringify(res.quests))
-        return res.quests
-      }
-      return getStoredQuests()
-    } catch {
-      return getStoredQuests()
-    }
+    const res = await api.get('/quests', { params })
+    const quests = Array.isArray(res?.quests) ? res.quests : []
+    localStorage.setItem(QUEST_STORAGE_KEY, JSON.stringify(quests))
+    return quests
   },
 
   /**
@@ -29,13 +24,8 @@ export const questService = {
    * @param {string} id
    */
   async getQuestById(id) {
-    try {
-      const res = await api.get(`/quests/${id}`)
-      return res?.quest || null
-    } catch {
-      const quests = getStoredQuests()
-      return quests.find((q) => q.id === id || q._id === id) || null
-    }
+    const res = await api.get(`/quests/${id}`)
+    return res?.quest || null
   },
 
   /**
@@ -43,45 +33,28 @@ export const questService = {
    * @param {Object} questData
    */
   async createQuest(questData) {
-    try {
-      const res = await api.post('/quests', questData)
-      if (res?.quest) {
-        const current = getStoredQuests()
-        localStorage.setItem(QUEST_STORAGE_KEY, JSON.stringify([res.quest, ...current]))
-        return res.quest
-      }
-      throw new Error('API failed')
-    } catch {
-      const current = getStoredQuests()
-      const newQuest = {
-        id: `quest-${Date.now()}`,
-        status: 'pending',
-        progress: 0,
-        history: [],
-        createdAt: new Date().toISOString(),
-        ...questData,
-      }
-      const updated = [newQuest, ...current]
-      localStorage.setItem(QUEST_STORAGE_KEY, JSON.stringify(updated))
-      return newQuest
-    }
+    const res = await api.post('/quests', questData)
+    if (!res?.quest) throw new Error('Quest creation failed: no quest returned by server.')
+    const current = getStoredQuests()
+    localStorage.setItem(QUEST_STORAGE_KEY, JSON.stringify([res.quest, ...current]))
+    return res.quest
   },
 
   /**
-   * Complete quest in MongoDB and receive XP/stat rewards.
-   * The local mirror (XP animation, boss damage, achievements, notifications)
-   * still runs so the UI's existing feedback effects keep working, but the
-   * server response is the source of truth for streak/XP once it lands.
+   * Complete quest in MongoDB and receive XP/stat rewards. The database is
+   * authoritative: the write must succeed before the local mirror (which
+   * drives XP animations, boss damage, achievements) is updated. On failure
+   * the error propagates and local state is left untouched.
    * @param {string} id
    * @param {Object} [options]
    */
   async completeQuest(id, options = {}) {
-    const localResult = localCompleteQuest(id, options)
     try {
-      const res = await api.post(`/quests/${id}/complete`, options)
-      return { ...localResult, server: res }
-    } catch {
-      return localResult
+      const server = await api.post(`/quests/${id}/complete`, options)
+      const localResult = localCompleteQuest(id, options)
+      return { ...localResult, server }
+    } catch (error) {
+      throw new Error(formatApiError(error))
     }
   },
 
@@ -91,12 +64,12 @@ export const questService = {
    * @param {{ reason: string, note?: string }} payload
    */
   async failQuest(id, payload) {
-    const localResult = recordQuestFailure(id, payload)
     try {
-      const res = await api.post(`/quests/${id}/fail`, payload)
-      return { ...localResult, server: res }
-    } catch {
-      return localResult
+      const server = await api.post(`/quests/${id}/fail`, payload)
+      const localResult = recordQuestFailure(id, payload)
+      return { ...localResult, server }
+    } catch (error) {
+      throw new Error(formatApiError(error))
     }
   },
 
@@ -106,12 +79,12 @@ export const questService = {
    * @param {Object} proofPayload
    */
   async verifyQuest(id, proofPayload = {}) {
-    const localResult = localCompleteQuest(id, { bypassVerification: true, proof: proofPayload })
     try {
-      const res = await api.post(`/quests/${id}/complete`, proofPayload)
-      return { ...localResult, server: res }
-    } catch {
-      return localResult
+      const server = await api.post(`/quests/${id}/complete`, proofPayload)
+      const localResult = localCompleteQuest(id, { bypassVerification: true, proof: proofPayload })
+      return { ...localResult, server }
+    } catch (error) {
+      throw new Error(formatApiError(error))
     }
   },
 }

@@ -23,7 +23,7 @@ import {
   getStoredExerciseStatus,
   toggleExerciseCompleted,
 } from '../../data/workoutSplit.js'
-import { completeQuest, getStoredQuests } from '../../hooks/useQuestCompletion.js'
+import { getStoredQuests } from '../../hooks/useQuestCompletion.js'
 import { questService } from '../../services/questService.js'
 import { defaultRoutineQuests } from '../../data/mockQuests.js'
 
@@ -35,6 +35,7 @@ function DailyWorkoutCard({ onQuestCompleted }) {
   )
   const [verificationOpen, setVerificationOpen] = useState(false)
   const [gymQuest, setGymQuest] = useState(null)
+  const [syncError, setSyncError] = useState('')
 
   const workoutPlan = WEEKLY_WORKOUT_SPLIT[selectedDay]
   const isToday = selectedDay === currentDayIndex
@@ -91,12 +92,16 @@ function DailyWorkoutCard({ onQuestCompleted }) {
   const allCompleted = totalExercises > 0 && completedCount === totalExercises
   const gymQuestCompleted = gymQuest?.status === 'completed'
 
-  const handleVerificationSuccess = (payload) => {
+  const handleVerificationSuccess = async (payload) => {
     const targetQuestId = gymQuest?.id || gymQuest?._id || 'gym-workout'
-    completeQuest(targetQuestId, { bypassVerification: true, proof: payload })
-    questService.verifyQuest(targetQuestId, payload).catch(() => {})
-    refreshWorkoutProgress()
-    if (onQuestCompleted) onQuestCompleted()
+    setSyncError('')
+    try {
+      await questService.verifyQuest(targetQuestId, payload)
+      refreshWorkoutProgress()
+      if (onQuestCompleted) onQuestCompleted()
+    } catch (error) {
+      setSyncError(error?.message || 'Failed to save workout completion. Check your connection and try again.')
+    }
   }
 
   const dayOrder = [1, 2, 3, 4, 5, 6, 0] // Mon -> Sun
@@ -248,6 +253,13 @@ function DailyWorkoutCard({ onQuestCompleted }) {
           })}
         </div>
       </div>
+
+      {/* Sync Error Banner */}
+      {syncError && (
+        <div className="rounded-xl border border-rose-400/30 bg-rose-950/20 p-3 text-xs text-rose-200">
+          {syncError}
+        </div>
+      )}
 
       {/* Completion & Gym Photo Proof Upload Footer */}
       <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-4.5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">

@@ -1,5 +1,4 @@
-import api from './api.js'
-import { fallbackPlayer, getStoredPlayer } from '../data/mockDashboardData.js'
+import api, { formatApiError } from './api.js'
 
 function clearLocalSessionData() {
   localStorage.removeItem('rankora_token')
@@ -30,9 +29,10 @@ export const authService = {
       }
       return res
     } catch (error) {
-      // Fallback for offline usage
-      const player = getStoredPlayer() || fallbackPlayer
-      return { success: true, token: 'local-jwt-token', user: player }
+      // No silent local fallback: a fake session here previously let the app
+      // run entirely on stale localStorage for days without anyone noticing
+      // the backend was unreachable. Surface the real failure instead.
+      throw new Error(formatApiError(error))
     }
   },
 
@@ -53,21 +53,7 @@ export const authService = {
       }
       return res
     } catch (error) {
-      const newPlayer = {
-        ...fallbackPlayer,
-        playerName: userData.name || 'PLAYER',
-        email: userData.email,
-        level: 1,
-        xp: 0,
-        rank: 'E',
-        stats: { str: 0, vit: 0, int: 0, agi: 0, disc: 0 },
-        currentStreak: 0,
-        bestStreak: 0,
-        onboardingCompleted: false,
-      }
-      localStorage.setItem('rankora_player', JSON.stringify(newPlayer))
-      window.dispatchEvent(new Event('rankora-player-updated'))
-      return { success: true, token: 'local-jwt-token', user: newPlayer }
+      throw new Error(formatApiError(error))
     }
   },
 
@@ -86,17 +72,13 @@ export const authService = {
    * Retrieve current authenticated user profile from backend
    */
   async getCurrentUser() {
-    try {
-      const res = await api.get('/auth/me')
-      if (res?.user) {
-        localStorage.setItem('rankora_player', JSON.stringify(res.user))
-        window.dispatchEvent(new Event('rankora-player-updated'))
-        return res.user
-      }
-      return getStoredPlayer()
-    } catch {
-      return getStoredPlayer()
+    const res = await api.get('/auth/me')
+    if (res?.user) {
+      localStorage.setItem('rankora_player', JSON.stringify(res.user))
+      window.dispatchEvent(new Event('rankora-player-updated'))
+      return res.user
     }
+    return null
   },
 
   /**

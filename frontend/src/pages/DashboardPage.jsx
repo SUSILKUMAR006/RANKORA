@@ -33,6 +33,7 @@ function DashboardPage() {
     () => getStoredWeeklyBoss()?.currentBoss || dashboardData.boss
   )
   const [weekly, setWeekly] = useState(() => getWeeklyOverview())
+  const [syncFailed, setSyncFailed] = useState(false)
 
   const handleRefresh = () => {
     setPlayer(getStoredPlayer())
@@ -48,6 +49,7 @@ function DashboardPage() {
     // localStorage never leaves quests/streak stuck on yesterday. If the
     // network/backend is unavailable, the existing local snapshot is kept.
     syncQuestsFromServer().then(({ quests: serverQuests, player: serverPlayer }) => {
+      setSyncFailed(!serverQuests && !serverPlayer)
       if (serverQuests) setQuests(serverQuests)
       if (serverPlayer) setPlayer(serverPlayer)
       setWeekly(getWeeklyOverview())
@@ -66,6 +68,13 @@ function DashboardPage() {
   return (
     <div className="space-y-10 pb-8">
       <DashboardHeader playerName={player.playerName || fallbackPlayer.playerName} />
+
+      {syncFailed && (
+        <div className="rounded-2xl border border-amber-400/30 bg-amber-950/20 p-3 text-xs text-amber-200">
+          Could not reach the server — showing your last saved data. Progress made now may not be recorded until connection is restored.
+        </div>
+      )}
+
       <PlayerStatusCard player={player} />
 
       {/* Daily Workout Split Protocol & Exercise Checklist */}

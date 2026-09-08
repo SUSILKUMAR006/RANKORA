@@ -31,7 +31,7 @@ import QuestFailureModal from '../components/quests/QuestFailureModal.jsx'
 import QuestVerificationModal from '../components/quests/QuestVerificationModal.jsx'
 import XPRewardAnimation from '../components/quests/XPRewardAnimation.jsx'
 import DailyWorkoutCard from '../components/workout/DailyWorkoutCard.jsx'
-import { completeQuest, getStoredQuests, restoreDefaultQuests } from '../hooks/useQuestCompletion.js'
+import { getStoredQuests, restoreDefaultQuests } from '../hooks/useQuestCompletion.js'
 import { questService } from '../services/questService.js'
 import { getQuestIcon } from '../data/mockQuests.js'
 import { isToday } from '../utils/failureUtils.js'
@@ -57,6 +57,7 @@ function QuestsPage() {
   const [verificationQuest, setVerificationQuest] = useState(null)
   const [failureQuest, setFailureQuest] = useState(null)
   const [xpAnimation, setXpAnimation] = useState(null)
+  const [syncError, setSyncError] = useState('')
 
   const refreshQuests = () => {
     setQuests(getStoredQuests())
@@ -73,7 +74,7 @@ function QuestsPage() {
     }
   }, [])
 
-  const handleExecute = (quest) => {
+  const handleExecute = async (quest) => {
     if (quest.status === 'completed') return
 
     // Check if verification required
@@ -82,24 +83,33 @@ function QuestsPage() {
       return
     }
 
-    // Direct Complete (local mirror updates UI instantly, backend write happens in the background)
-    const result = completeQuest(quest.id)
-    if (result && !result.error) {
-      questService.completeQuest(quest.id).catch(() => {})
-      setXpAnimation({ xp: result.gainedXp || quest.xp, title: quest.title })
-      refreshQuests()
-      setTimeout(() => setXpAnimation(null), 2500)
+    setSyncError('')
+    try {
+      // Database is authoritative: wait for the write to succeed before
+      // updating the local mirror / showing the reward animation.
+      const result = await questService.completeQuest(quest.id)
+      if (result && !result.error) {
+        setXpAnimation({ xp: result.gainedXp || quest.xp, title: quest.title })
+        refreshQuests()
+        setTimeout(() => setXpAnimation(null), 2500)
+      }
+    } catch (error) {
+      setSyncError(error?.message || 'Failed to save quest completion. Check your connection and try again.')
     }
   }
 
-  const handleVerificationSuccess = (payload) => {
+  const handleVerificationSuccess = async (payload) => {
     if (verificationQuest) {
       const targetId = verificationQuest.id || verificationQuest._id
-      const result = completeQuest(targetId, { bypassVerification: true, proof: payload })
-      questService.verifyQuest(targetId, payload).catch(() => {})
-      if (result && !result.error) {
-        setXpAnimation({ xp: result.gainedXp || verificationQuest.xp, title: verificationQuest.title })
-        setTimeout(() => setXpAnimation(null), 2500)
+      setSyncError('')
+      try {
+        const result = await questService.verifyQuest(targetId, payload)
+        if (result && !result.error) {
+          setXpAnimation({ xp: result.gainedXp || verificationQuest.xp, title: verificationQuest.title })
+          setTimeout(() => setXpAnimation(null), 2500)
+        }
+      } catch (error) {
+        setSyncError(error?.message || 'Failed to save quest completion. Check your connection and try again.')
       }
     }
     refreshQuests()
@@ -185,6 +195,18 @@ function QuestsPage() {
           </Link>
         </div>
       </motion.header>
+
+      {/* Sync Error Banner */}
+      {syncError && (
+        <motion.div
+          initial={{ opacity: 0, y: -6 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="flex items-center gap-3 rounded-2xl border border-rose-400/30 bg-rose-950/20 p-4 text-rose-200"
+        >
+          <AlertTriangle size={18} className="shrink-0 text-rose-300" />
+          <p className="text-xs leading-relaxed">{syncError}</p>
+        </motion.div>
+      )}
 
       {/* Sunday Rest Day Banner */}
       {new Date().getDay() === 0 && (
