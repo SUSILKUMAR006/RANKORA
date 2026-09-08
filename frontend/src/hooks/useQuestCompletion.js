@@ -6,9 +6,15 @@ import { evaluateAchievements } from '../utils/achievementUtils.js'
 import { applyQuestDamageToBoss } from '../utils/bossUtils.js'
 import { addNotification } from '../utils/notificationUtils.js'
 import { formatStatReward } from '../utils/xpUtils.js'
+import { recordDailyCompletion } from '../utils/dailyLogUtils.js'
 
 export const QUEST_STORAGE_KEY = 'rankora_mock_quests'
+export const QUEST_DATE_STORAGE_KEY = 'rankora_quests_date'
 export const PLAYER_STORAGE_KEY = 'rankora_player'
+
+function todayKey(now = new Date()) {
+  return now.toISOString().slice(0, 10)
+}
 
 function persistQuests(quests) {
   try {
@@ -121,18 +127,50 @@ export function sanitizeAndRestoreQuests(savedQuests) {
   }))
 }
 
+function resetQuestsForNewDay(previousQuests, now = new Date()) {
+  if (previousQuests.length > 0) {
+    recordDailyCompletion(previousQuests, new Date(now.getTime() - 24 * 60 * 60 * 1000))
+  }
+  const freshDefaults = defaultRoutineQuests.map((q) => ({
+    ...q,
+    status: 'pending',
+    progress: 0,
+    history: [],
+    verificationProof: null,
+  }))
+  persistQuests(freshDefaults)
+  localStorage.setItem(QUEST_DATE_STORAGE_KEY, todayKey(now))
+  return freshDefaults
+}
+
 export function getStoredQuests() {
+  const now = new Date()
   try {
     const raw = localStorage.getItem(QUEST_STORAGE_KEY)
+    const storedDateKey = localStorage.getItem(QUEST_DATE_STORAGE_KEY)
+
     if (!raw) {
       persistQuests(defaultRoutineQuests)
+      localStorage.setItem(QUEST_DATE_STORAGE_KEY, todayKey(now))
       return defaultRoutineQuests.map((quest) => ({
         ...quest,
         icon: getQuestIcon(quest),
       }))
     }
+
     const saved = JSON.parse(raw)
-    return sanitizeAndRestoreQuests(saved)
+    const restored = sanitizeAndRestoreQuests(saved)
+
+    if (storedDateKey && storedDateKey !== todayKey(now)) {
+      const reset = resetQuestsForNewDay(restored, now)
+      return reset.map((quest) => ({ ...quest, icon: getQuestIcon(quest) }))
+    }
+
+    if (!storedDateKey) {
+      localStorage.setItem(QUEST_DATE_STORAGE_KEY, todayKey(now))
+    }
+
+    return restored
   } catch {
     return defaultRoutineQuests.map((quest) => ({
       ...quest,
@@ -150,6 +188,7 @@ export function restoreDefaultQuests() {
     verificationProof: null,
   }))
   persistQuests(freshDefaults)
+  localStorage.setItem(QUEST_DATE_STORAGE_KEY, todayKey())
   window.dispatchEvent(new Event('storage'))
   window.dispatchEvent(new Event('rankora-player-updated'))
   window.dispatchEvent(new Event('rankora-workout-updated'))
@@ -242,6 +281,7 @@ export function completeQuest(questId, options = {}) {
   })
 
   persistQuests(updatedQuests)
+  recordDailyCompletion(updatedQuests, now)
 
   const allDailyQuestsCompleted = updatedQuests.every((item) => item.status === 'completed')
   if (allDailyQuestsCompleted) {
