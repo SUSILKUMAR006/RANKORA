@@ -23,10 +23,10 @@ async function spawnEnergyBurst(x, y) {
   const el = document.createElement('div')
   el.id = id
   el.style.position = 'fixed'
-  el.style.left = `${x - 260}px`
-  el.style.top = `${y - 260}px`
-  el.style.width = '520px'
-  el.style.height = '520px'
+  el.style.left = `${x - 90}px`
+  el.style.top = `${y - 90}px`
+  el.style.width = '180px'
+  el.style.height = '180px'
   el.style.pointerEvents = 'none'
   el.style.zIndex = '9998'
   document.body.appendChild(el)
@@ -44,16 +44,16 @@ async function spawnEnergyBurst(x, y) {
         shape: { type: ['circle', 'star'] },
         opacity: {
           value: { min: 0, max: 1 },
-          animation: { enable: true, speed: 1.6, startValue: 'max', destroy: 'min' },
+          animation: { enable: true, speed: 2.4, startValue: 'max', destroy: 'min' },
         },
         size: {
-          value: { min: 1, max: 5 },
-          animation: { enable: true, speed: 6, startValue: 'max', destroy: 'min' },
+          value: { min: 0.6, max: 2.4 },
+          animation: { enable: true, speed: 8, startValue: 'max', destroy: 'min' },
         },
         move: {
           enable: true,
-          speed: { min: 6, max: 22 },
-          decay: 0.09,
+          speed: { min: 2, max: 8 },
+          decay: 0.12,
           direction: 'none',
           outModes: { default: 'destroy' },
         },
@@ -61,7 +61,7 @@ async function spawnEnergyBurst(x, y) {
       },
       emitters: {
         position: { x: 50, y: 50 },
-        rate: { quantity: 40, delay: 0 },
+        rate: { quantity: 24, delay: 0 },
         life: { count: 1, duration: 0.08 },
         particles: {
           move: { direction: 'none' },
