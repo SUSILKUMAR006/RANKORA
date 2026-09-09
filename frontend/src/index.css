@@ -75,52 +75,119 @@ body.sl-cursor-active * {
 	cursor: none !important;
 }
 
-.sl-slash-burst {
+/* Dramatic X-slash flash on click */
+.sl-xslash-wrapper {
 	position: fixed;
 	left: 0;
 	top: 0;
-	width: 46px;
-	height: 46px;
-	margin-left: -23px;
-	margin-top: -23px;
+	width: 0;
+	height: 0;
 	pointer-events: none;
-	z-index: 9999;
-	border-radius: 9999px;
-	background: radial-gradient(circle, rgba(196, 181, 253, 0.55), rgba(124, 58, 237, 0.25) 45%, transparent 72%);
-	transform: scale(0.2) rotate(-20deg);
-	animation: sl-slash-pop 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+	z-index: 10000;
 }
 
-.sl-slash-burst::before,
-.sl-slash-burst::after {
-	content: '';
+.sl-xslash-line {
 	position: absolute;
-	inset: 6px;
-	border: 2px solid rgba(224, 214, 255, 0.9);
-	border-radius: 40% 60% 55% 45%;
-	border-left-color: transparent;
-	border-bottom-color: transparent;
-	filter: drop-shadow(0 0 6px rgba(167, 139, 250, 0.8));
+	left: 0;
+	top: 0;
+	width: 220px;
+	height: 6px;
+	margin-left: -110px;
+	margin-top: -3px;
+	border-radius: 9999px;
+	background: linear-gradient(
+		90deg,
+		transparent 0%,
+		rgba(196, 181, 253, 0.15) 12%,
+		rgba(245, 243, 255, 0.98) 50%,
+		rgba(196, 181, 253, 0.15) 88%,
+		transparent 100%
+	);
+	filter: drop-shadow(0 0 10px rgba(167, 139, 250, 0.95)) drop-shadow(0 0 24px rgba(109, 40, 217, 0.7));
+	transform: scaleX(0);
+	opacity: 0;
 }
 
-.sl-slash-burst::after {
-	inset: 12px;
-	transform: rotate(35deg);
-	opacity: 0.7;
+.sl-xslash-a {
+	animation: sl-xslash-fade 0.42s cubic-bezier(0.16, 1, 0.3, 1) forwards,
+		sl-xslash-scale-a 0.42s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
-@keyframes sl-slash-pop {
+.sl-xslash-b {
+	animation: sl-xslash-fade 0.42s cubic-bezier(0.16, 1, 0.3, 1) 0.05s forwards,
+		sl-xslash-scale-b 0.42s cubic-bezier(0.16, 1, 0.3, 1) 0.05s forwards;
+}
+
+.sl-xslash-flash {
+	position: absolute;
+	left: 0;
+	top: 0;
+	width: 160px;
+	height: 160px;
+	margin-left: -80px;
+	margin-top: -80px;
+	border-radius: 9999px;
+	background: radial-gradient(circle, rgba(224, 214, 255, 0.65), rgba(109, 40, 217, 0.3) 40%, transparent 70%);
+	transform: scale(0.1);
+	opacity: 0.9;
+	animation: sl-flash-pop 0.45s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes sl-xslash-fade {
 	0% {
-		transform: scale(0.2) rotate(-20deg);
-		opacity: 1;
-	}
-	60% {
-		transform: scale(1.05) rotate(10deg);
-		opacity: 0.9;
-	}
-	100% {
-		transform: scale(1.6) rotate(20deg);
 		opacity: 0;
 	}
+	8% {
+		opacity: 1;
+	}
+	55% {
+		opacity: 1;
+	}
+	100% {
+		opacity: 0;
+	}
+}
+
+@keyframes sl-xslash-scale-a {
+	0% {
+		transform: rotate(-32deg) scaleX(0.1);
+	}
+	100% {
+		transform: rotate(-32deg) scaleX(1.35);
+	}
+}
+
+@keyframes sl-xslash-scale-b {
+	0% {
+		transform: rotate(32deg) scaleX(0.1);
+	}
+	100% {
+		transform: rotate(32deg) scaleX(1.35);
+	}
+}
+
+@keyframes sl-flash-pop {
+	0% {
+		transform: scale(0.1);
+		opacity: 0.95;
+	}
+	100% {
+		transform: scale(1.15);
+		opacity: 0;
+	}
+}
+
+/* Brief screen-shake to sell the impact of a slash */
+@keyframes sl-shake {
+	0%, 100% { transform: translate(0, 0); }
+	20% { transform: translate(-3px, 2px); }
+	40% { transform: translate(3px, -2px); }
+	60% { transform: translate(-2px, -3px); }
+	80% { transform: translate(2px, 3px); }
+}
+
+body.sl-screen-shake > #root,
+body.sl-screen-shake > div {
+	animation: sl-shake 0.26s ease-in-out;
 }
 

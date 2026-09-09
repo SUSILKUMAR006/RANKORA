@@ -1,16 +1,18 @@
 import { useEffect, useRef } from 'react'
 
-const TRAIL_COLOR = '138, 92, 246' // violet-ish "shadow monarch" glow
-const TRAIL_LIFETIME = 420 // ms
-const MAX_POINTS = 26
+const TRAIL_LIFETIME = 320 // ms — how long a slash ribbon segment lives
+const MAX_POINTS = 18
+const PARTICLE_LIFETIME = 900 // ms — how long a shadow particle drifts before fading
 
 function SwordCursor() {
   const canvasRef = useRef(null)
   const cursorRef = useRef(null)
   const pointsRef = useRef([])
+  const particlesRef = useRef([])
   const mouse = useRef({ x: -100, y: -100 })
   const smooth = useRef({ x: -100, y: -100, angle: -45 })
   const rafRef = useRef(null)
+  const lastParticleRef = useRef(0)
 
   useEffect(() => {
     const isCoarsePointer = window.matchMedia?.('(pointer: coarse)').matches
@@ -39,13 +41,23 @@ function SwordCursor() {
       if (pointsRef.current.length > MAX_POINTS) pointsRef.current.shift()
     }
 
+    const triggerShake = () => {
+      document.body.classList.add('sl-screen-shake')
+      window.setTimeout(() => document.body.classList.remove('sl-screen-shake'), 260)
+    }
+
     const spawnSlash = (x, y) => {
-      const burst = document.createElement('div')
-      burst.className = 'sl-slash-burst'
-      burst.style.left = `${x}px`
-      burst.style.top = `${y}px`
-      document.body.appendChild(burst)
-      window.setTimeout(() => burst.remove(), 500)
+      const wrapper = document.createElement('div')
+      wrapper.className = 'sl-xslash-wrapper'
+      wrapper.style.left = `${x}px`
+      wrapper.style.top = `${y}px`
+      wrapper.innerHTML =
+        '<span class="sl-xslash-line sl-xslash-a"></span>' +
+        '<span class="sl-xslash-line sl-xslash-b"></span>' +
+        '<span class="sl-xslash-flash"></span>'
+      document.body.appendChild(wrapper)
+      window.setTimeout(() => wrapper.remove(), 480)
+      triggerShake()
     }
 
     const handleDown = (e) => spawnSlash(e.clientX, e.clientY)
@@ -63,9 +75,11 @@ function SwordCursor() {
     let lastY = mouse.current.y
 
     const tick = () => {
-      // Ease the cursor toward the real pointer for a light "trailing" feel
-      smooth.current.x += (mouse.current.x - smooth.current.x) * 0.32
-      smooth.current.y += (mouse.current.y - smooth.current.y) * 0.32
+      const now = performance.now()
+
+      // Ease the blade toward the real pointer
+      smooth.current.x += (mouse.current.x - smooth.current.x) * 0.35
+      smooth.current.y += (mouse.current.y - smooth.current.y) * 0.35
 
       const dx = mouse.current.x - lastX
       const dy = mouse.current.y - lastY
@@ -74,7 +88,21 @@ function SwordCursor() {
         const targetAngle = (Math.atan2(dy, dx) * 180) / Math.PI + 45
         let delta = targetAngle - smooth.current.angle
         delta = ((delta + 180) % 360) - 180
-        smooth.current.angle += delta * 0.25
+        smooth.current.angle += delta * 0.28
+
+        // Spawn shadow-essence particles trailing the blade while moving
+        if (now - lastParticleRef.current > 28) {
+          lastParticleRef.current = now
+          particlesRef.current.push({
+            x: smooth.current.x + (Math.random() - 0.5) * 6,
+            y: smooth.current.y + (Math.random() - 0.5) * 6,
+            t: now,
+            r: 2 + Math.random() * 2.5,
+            vx: (Math.random() - 0.5) * 0.4,
+            vy: 0.35 + Math.random() * 0.5,
+          })
+          if (particlesRef.current.length > 90) particlesRef.current.shift()
+        }
       }
       lastX = mouse.current.x
       lastY = mouse.current.y
@@ -84,9 +112,28 @@ function SwordCursor() {
           `translate(${smooth.current.x}px, ${smooth.current.y}px) rotate(${smooth.current.angle}deg)`
       }
 
-      // Draw fading slash trail from recent points
       ctx.clearRect(0, 0, canvas.width, canvas.height)
-      const now = performance.now()
+
+      // Shadow particles: dark violet embers drifting and fading behind the blade
+      particlesRef.current = particlesRef.current.filter((p) => now - p.t < PARTICLE_LIFETIME)
+      for (const p of particlesRef.current) {
+        const age = (now - p.t) / PARTICLE_LIFETIME
+        const alpha = Math.max(0, 1 - age)
+        const x = p.x + p.vx * (now - p.t) * 0.05
+        const y = p.y + p.vy * (now - p.t) * 0.05
+        const radius = p.r * (1 - age * 0.6)
+
+        ctx.beginPath()
+        ctx.arc(x, y, Math.max(0.4, radius), 0, Math.PI * 2)
+        const grad = ctx.createRadialGradient(x, y, 0, x, y, Math.max(1, radius * 2.2))
+        grad.addColorStop(0, `rgba(196, 181, 253, ${alpha * 0.85})`)
+        grad.addColorStop(0.5, `rgba(109, 40, 217, ${alpha * 0.55})`)
+        grad.addColorStop(1, 'rgba(20, 10, 40, 0)')
+        ctx.fillStyle = grad
+        ctx.fill()
+      }
+
+      // Slash trail: tapered ribbon quads instead of a thin line, for a real sword-swing streak
       pointsRef.current = pointsRef.current.filter((p) => now - p.t < TRAIL_LIFETIME)
       const pts = pointsRef.current
 
@@ -96,18 +143,42 @@ function SwordCursor() {
           const p1 = pts[i]
           const age = (now - p1.t) / TRAIL_LIFETIME
           const alpha = Math.max(0, 1 - age)
-          const width = Math.max(0.5, 5.5 * (1 - age))
+          if (alpha <= 0) continue
+
+          const segDx = p1.x - p0.x
+          const segDy = p1.y - p0.y
+          const len = Math.hypot(segDx, segDy) || 1
+          const nx = -segDy / len
+          const ny = segDx / len
+          const halfWidth = Math.max(0.6, 9 * (1 - age))
 
           ctx.beginPath()
-          ctx.moveTo(p0.x, p0.y)
-          ctx.lineTo(p1.x, p1.y)
-          ctx.lineCap = 'round'
-          ctx.strokeStyle = `rgba(${TRAIL_COLOR}, ${alpha * 0.55})`
-          ctx.lineWidth = width
-          ctx.shadowColor = `rgba(${TRAIL_COLOR}, ${alpha * 0.9})`
-          ctx.shadowBlur = 12
-          ctx.stroke()
+          ctx.moveTo(p0.x + nx * halfWidth, p0.y + ny * halfWidth)
+          ctx.lineTo(p1.x + nx * halfWidth * 0.4, p1.y + ny * halfWidth * 0.4)
+          ctx.lineTo(p1.x - nx * halfWidth * 0.4, p1.y - ny * halfWidth * 0.4)
+          ctx.lineTo(p0.x - nx * halfWidth, p0.y - ny * halfWidth)
+          ctx.closePath()
+
+          const grad = ctx.createLinearGradient(p0.x, p0.y, p1.x, p1.y)
+          grad.addColorStop(0, `rgba(237, 233, 254, ${alpha * 0.05})`)
+          grad.addColorStop(1, `rgba(196, 181, 253, ${alpha * 0.75})`)
+          ctx.fillStyle = grad
+          ctx.shadowColor = `rgba(139, 92, 246, ${alpha})`
+          ctx.shadowBlur = 16
+          ctx.fill()
         }
+
+        // Bright hot core along the freshest part of the swing
+        ctx.beginPath()
+        ctx.moveTo(pts[0].x, pts[0].y)
+        for (let i = 1; i < pts.length; i++) ctx.lineTo(pts[i].x, pts[i].y)
+        ctx.strokeStyle = 'rgba(245, 243, 255, 0.55)'
+        ctx.lineWidth = 1.4
+        ctx.lineCap = 'round'
+        ctx.lineJoin = 'round'
+        ctx.shadowColor = 'rgba(224, 214, 255, 0.9)'
+        ctx.shadowBlur = 10
+        ctx.stroke()
       }
 
       rafRef.current = requestAnimationFrame(tick)
@@ -137,34 +208,40 @@ function SwordCursor() {
         aria-hidden="true"
       >
         <svg
-          width="34"
-          height="34"
-          viewBox="0 0 34 34"
+          width="52"
+          height="52"
+          viewBox="0 0 52 52"
           style={{
-            transform: 'translate(-6px, -26px)',
-            filter: 'drop-shadow(0 0 6px rgba(167,139,250,0.85)) drop-shadow(0 0 14px rgba(124,58,237,0.5))',
+            transform: 'translate(-9px, -40px)',
+            filter:
+              'drop-shadow(0 0 8px rgba(196,181,253,0.95)) drop-shadow(0 0 22px rgba(109,40,217,0.65)) drop-shadow(0 0 40px rgba(76,29,149,0.35))',
           }}
         >
-          {/* blade */}
-          <polygon
-            points="8,2 12,2 14,22 6,22"
+          {/* long katana blade with curved tip */}
+          <path
+            d="M14 2 L18 2 L20 6 L19 34 Q19 38 15.8 40 L14.2 40 Q12 38 12 34 L11 6 Z"
             fill="url(#slBladeGradient)"
-            stroke="rgba(224,214,255,0.9)"
+            stroke="rgba(237,233,254,0.95)"
             strokeWidth="0.6"
           />
-          {/* blade center glow line */}
-          <line x1="10" y1="3" x2="10" y2="21" stroke="rgba(255,255,255,0.85)" strokeWidth="0.8" />
-          {/* guard */}
-          <rect x="3.5" y="22" width="13" height="2.4" rx="1" fill="#2b2440" stroke="#a78bfa" strokeWidth="0.5" />
-          {/* grip */}
-          <rect x="8.5" y="24.4" width="3" height="7" rx="1.2" fill="#1c1730" stroke="#6d28d9" strokeWidth="0.5" />
-          {/* pommel */}
-          <circle cx="10" cy="32" r="1.6" fill="#a78bfa" />
+          {/* center fuller / glow line down the blade */}
+          <line x1="15.4" y1="4" x2="15" y2="36" stroke="rgba(255,255,255,0.9)" strokeWidth="1" />
+          {/* edge glint */}
+          <path d="M18.6 5 L18 22" stroke="rgba(255,255,255,0.75)" strokeWidth="0.6" strokeLinecap="round" />
+          {/* tsuba / guard */}
+          <ellipse cx="15" cy="40.5" rx="9.5" ry="2.4" fill="#241b3d" stroke="#a78bfa" strokeWidth="0.7" />
+          {/* grip wrap */}
+          <rect x="12" y="42.6" width="6" height="8.5" rx="1.6" fill="#160f28" stroke="#7c3aed" strokeWidth="0.6" />
+          <line x1="12" y1="45" x2="18" y2="45.9" stroke="#a78bfa" strokeWidth="0.5" opacity="0.6" />
+          <line x1="12" y1="48" x2="18" y2="48.9" stroke="#a78bfa" strokeWidth="0.5" opacity="0.6" />
+          {/* pommel cap */}
+          <circle cx="15" cy="51" r="2.1" fill="#c4b5fd" />
           <defs>
-            <linearGradient id="slBladeGradient" x1="10" y1="2" x2="10" y2="22" gradientUnits="userSpaceOnUse">
-              <stop offset="0%" stopColor="#f5f3ff" />
-              <stop offset="45%" stopColor="#c4b5fd" />
-              <stop offset="100%" stopColor="#7c3aed" />
+            <linearGradient id="slBladeGradient" x1="15" y1="2" x2="15" y2="40" gradientUnits="userSpaceOnUse">
+              <stop offset="0%" stopColor="#ffffff" />
+              <stop offset="35%" stopColor="#ddd6fe" />
+              <stop offset="70%" stopColor="#8b5cf6" />
+              <stop offset="100%" stopColor="#4c1d95" />
             </linearGradient>
           </defs>
         </svg>
