@@ -1,21 +1,8 @@
-import mongoose from 'mongoose'
 import Boss from '../models/Boss.js'
 import DailyLog from '../models/DailyLog.js'
 import Notification from '../models/Notification.js'
 import Quest from '../models/Quest.js'
 import User from '../models/User.js'
-
-// Quests are looked up by either their Mongo _id or their stable questKey
-// (e.g. "wakeup-530"). Mongoose casts every clause in an $or up front, so
-// passing a non-ObjectId string straight into { _id: value } throws a
-// CastError before the questKey branch ever gets a chance to match.
-function findQuestByIdOrKey(userId, idOrKey) {
-  const conditions = [{ questKey: idOrKey }]
-  if (mongoose.Types.ObjectId.isValid(idOrKey)) {
-    conditions.push({ _id: idOrKey })
-  }
-  return Quest.findOne({ $or: conditions, userId })
-}
 
 function requiredXpForLevel(level) {
   if (level <= 1) return 100
@@ -132,7 +119,10 @@ export async function getQuests(req, res, next) {
 
 export async function getQuestById(req, res, next) {
   try {
-    const quest = await findQuestByIdOrKey(req.user._id, req.params.id)
+    const quest = await Quest.findOne({
+      $or: [{ _id: req.params.id }, { questKey: req.params.id }],
+      userId: req.user._id,
+    })
     if (!quest) {
       return res.status(404).json({ success: false, message: 'Quest not found.' })
     }
@@ -159,7 +149,10 @@ export async function completeQuest(req, res, next) {
   try {
     await ensureQuestsForToday(req.user._id)
 
-    const quest = await findQuestByIdOrKey(req.user._id, req.params.id)
+    const quest = await Quest.findOne({
+      $or: [{ _id: req.params.id }, { questKey: req.params.id }],
+      userId: req.user._id,
+    })
     if (!quest) {
       return res.status(404).json({ success: false, message: 'Quest not found.' })
     }
@@ -274,7 +267,10 @@ export async function failQuest(req, res, next) {
     await ensureQuestsForToday(req.user._id)
 
     const { reason, note } = req.body
-    const quest = await findQuestByIdOrKey(req.user._id, req.params.id)
+    const quest = await Quest.findOne({
+      $or: [{ _id: req.params.id }, { questKey: req.params.id }],
+      userId: req.user._id,
+    })
     if (!quest) {
       return res.status(404).json({ success: false, message: 'Quest not found.' })
     }
@@ -305,11 +301,10 @@ export async function failQuest(req, res, next) {
 
 export async function deleteQuest(req, res, next) {
   try {
-    const conditions = [{ questKey: req.params.id }]
-    if (mongoose.Types.ObjectId.isValid(req.params.id)) {
-      conditions.push({ _id: req.params.id })
-    }
-    await Quest.findOneAndDelete({ $or: conditions, userId: req.user._id })
+    await Quest.findOneAndDelete({
+      $or: [{ _id: req.params.id }, { questKey: req.params.id }],
+      userId: req.user._id,
+    })
     res.json({ success: true, message: 'Quest deleted successfully.' })
   } catch (error) {
     next(error)
