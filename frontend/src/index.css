@@ -69,6 +69,89 @@ button, a { -webkit-tap-highlight-color: transparent; }
 	background: rgba(103, 232, 249, 0.5);
 }
 
+/* Custom energy-orb cursor */
+body.sl-cursor-active,
+body.sl-cursor-active * {
+	cursor: none !important;
+}
+
+.sl-orb {
+	width: 0;
+	height: 0;
+}
+
+.sl-orb-core {
+	position: absolute;
+	left: 0;
+	top: 0;
+	width: 12px;
+	height: 12px;
+	margin-left: -6px;
+	margin-top: -6px;
+	border-radius: 9999px;
+	background: radial-gradient(circle, #f5f3ff 0%, #c4b5fd 45%, #7c3aed 100%);
+	box-shadow: 0 0 10px rgba(196, 181, 253, 0.95), 0 0 22px rgba(124, 58, 237, 0.7);
+	animation: sl-orb-breathe 1.8s ease-in-out infinite;
+}
+
+.sl-orb-halo {
+	position: absolute;
+	left: 0;
+	top: 0;
+	width: 28px;
+	height: 28px;
+	margin-left: -14px;
+	margin-top: -14px;
+	border-radius: 9999px;
+	border: 1px solid rgba(196, 181, 253, 0.45);
+	box-shadow: 0 0 14px rgba(139, 92, 246, 0.35);
+	animation: sl-orb-breathe 1.8s ease-in-out infinite reverse;
+}
+
+@keyframes sl-orb-breathe {
+	0%, 100% {
+		transform: scale(0.85);
+		opacity: 0.85;
+	}
+	50% {
+		transform: scale(1.15);
+		opacity: 1;
+	}
+}
+
+.sl-orb-pulse .sl-orb-core {
+	animation: sl-orb-click-pulse 0.4s ease-out;
+}
+
+.sl-orb-pulse .sl-orb-halo {
+	animation: sl-orb-click-halo 0.4s ease-out;
+}
+
+@keyframes sl-orb-click-pulse {
+	0% {
+		transform: scale(1.6);
+		filter: brightness(1.6);
+	}
+	100% {
+		transform: scale(1);
+		filter: brightness(1);
+	}
+}
+
+@keyframes sl-orb-click-halo {
+	0% {
+		transform: scale(2.2);
+		opacity: 0;
+	}
+	40% {
+		opacity: 0.9;
+	}
+	100% {
+		transform: scale(1);
+		opacity: 1;
+	}
+}
+
 /* Anime-style expanding ring shockwave on click */
 .sl-wave-wrapper {
 	position: fixed;
