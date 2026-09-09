@@ -1,11 +1,12 @@
 import { useEffect, useState } from 'react'
-import { motion } from 'framer-motion'
+import { AnimatePresence, motion } from 'framer-motion'
 import {
   AlertTriangle,
   BookOpen,
   Calendar,
   Check,
   Edit3,
+  Feather,
   Flame,
   Lock,
   Plus,
@@ -14,6 +15,7 @@ import {
   Tag,
   Trash2,
   TrendingUp,
+  X,
   Zap,
 } from 'lucide-react'
 import Badge from '../components/common/Badge.jsx'
@@ -318,121 +320,202 @@ function DiaryPage() {
         </Card>
       )}
 
-      {/* Inscribe Entry Modal */}
-      <Modal
-        open={modalOpen}
-        onClose={() => setModalOpen(false)}
-        title="WRITE DIARY ENTRY"
-        eyebrow="DAILY CODEX & LOG"
-      >
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <label className="block">
-            <span className="label-caps text-slate-400">Entry Title</span>
-            <input
-              type="text"
-              placeholder="e.g. Day 1: 5:30 AM Wakeup & Heavy Chest Session"
-              value={form.title}
-              onChange={(e) => setForm({ ...form, title: e.target.value })}
-              className="mt-1 h-10 w-full rounded-xl border border-white/10 bg-white/[0.03] px-3 font-display text-sm text-white outline-none focus:border-cyan-300/50"
-            />
-          </label>
+      {/* Inscribe Entry Modal — styled as an open book/journal page */}
+      <AnimatePresence>
+        {modalOpen && (
+          <motion.div
+            className="fixed inset-0 z-50 grid place-items-center bg-black/70 p-4 backdrop-blur-sm"
+            role="dialog"
+            aria-modal="true"
+            aria-label="Write Diary Entry"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setModalOpen(false)}
+          >
+            <motion.div
+              className="relative max-h-[calc(100vh-2rem)] w-full max-w-2xl overflow-y-auto rounded-[6px] bg-[#f3e9d2] shadow-[0_25px_70px_rgba(0,0,0,0.55),0_0_0_1px_rgba(120,90,50,0.35)]"
+              initial={{ opacity: 0, scale: 0.94, rotateX: -6, y: 16 }}
+              animate={{ opacity: 1, scale: 1, rotateX: 0, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 12 }}
+              transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
+              style={{
+                backgroundImage:
+                  'radial-gradient(ellipse at top left, rgba(255,255,255,0.35), transparent 55%), repeating-linear-gradient(0deg, rgba(139,110,60,0.05) 0px, rgba(139,110,60,0.05) 1px, transparent 1px, transparent 32px)',
+              }}
+              onClick={(event) => event.stopPropagation()}
+            >
+              {/* leather spine */}
+              <div className="pointer-events-none absolute inset-y-0 left-0 w-6 bg-gradient-to-r from-[#4a2f1a] via-[#6b4526]/70 to-transparent" />
+              {/* deckle edge shadow */}
+              <div className="pointer-events-none absolute inset-0 rounded-[6px] shadow-[inset_0_0_40px_rgba(90,60,20,0.18)]" />
 
-          <div className="grid gap-3 sm:grid-cols-2">
-            <label className="block">
-              <span className="label-caps text-slate-400">Date</span>
-              <input
-                type="date"
-                value={form.date}
-                onChange={(e) => setForm({ ...form, date: e.target.value })}
-                className="mt-1 h-10 w-full rounded-xl border border-white/10 bg-white/[0.03] px-3 font-mono text-xs text-white outline-none focus:border-cyan-300/50"
-              />
-            </label>
+              {/* ribbon bookmark */}
+              <div className="pointer-events-none absolute -top-1 right-16 h-16 w-5 bg-gradient-to-b from-rose-700 to-rose-800 shadow-md [clip-path:polygon(0_0,100%_0,100%_100%,50%_75%,0_100%)]" />
 
-            <label className="block">
-              <span className="label-caps text-slate-400">Energy & Mood</span>
-              <select
-                value={form.mood}
-                onChange={(e) => setForm({ ...form, mood: Number(e.target.value) })}
-                className="mt-1 h-10 w-full rounded-xl border border-white/10 bg-rankora-900 px-3 font-mono text-xs text-white outline-none focus:border-cyan-300/50"
+              <button
+                type="button"
+                aria-label="Close diary"
+                onClick={() => setModalOpen(false)}
+                className="absolute right-4 top-4 z-10 rounded-full border border-[#8b6e3c]/30 bg-[#f3e9d2]/80 p-1.5 text-[#5c4527] transition hover:bg-[#e6d7ae]"
               >
-                {[1, 2, 3, 4, 5].map((val) => (
-                  <option key={val} value={val}>
-                    {moodLabels[val]}
-                  </option>
-                ))}
-              </select>
-            </label>
-          </div>
+                <X size={16} />
+              </button>
 
-          <label className="block">
-            <span className="label-caps text-slate-400">Daily Details & Reflections</span>
-            <textarea
-              required
-              rows={5}
-              placeholder="Write your daily details, workout notes, diet, reading progress, and reflections..."
-              value={form.content}
-              onChange={(e) => setForm({ ...form, content: e.target.value })}
-              className="mt-1 w-full rounded-xl border border-white/10 bg-white/[0.03] p-3 font-sans text-sm text-white outline-none focus:border-cyan-300/50 placeholder:text-slate-500"
-            />
-          </label>
+              <div className="relative px-8 pb-8 pt-9 sm:px-12">
+                <div className="flex items-center gap-2 text-[#8b6e3c]">
+                  <Feather size={15} />
+                  <p className="font-mono text-[0.65rem] uppercase tracking-[0.2em]">
+                    Daily Codex &amp; Log
+                  </p>
+                </div>
+                <h2
+                  className="mt-2 text-[2rem] leading-none text-[#3a2b16] sm:text-[2.35rem]"
+                  style={{ fontFamily: "'Cormorant Garamond', serif" }}
+                >
+                  Write Diary Entry
+                </h2>
+                <div className="mt-3 h-px w-full bg-gradient-to-r from-[#8b6e3c]/50 via-[#8b6e3c]/20 to-transparent" />
 
-          <div className="grid gap-3 sm:grid-cols-2">
-            <label className="block">
-              <span className="label-caps text-slate-400">Key Win / Breakthrough</span>
-              <input
-                type="text"
-                placeholder="e.g. Completed all 7 routine habits & read 12 pages"
-                value={form.keyWin}
-                onChange={(e) => setForm({ ...form, keyWin: e.target.value })}
-                className="mt-1 h-9 w-full rounded-xl border border-white/10 bg-white/[0.03] px-3 font-mono text-xs text-white outline-none focus:border-cyan-300/50 placeholder:text-slate-600"
-              />
-            </label>
+                <form onSubmit={handleSubmit} className="mt-6 space-y-5" style={{ fontFamily: "'Crimson Pro', serif" }}>
+                  <label className="block">
+                    <span className="font-mono text-[0.65rem] uppercase tracking-[0.16em] text-[#7a5c33]">
+                      Entry Title
+                    </span>
+                    <input
+                      type="text"
+                      placeholder="e.g. Day 1: 5:30 AM Wakeup & Heavy Chest Session"
+                      value={form.title}
+                      onChange={(e) => setForm({ ...form, title: e.target.value })}
+                      className="mt-1.5 h-11 w-full border-0 border-b-2 border-[#8b6e3c]/30 bg-transparent px-1 text-lg italic text-[#3a2b16] outline-none transition placeholder:text-[#8b6e3c]/50 focus:border-[#8b6e3c]"
+                    />
+                  </label>
 
-            <label className="block">
-              <span className="label-caps text-slate-400">Obstacle / Resistance</span>
-              <input
-                type="text"
-                placeholder="e.g. Resisted afternoon cravings and fatigue"
-                value={form.obstacle}
-                onChange={(e) => setForm({ ...form, obstacle: e.target.value })}
-                className="mt-1 h-9 w-full rounded-xl border border-white/10 bg-white/[0.03] px-3 font-mono text-xs text-white outline-none focus:border-cyan-300/50 placeholder:text-slate-600"
-              />
-            </label>
-          </div>
+                  <div className="grid gap-5 sm:grid-cols-2">
+                    <label className="block">
+                      <span className="font-mono text-[0.65rem] uppercase tracking-[0.16em] text-[#7a5c33]">
+                        Date
+                      </span>
+                      <input
+                        type="date"
+                        value={form.date}
+                        onChange={(e) => setForm({ ...form, date: e.target.value })}
+                        className="mt-1.5 h-10 w-full border-0 border-b-2 border-[#8b6e3c]/30 bg-transparent px-1 text-sm text-[#3a2b16] outline-none transition focus:border-[#8b6e3c]"
+                        style={{ colorScheme: 'light' }}
+                      />
+                    </label>
 
-          <div>
-            <p className="label-caps text-slate-400">Categories & Tags</p>
-            <div className="mt-2 flex flex-wrap gap-1.5">
-              {availableTags.map((tag) => {
-                const isSelected = form.tags.includes(tag)
-                return (
-                  <button
-                    type="button"
-                    key={tag}
-                    onClick={() => handleToggleTag(tag)}
-                    className={`rounded-lg px-2.5 py-1 font-mono text-[0.65rem] transition ${
-                      isSelected
-                        ? 'border border-cyan-300/50 bg-cyan-400/20 text-cyan-200 shadow-[0_0_10px_rgba(103,232,249,0.15)]'
-                        : 'border border-white/10 bg-white/[0.02] text-slate-500 hover:text-white'
-                    }`}
-                  >
-                    {tag}
-                  </button>
-                )
-              })}
-            </div>
-          </div>
+                    <label className="block">
+                      <span className="font-mono text-[0.65rem] uppercase tracking-[0.16em] text-[#7a5c33]">
+                        Energy &amp; Mood
+                      </span>
+                      <select
+                        value={form.mood}
+                        onChange={(e) => setForm({ ...form, mood: Number(e.target.value) })}
+                        className="mt-1.5 h-10 w-full border-0 border-b-2 border-[#8b6e3c]/30 bg-transparent px-1 text-sm text-[#3a2b16] outline-none transition focus:border-[#8b6e3c]"
+                      >
+                        {[1, 2, 3, 4, 5].map((val) => (
+                          <option key={val} value={val}>
+                            {moodLabels[val]}
+                          </option>
+                        ))}
+                      </select>
+                    </label>
+                  </div>
 
-          <div className="flex justify-end gap-2 pt-3 border-t border-white/10">
-            <Button type="button" variant="ghost" onClick={() => setModalOpen(false)}>
-              CANCEL
-            </Button>
-            <Button type="submit" variant="primary">
-              <Check size={15} /> SAVE TO DIARY
-            </Button>
-          </div>
-        </form>
-      </Modal>
+                  <label className="block">
+                    <span className="font-mono text-[0.65rem] uppercase tracking-[0.16em] text-[#7a5c33]">
+                      Daily Details &amp; Reflections
+                    </span>
+                    <textarea
+                      required
+                      rows={6}
+                      placeholder="Write your daily details, workout notes, diet, reading progress, and reflections..."
+                      value={form.content}
+                      onChange={(e) => setForm({ ...form, content: e.target.value })}
+                      className="mt-1.5 w-full resize-none rounded-sm border border-[#8b6e3c]/25 bg-[#fbf4e3]/60 p-3 text-base leading-8 text-[#3a2b16] outline-none transition placeholder:text-[#8b6e3c]/50 focus:border-[#8b6e3c]"
+                      style={{
+                        backgroundImage:
+                          'repeating-linear-gradient(0deg, transparent, transparent 31px, rgba(139,110,60,0.22) 31px, rgba(139,110,60,0.22) 32px)',
+                        backgroundPositionY: '4px',
+                      }}
+                    />
+                  </label>
+
+                  <div className="grid gap-5 sm:grid-cols-2">
+                    <label className="block">
+                      <span className="font-mono text-[0.65rem] uppercase tracking-[0.16em] text-emerald-800/80">
+                        Key Win / Breakthrough
+                      </span>
+                      <input
+                        type="text"
+                        placeholder="e.g. Completed all 7 routine habits & read 12 pages"
+                        value={form.keyWin}
+                        onChange={(e) => setForm({ ...form, keyWin: e.target.value })}
+                        className="mt-1.5 h-10 w-full border-0 border-b-2 border-[#8b6e3c]/30 bg-transparent px-1 text-sm text-[#3a2b16] outline-none transition placeholder:text-[#8b6e3c]/40 focus:border-emerald-700/60"
+                      />
+                    </label>
+
+                    <label className="block">
+                      <span className="font-mono text-[0.65rem] uppercase tracking-[0.16em] text-amber-800/80">
+                        Obstacle / Resistance
+                      </span>
+                      <input
+                        type="text"
+                        placeholder="e.g. Resisted afternoon cravings and fatigue"
+                        value={form.obstacle}
+                        onChange={(e) => setForm({ ...form, obstacle: e.target.value })}
+                        className="mt-1.5 h-10 w-full border-0 border-b-2 border-[#8b6e3c]/30 bg-transparent px-1 text-sm text-[#3a2b16] outline-none transition placeholder:text-[#8b6e3c]/40 focus:border-amber-700/60"
+                      />
+                    </label>
+                  </div>
+
+                  <div>
+                    <p className="font-mono text-[0.65rem] uppercase tracking-[0.16em] text-[#7a5c33]">
+                      Categories &amp; Tags
+                    </p>
+                    <div className="mt-2.5 flex flex-wrap gap-2">
+                      {availableTags.map((tag) => {
+                        const isSelected = form.tags.includes(tag)
+                        return (
+                          <button
+                            type="button"
+                            key={tag}
+                            onClick={() => handleToggleTag(tag)}
+                            className={`rounded-full border px-3 py-1 font-mono text-[0.65rem] uppercase tracking-wide transition ${
+                              isSelected
+                                ? 'border-[#6b4526] bg-[#6b4526] text-[#f3e9d2] shadow-sm'
+                                : 'border-[#8b6e3c]/35 bg-transparent text-[#7a5c33] hover:border-[#8b6e3c]'
+                            }`}
+                          >
+                            {tag}
+                          </button>
+                        )
+                      })}
+                    </div>
+                  </div>
+
+                  <div className="flex justify-end gap-3 border-t border-[#8b6e3c]/25 pt-5">
+                    <button
+                      type="button"
+                      onClick={() => setModalOpen(false)}
+                      className="rounded-sm px-4 py-2 font-mono text-xs uppercase tracking-wide text-[#7a5c33] transition hover:text-[#3a2b16]"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      type="submit"
+                      className="flex items-center gap-2 rounded-sm bg-[#3a2b16] px-5 py-2 font-mono text-xs uppercase tracking-wide text-[#f3e9d2] shadow-md transition hover:bg-[#4a3520]"
+                    >
+                      <Check size={14} /> Save to Diary
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Delete Confirmation Modal */}
       <Modal
