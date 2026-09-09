@@ -1,8 +1,82 @@
 import { useEffect, useRef } from 'react'
+import { tsParticles } from '@tsparticles/engine'
+import { loadFull } from 'tsparticles'
 
 const TRAIL_LIFETIME = 320 // ms — how long a slash ribbon segment lives
 const MAX_POINTS = 18
 const PARTICLE_LIFETIME = 900 // ms — how long a shadow particle drifts before fading
+
+let burstSeq = 0
+let enginePromise = null
+
+function ensureEngine() {
+  if (!enginePromise) enginePromise = loadFull(tsParticles)
+  return enginePromise
+}
+
+// One-shot explosive burst of shadow/energy particles at (x, y) — like the
+// Shadow Monarch's dagger detonating on impact. Spawns an isolated
+// tsParticles container over the click point, lets it fully burn out, then
+// tears itself down so we never accumulate live canvases.
+async function spawnEnergyBurst(x, y) {
+  await ensureEngine()
+
+  const id = `sl-burst-${++burstSeq}`
+  const el = document.createElement('div')
+  el.id = id
+  el.style.position = 'fixed'
+  el.style.left = `${x - 260}px`
+  el.style.top = `${y - 260}px`
+  el.style.width = '520px'
+  el.style.height = '520px'
+  el.style.pointerEvents = 'none'
+  el.style.zIndex = '10000'
+  document.body.appendChild(el)
+
+  const container = await tsParticles.load({
+    id,
+    element: el,
+    options: {
+      fullScreen: { enable: false },
+      detectRetina: true,
+      background: { color: 'transparent' },
+      particles: {
+        number: { value: 0 },
+        color: { value: ['#f5f3ff', '#c4b5fd', '#8b5cf6', '#4c1d95', '#22d3ee'] },
+        shape: { type: ['circle', 'star'] },
+        opacity: {
+          value: { min: 0, max: 1 },
+          animation: { enable: true, speed: 1.6, startValue: 'max', destroy: 'min' },
+        },
+        size: {
+          value: { min: 1, max: 5 },
+          animation: { enable: true, speed: 6, startValue: 'max', destroy: 'min' },
+        },
+        move: {
+          enable: true,
+          speed: { min: 6, max: 22 },
+          decay: 0.09,
+          direction: 'none',
+          outModes: { default: 'destroy' },
+        },
+        life: { duration: { value: 1 }, count: 1 },
+      },
+      emitters: {
+        position: { x: 50, y: 50 },
+        rate: { quantity: 55, delay: 0 },
+        life: { count: 1, duration: 0.08 },
+        particles: {
+          move: { direction: 'none' },
+        },
+      },
+    },
+  })
+
+  window.setTimeout(() => {
+    container?.destroy()
+    el.remove()
+  }, 1400)
+}
 
 function SwordCursor() {
   const canvasRef = useRef(null)
@@ -19,6 +93,7 @@ function SwordCursor() {
     if (isCoarsePointer) return
 
     document.body.classList.add('sl-cursor-active')
+    ensureEngine()
 
     const canvas = canvasRef.current
     const ctx = canvas.getContext('2d')
@@ -58,6 +133,7 @@ function SwordCursor() {
       document.body.appendChild(wrapper)
       window.setTimeout(() => wrapper.remove(), 480)
       triggerShake()
+      spawnEnergyBurst(x, y)
     }
 
     const handleDown = (e) => spawnSlash(e.clientX, e.clientY)
