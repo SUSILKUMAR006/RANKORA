@@ -22,6 +22,7 @@ import { NavLink, useLocation, useNavigate } from 'react-router-dom'
 import Badge from '../common/Badge.jsx'
 import Card from '../common/Card.jsx'
 import NotificationPanel from './NotificationPanel.jsx'
+import SwordCursor from './SwordCursor.jsx'
 import RankBadge from '../player/RankBadge.jsx'
 import { fallbackPlayer, getStoredPlayer } from '../../data/mockDashboardData.js'
 import { useNotifications } from '../../hooks/useNotifications.js'
@@ -119,6 +120,8 @@ function AppLayout({ children }) {
 
   return (
     <div className="min-h-screen overflow-x-hidden bg-rankora-950 text-slate-100 lg:flex">
+      <SwordCursor />
+
       {/* Desktop Sidebar (Fixed) */}
       <aside className="hidden w-64 shrink-0 border-r border-white/10 bg-rankora-950/90 backdrop-blur-xl px-4 py-6 lg:flex lg:flex-col lg:fixed lg:left-0 lg:top-0 lg:bottom-0 lg:h-screen lg:z-30 lg:overflow-y-auto">
         <Logo />

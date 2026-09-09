@@ -69,3 +69,58 @@ button, a { -webkit-tap-highlight-color: transparent; }
 	background: rgba(103, 232, 249, 0.5);
 }
 
+/* Solo Leveling style sword cursor */
+body.sl-cursor-active,
+body.sl-cursor-active * {
+	cursor: none !important;
+}
+
+.sl-slash-burst {
+	position: fixed;
+	left: 0;
+	top: 0;
+	width: 46px;
+	height: 46px;
+	margin-left: -23px;
+	margin-top: -23px;
+	pointer-events: none;
+	z-index: 9999;
+	border-radius: 9999px;
+	background: radial-gradient(circle, rgba(196, 181, 253, 0.55), rgba(124, 58, 237, 0.25) 45%, transparent 72%);
+	transform: scale(0.2) rotate(-20deg);
+	animation: sl-slash-pop 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.sl-slash-burst::before,
+.sl-slash-burst::after {
+	content: '';
+	position: absolute;
+	inset: 6px;
+	border: 2px solid rgba(224, 214, 255, 0.9);
+	border-radius: 40% 60% 55% 45%;
+	border-left-color: transparent;
+	border-bottom-color: transparent;
+	filter: drop-shadow(0 0 6px rgba(167, 139, 250, 0.8));
+}
+
+.sl-slash-burst::after {
+	inset: 12px;
+	transform: rotate(35deg);
+	opacity: 0.7;
+}
+
+@keyframes sl-slash-pop {
+	0% {
+		transform: scale(0.2) rotate(-20deg);
+		opacity: 1;
+	}
+	60% {
+		transform: scale(1.05) rotate(10deg);
+		opacity: 0.9;
+	}
+	100% {
+		transform: scale(1.6) rotate(20deg);
+		opacity: 0;
+	}
+}
+
