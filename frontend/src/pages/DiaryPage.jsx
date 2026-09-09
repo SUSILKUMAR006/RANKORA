@@ -334,21 +334,21 @@ function DiaryPage() {
             onClick={() => setModalOpen(false)}
           >
             <motion.div
-              className="relative max-h-[calc(100vh-2rem)] w-full max-w-5xl overflow-y-auto rounded-[6px] bg-[#3a2b16] shadow-[0_35px_90px_rgba(0,0,0,0.6)]"
+              className="relative max-h-[calc(100vh-2rem)] w-full max-w-5xl overflow-y-auto rounded-[6px] bg-[#0c0e14] shadow-[0_35px_90px_rgba(0,0,0,0.75),0_0_60px_rgba(56,80,110,0.15)]"
               initial={{ opacity: 0, scale: 0.94, rotateX: -6, y: 16 }}
               animate={{ opacity: 1, scale: 1, rotateX: 0, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 12 }}
               transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
               onClick={(event) => event.stopPropagation()}
             >
-              {/* ribbon bookmark */}
-              <div className="pointer-events-none absolute -top-1 right-16 h-16 w-5 bg-gradient-to-b from-rose-700 to-rose-800 shadow-md [clip-path:polygon(0_0,100%_0,100%_100%,50%_75%,0_100%)]" />
+              {/* moonlit ribbon bookmark */}
+              <div className="pointer-events-none absolute -top-1 right-16 h-16 w-5 bg-gradient-to-b from-slate-300 to-slate-500 shadow-[0_0_12px_rgba(203,213,225,0.4)] [clip-path:polygon(0_0,100%_0,100%_100%,50%_75%,0_100%)]" />
 
               <button
                 type="button"
                 aria-label="Close diary"
                 onClick={() => setModalOpen(false)}
-                className="absolute right-4 top-4 z-20 rounded-full border border-[#8b6e3c]/40 bg-[#f3e9d2]/90 p-1.5 text-[#5c4527] transition hover:bg-[#e6d7ae]"
+                className="absolute right-4 top-4 z-20 rounded-full border border-amber-300/25 bg-[#12141c]/90 p-1.5 text-amber-200/80 transition hover:bg-[#1a1d28] hover:text-amber-100"
               >
                 <X size={16} />
               </button>
@@ -359,57 +359,58 @@ function DiaryPage() {
                 style={{ fontFamily: "'Crimson Pro', serif" }}
               >
                 {/* center spine/fold */}
-                <div className="pointer-events-none absolute inset-y-0 left-1/2 hidden w-8 -translate-x-1/2 bg-gradient-to-r from-black/25 via-black/5 to-black/25 sm:block" />
-                <div className="pointer-events-none absolute inset-y-3 left-1/2 hidden w-px -translate-x-1/2 bg-black/20 sm:block" />
+                <div className="pointer-events-none absolute inset-y-0 left-1/2 hidden w-8 -translate-x-1/2 bg-gradient-to-r from-black/50 via-black/10 to-black/50 sm:block" />
+                <div className="pointer-events-none absolute inset-y-3 left-1/2 hidden w-px -translate-x-1/2 bg-amber-200/10 sm:block" />
 
                 {/* LEFT PAGE — details */}
                 <div
-                  className="relative rounded-l-[6px] bg-[#f0e4c6] px-8 pb-8 pt-9 sm:pr-10"
+                  className="relative rounded-l-[6px] bg-[#11131c] px-8 pb-8 pt-9 sm:pr-10"
                   style={{
                     backgroundImage:
-                      'radial-gradient(ellipse at top left, rgba(255,255,255,0.35), transparent 55%), repeating-linear-gradient(0deg, rgba(139,110,60,0.05) 0px, rgba(139,110,60,0.05) 1px, transparent 1px, transparent 32px)',
+                      'radial-gradient(ellipse at top left, rgba(120,140,190,0.08), transparent 55%), repeating-linear-gradient(0deg, rgba(203,213,225,0.035) 0px, rgba(203,213,225,0.035) 1px, transparent 1px, transparent 32px)',
                   }}
                 >
-                  <div className="flex items-center gap-2 text-[#8b6e3c]">
+                  <div className="flex items-center gap-2 text-amber-300/70">
                     <Feather size={15} />
                     <p className="font-mono text-[0.65rem] uppercase tracking-[0.2em]">
                       Daily Codex &amp; Log
                     </p>
                   </div>
                   <h2
-                    className="mt-2 text-[1.9rem] leading-none text-[#3a2b16] sm:text-[2.1rem]"
+                    className="mt-2 text-[1.9rem] leading-none text-amber-100 sm:text-[2.1rem] [text-shadow:0_0_18px_rgba(251,191,36,0.25)]"
                     style={{ fontFamily: "'Cormorant Garamond', serif" }}
                   >
                     Entry Details
                   </h2>
-                  <div className="mt-3 h-px w-full bg-gradient-to-r from-[#8b6e3c]/50 via-[#8b6e3c]/20 to-transparent" />
+                  <div className="mt-3 h-px w-full bg-gradient-to-r from-amber-200/30 via-amber-200/10 to-transparent" />
 
                   <div className="mt-6 space-y-5">
                     <div className="grid gap-5 grid-cols-2">
                       <label className="block">
-                        <span className="font-mono text-[0.65rem] uppercase tracking-[0.16em] text-[#7a5c33]">
+                        <span className="font-mono text-[0.65rem] uppercase tracking-[0.16em] text-amber-200/50">
                           Date
                         </span>
                         <input
                           type="date"
                           value={form.date}
                           onChange={(e) => setForm({ ...form, date: e.target.value })}
-                          className="mt-1.5 h-10 w-full border-0 border-b-2 border-[#8b6e3c]/30 bg-transparent px-1 text-sm text-[#3a2b16] outline-none transition focus:border-[#8b6e3c]"
-                          style={{ colorScheme: 'light' }}
+                          className="mt-1.5 h-10 w-full border-0 border-b-2 border-amber-200/20 bg-transparent px-1 text-sm text-amber-100 outline-none transition focus:border-amber-300/60"
+                          style={{ colorScheme: 'dark' }}
                         />
                       </label>
 
                       <label className="block">
-                        <span className="font-mono text-[0.65rem] uppercase tracking-[0.16em] text-[#7a5c33]">
+                        <span className="font-mono text-[0.65rem] uppercase tracking-[0.16em] text-amber-200/50">
                           Energy &amp; Mood
                         </span>
                         <select
                           value={form.mood}
                           onChange={(e) => setForm({ ...form, mood: Number(e.target.value) })}
-                          className="mt-1.5 h-10 w-full border-0 border-b-2 border-[#8b6e3c]/30 bg-transparent px-1 text-sm text-[#3a2b16] outline-none transition focus:border-[#8b6e3c]"
+                          className="mt-1.5 h-10 w-full border-0 border-b-2 border-amber-200/20 bg-transparent px-1 text-sm text-amber-100 outline-none transition focus:border-amber-300/60"
+                          style={{ colorScheme: 'dark' }}
                         >
                           {[1, 2, 3, 4, 5].map((val) => (
-                            <option key={val} value={val}>
+                            <option key={val} value={val} className="bg-[#11131c] text-amber-100">
                               {moodLabels[val]}
                             </option>
                           ))}
@@ -418,7 +419,7 @@ function DiaryPage() {
                     </div>
 
                     <label className="block">
-                      <span className="font-mono text-[0.65rem] uppercase tracking-[0.16em] text-emerald-800/80">
+                      <span className="font-mono text-[0.65rem] uppercase tracking-[0.16em] text-emerald-300/70">
                         Key Win / Breakthrough
                       </span>
                       <input
@@ -426,12 +427,12 @@ function DiaryPage() {
                         placeholder="e.g. Completed all 7 routine habits & read 12 pages"
                         value={form.keyWin}
                         onChange={(e) => setForm({ ...form, keyWin: e.target.value })}
-                        className="mt-1.5 h-10 w-full border-0 border-b-2 border-[#8b6e3c]/30 bg-transparent px-1 text-sm text-[#3a2b16] outline-none transition placeholder:text-[#8b6e3c]/40 focus:border-emerald-700/60"
+                        className="mt-1.5 h-10 w-full border-0 border-b-2 border-amber-200/20 bg-transparent px-1 text-sm text-amber-100 outline-none transition placeholder:text-amber-200/25 focus:border-emerald-300/60"
                       />
                     </label>
 
                     <label className="block">
-                      <span className="font-mono text-[0.65rem] uppercase tracking-[0.16em] text-amber-800/80">
+                      <span className="font-mono text-[0.65rem] uppercase tracking-[0.16em] text-rose-300/70">
                         Obstacle / Resistance
                       </span>
                       <input
@@ -439,12 +440,12 @@ function DiaryPage() {
                         placeholder="e.g. Resisted afternoon cravings and fatigue"
                         value={form.obstacle}
                         onChange={(e) => setForm({ ...form, obstacle: e.target.value })}
-                        className="mt-1.5 h-10 w-full border-0 border-b-2 border-[#8b6e3c]/30 bg-transparent px-1 text-sm text-[#3a2b16] outline-none transition placeholder:text-[#8b6e3c]/40 focus:border-amber-700/60"
+                        className="mt-1.5 h-10 w-full border-0 border-b-2 border-amber-200/20 bg-transparent px-1 text-sm text-amber-100 outline-none transition placeholder:text-amber-200/25 focus:border-rose-300/60"
                       />
                     </label>
 
                     <div>
-                      <p className="font-mono text-[0.65rem] uppercase tracking-[0.16em] text-[#7a5c33]">
+                      <p className="font-mono text-[0.65rem] uppercase tracking-[0.16em] text-amber-200/50">
                         Categories &amp; Tags
                       </p>
                       <div className="mt-2.5 flex flex-wrap gap-2">
@@ -457,8 +458,8 @@ function DiaryPage() {
                               onClick={() => handleToggleTag(tag)}
                               className={`rounded-full border px-3 py-1 font-mono text-[0.65rem] uppercase tracking-wide transition ${
                                 isSelected
-                                  ? 'border-[#6b4526] bg-[#6b4526] text-[#f3e9d2] shadow-sm'
-                                  : 'border-[#8b6e3c]/35 bg-transparent text-[#7a5c33] hover:border-[#8b6e3c]'
+                                  ? 'border-amber-300/60 bg-amber-400/15 text-amber-200 shadow-[0_0_10px_rgba(251,191,36,0.2)]'
+                                  : 'border-amber-200/15 bg-transparent text-amber-200/40 hover:border-amber-200/40 hover:text-amber-200/70'
                               }`}
                             >
                               {tag}
@@ -469,7 +470,7 @@ function DiaryPage() {
                     </div>
 
                     {/* page number */}
-                    <p className="pt-4 text-center font-mono text-[0.6rem] text-[#8b6e3c]/60">
+                    <p className="pt-4 text-center font-mono text-[0.6rem] text-amber-200/25">
                       — left page —
                     </p>
                   </div>
@@ -477,13 +478,13 @@ function DiaryPage() {
 
                 {/* RIGHT PAGE — write */}
                 <div
-                  className="relative rounded-r-[6px] bg-[#f3e9d2] px-8 pb-8 pt-9 sm:pl-10"
+                  className="relative rounded-r-[6px] bg-[#0f1119] px-8 pb-8 pt-9 sm:pl-10"
                   style={{
                     backgroundImage:
-                      'radial-gradient(ellipse at top right, rgba(255,255,255,0.35), transparent 55%), repeating-linear-gradient(0deg, rgba(139,110,60,0.05) 0px, rgba(139,110,60,0.05) 1px, transparent 1px, transparent 32px)',
+                      'radial-gradient(ellipse at top right, rgba(120,140,190,0.08), transparent 55%), repeating-linear-gradient(0deg, rgba(203,213,225,0.035) 0px, rgba(203,213,225,0.035) 1px, transparent 1px, transparent 32px)',
                   }}
                 >
-                  <p className="font-mono text-[0.65rem] uppercase tracking-[0.2em] text-[#8b6e3c]">
+                  <p className="font-mono text-[0.65rem] uppercase tracking-[0.2em] text-amber-300/70">
                     Today&rsquo;s Page
                   </p>
                   <label className="mt-2 block">
@@ -492,14 +493,14 @@ function DiaryPage() {
                       placeholder="e.g. Day 1: 5:30 AM Wakeup & Heavy Chest Session"
                       value={form.title}
                       onChange={(e) => setForm({ ...form, title: e.target.value })}
-                      className="h-10 w-full border-0 bg-transparent p-0 text-[1.9rem] leading-none text-[#3a2b16] outline-none transition placeholder:text-[#8b6e3c]/40 sm:text-[2.1rem]"
+                      className="h-10 w-full border-0 bg-transparent p-0 text-[1.9rem] leading-none text-amber-100 outline-none transition placeholder:text-amber-200/25 sm:text-[2.1rem] [text-shadow:0_0_18px_rgba(251,191,36,0.25)]"
                       style={{ fontFamily: "'Cormorant Garamond', serif" }}
                     />
                   </label>
-                  <div className="mt-3 h-px w-full bg-gradient-to-r from-[#8b6e3c]/50 via-[#8b6e3c]/20 to-transparent" />
+                  <div className="mt-3 h-px w-full bg-gradient-to-r from-amber-200/30 via-amber-200/10 to-transparent" />
 
                   <label className="mt-6 block">
-                    <span className="font-mono text-[0.65rem] uppercase tracking-[0.16em] text-[#7a5c33]">
+                    <span className="font-mono text-[0.65rem] uppercase tracking-[0.16em] text-amber-200/50">
                       Dear Diary&hellip;
                     </span>
                     <textarea
@@ -508,28 +509,28 @@ function DiaryPage() {
                       placeholder="Write your daily details, workout notes, diet, reading progress, and reflections..."
                       value={form.content}
                       onChange={(e) => setForm({ ...form, content: e.target.value })}
-                      className="mt-1.5 w-full resize-none border-0 bg-transparent p-0 text-base leading-8 text-[#3a2b16] outline-none transition placeholder:text-[#8b6e3c]/50"
+                      className="mt-1.5 w-full resize-none border-0 bg-transparent p-0 text-base leading-8 text-amber-100/90 outline-none transition placeholder:text-amber-200/25"
                       style={{
                         backgroundImage:
-                          'repeating-linear-gradient(0deg, transparent, transparent 31px, rgba(139,110,60,0.22) 31px, rgba(139,110,60,0.22) 32px)',
+                          'repeating-linear-gradient(0deg, transparent, transparent 31px, rgba(203,213,225,0.1) 31px, rgba(203,213,225,0.1) 32px)',
                         backgroundPositionY: '4px',
                       }}
                     />
                   </label>
 
-                  <div className="mt-6 flex items-center justify-between border-t border-[#8b6e3c]/25 pt-5">
-                    <p className="font-mono text-[0.6rem] text-[#8b6e3c]/60">— right page —</p>
+                  <div className="mt-6 flex items-center justify-between border-t border-amber-200/15 pt-5">
+                    <p className="font-mono text-[0.6rem] text-amber-200/25">— right page —</p>
                     <div className="flex gap-3">
                       <button
                         type="button"
                         onClick={() => setModalOpen(false)}
-                        className="rounded-sm px-4 py-2 font-mono text-xs uppercase tracking-wide text-[#7a5c33] transition hover:text-[#3a2b16]"
+                        className="rounded-sm px-4 py-2 font-mono text-xs uppercase tracking-wide text-amber-200/50 transition hover:text-amber-100"
                       >
                         Cancel
                       </button>
                       <button
                         type="submit"
-                        className="flex items-center gap-2 rounded-sm bg-[#3a2b16] px-5 py-2 font-mono text-xs uppercase tracking-wide text-[#f3e9d2] shadow-md transition hover:bg-[#4a3520]"
+                        className="flex items-center gap-2 rounded-sm bg-amber-400/90 px-5 py-2 font-mono text-xs uppercase tracking-wide text-[#0c0e14] shadow-[0_0_20px_rgba(251,191,36,0.35)] transition hover:bg-amber-300"
                       >
                         <Check size={14} /> Save to Diary
                       </button>
