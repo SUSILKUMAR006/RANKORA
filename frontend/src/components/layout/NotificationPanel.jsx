@@ -75,13 +75,17 @@ function NotificationPanel({ onClose }) {
     clearAll,
   } = useNotifications()
 
+  const handleClose = () => {
+    if (typeof onClose === 'function') onClose()
+  }
+
   const handleNotificationClick = (item) => {
     if (!item.isRead) {
       markAsRead(item.id)
     }
     if (item.link) {
       navigate(item.link)
-      onClose()
+      handleClose()
     }
   }
 
@@ -146,7 +150,7 @@ function NotificationPanel({ onClose }) {
             <button
               type="button"
               aria-label="Close notifications"
-              onClick={onClose}
+              onClick={handleClose}
               className="rounded-lg p-1.5 text-slate-500 transition hover:bg-white/10 hover:text-white"
             >
               <X size={16} />

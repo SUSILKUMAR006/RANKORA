@@ -261,7 +261,7 @@ export function ExpenseList({
                       <button
                         type="button"
                         aria-label="Edit transaction"
-                        onClick={() => onEditTransaction(item)}
+                        onClick={() => onEditTransaction?.(item)}
                         className="rounded-lg p-2 text-slate-400 transition hover:bg-white/10 hover:text-white"
                       >
                         <Edit3 size={15} />
@@ -269,7 +269,7 @@ export function ExpenseList({
                       <button
                         type="button"
                         aria-label="Delete transaction"
-                        onClick={() => onDeleteTransaction(item)}
+                        onClick={() => onDeleteTransaction?.(item)}
                         className="rounded-lg p-2 text-slate-500 transition hover:bg-rose-400/10 hover:text-rose-300"
                       >
                         <Trash2 size={15} />

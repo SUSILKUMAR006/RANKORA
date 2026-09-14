@@ -56,6 +56,8 @@ function QuestsPage() {
   // Modal States
   const [verificationQuest, setVerificationQuest] = useState(null)
   const [failureQuest, setFailureQuest] = useState(null)
+  const [failureProcessing, setFailureProcessing] = useState(false)
+  const [failureRecorded, setFailureRecorded] = useState(false)
   const [xpAnimation, setXpAnimation] = useState(null)
   const [syncError, setSyncError] = useState('')
 
@@ -115,9 +117,23 @@ function QuestsPage() {
     refreshQuests()
   }
 
-  const handleFailureRecorded = () => {
-    setFailureQuest(null)
-    refreshQuests()
+  const handleConfirmFailure = async (payload) => {
+    if (!failureQuest) return
+    setFailureProcessing(true)
+    setSyncError('')
+    try {
+      await questService.failQuest(failureQuest.id || failureQuest._id, payload)
+      setFailureProcessing(false)
+      setFailureRecorded(true)
+      refreshQuests()
+      setTimeout(() => {
+        setFailureQuest(null)
+        setFailureRecorded(false)
+      }, 1500)
+    } catch (error) {
+      setFailureProcessing(false)
+      setSyncError(error?.message || 'Failed to record quest failure. Check your connection and try again.')
+    }
   }
 
   const handleRestoreDefaults = () => {
@@ -463,10 +479,17 @@ function QuestsPage() {
       {/* Failure Modal */}
       {failureQuest && (
         <QuestFailureModal
+          key={failureQuest.id || failureQuest._id}
           open={Boolean(failureQuest)}
           quest={failureQuest}
-          onClose={() => setFailureQuest(null)}
-          onRecorded={handleFailureRecorded}
+          processing={failureProcessing}
+          submitted={failureRecorded}
+          onClose={() => {
+            setFailureQuest(null)
+            setFailureRecorded(false)
+          }}
+          onConfirm={handleConfirmFailure}
+          onRecorded={handleConfirmFailure}
         />
       )}
 

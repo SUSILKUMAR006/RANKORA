@@ -139,9 +139,9 @@ function QuestVerificationModal({ quest, open, onClose, onVerified, onSubmitted 
       fileName: file?.name || 'workout-proof.jpg',
     }
 
-    if (onVerified) {
+    if (typeof onVerified === 'function') {
       onVerified(payload)
-    } else if (onSubmitted) {
+    } else if (typeof onSubmitted === 'function') {
       onSubmitted(payload)
     }
 
@@ -149,20 +149,24 @@ function QuestVerificationModal({ quest, open, onClose, onVerified, onSubmitted 
     setSubmitted(true)
   }
 
+  const handleClose = () => {
+    if (typeof onClose === 'function') onClose()
+  }
+
   return (
     <Modal
       open={open}
-      onClose={processing ? undefined : onClose}
+      onClose={processing ? undefined : handleClose}
       title={submitted ? 'PROOF VERIFIED & COMPLETED' : 'PHOTO PROOF VERIFICATION'}
       eyebrow={isGymQuest ? 'GYM WORKOUT PROTOCOL' : 'RANKORA SYSTEM'}
       footer={
         submitted ? (
-          <Button onClick={onClose} variant="primary">
+          <Button onClick={handleClose} variant="primary">
             DISMISS
           </Button>
         ) : (
           <>
-            <Button variant="ghost" onClick={onClose} disabled={processing}>
+            <Button variant="ghost" onClick={handleClose} disabled={processing}>
               CANCEL
             </Button>
             <Button

@@ -38,7 +38,7 @@ function ProgressTimeline({ photos, onSelect, onEdit, onDelete }) {
               <div className="grid sm:grid-cols-[minmax(12rem,0.8fr)_1fr]">
                 <button
                   type="button"
-                  onClick={() => onSelect(photo)}
+                  onClick={() => onSelect?.(photo)}
                   className="group relative min-h-48 overflow-hidden border-b border-white/10 bg-black/20 text-left sm:border-b-0 sm:border-r"
                 >
                   <span className="absolute left-3 top-3 z-10 rounded-md bg-rankora-950/80 px-2 py-1 font-mono text-[0.65rem] text-cyan-200">
@@ -80,7 +80,7 @@ function ProgressTimeline({ photos, onSelect, onEdit, onDelete }) {
                         aria-label={`Edit checkpoint from ${formatCheckpointDate(
                           photo.date
                         )}`}
-                        onClick={() => onEdit(photo)}
+                        onClick={() => onEdit?.(photo)}
                         className="rounded-lg p-2 text-slate-500 hover:bg-white/10 hover:text-cyan-200"
                       >
                         <Edit3 size={15} />
@@ -91,7 +91,7 @@ function ProgressTimeline({ photos, onSelect, onEdit, onDelete }) {
                           aria-label={`Delete checkpoint from ${formatCheckpointDate(
                             photo.date
                           )}`}
-                          onClick={() => onDelete(photo)}
+                          onClick={() => onDelete?.(photo)}
                           className="rounded-lg p-2 text-slate-500 hover:bg-rose-400/10 hover:text-rose-200"
                         >
                           <Trash2 size={15} />

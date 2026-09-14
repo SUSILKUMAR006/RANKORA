@@ -7,6 +7,10 @@ import SystemMessage from '../common/SystemMessage.jsx'
 function AchievementUnlockModal({ achievement, onClose }) {
   if (!achievement) return null
 
+  const handleClose = () => {
+    if (typeof onClose === 'function') onClose()
+  }
+
   const {
     name = 'Achievement Unlocked',
     description = 'You have accomplished a new milestone.',
@@ -19,13 +23,13 @@ function AchievementUnlockModal({ achievement, onClose }) {
   return (
     <Modal
       open={Boolean(achievement)}
-      onClose={onClose}
+      onClose={handleClose}
       title="ACHIEVEMENT UNLOCKED"
       eyebrow="RANKORA SYSTEM NOTIFICATION"
       footer={
         <div className="flex w-full items-center justify-between gap-3">
           <span className="font-mono text-xs text-slate-500">Milestone Recorded</span>
-          <Button onClick={onClose} className="min-w-32">
+          <Button onClick={handleClose} className="min-w-32">
             <Check size={16} /> CLAIM & CONTINUE
           </Button>
         </div>

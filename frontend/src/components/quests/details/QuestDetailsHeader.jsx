@@ -14,7 +14,7 @@ function QuestDetailsHeader({ quest, onBack, onAction, onFailure }) {
     <div>
       <button
         type="button"
-        onClick={onBack}
+        onClick={() => onBack?.()}
         className="mb-7 flex items-center gap-2 text-sm text-slate-500 transition hover:-translate-x-1 hover:text-cyan-200"
       >
         <ArrowLeft size={16} />BACK TO DAILY QUESTS
@@ -71,10 +71,10 @@ function QuestDetailsHeader({ quest, onBack, onAction, onFailure }) {
               <Badge tone="category">QUEST SKIPPED</Badge>
             ) : (
               <div className="flex flex-wrap gap-2">
-                <Button variant={quest.verification !== 'None' ? 'secondary' : 'primary'} onClick={onAction}>
+                <Button variant={quest.verification !== 'None' ? 'secondary' : 'primary'} onClick={() => onAction?.()}>
                   {quest.verification !== 'None' ? 'PROCEED TO VERIFICATION' : 'COMPLETE QUEST'}
                 </Button>
-                <Button variant="ghost" onClick={onFailure}>
+                <Button variant="ghost" onClick={() => onFailure?.()}>
                   <AlertTriangle size={15} />MARK AS FAILED
                 </Button>
               </div>

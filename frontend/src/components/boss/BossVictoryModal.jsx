@@ -7,16 +7,20 @@ import SystemMessage from '../common/SystemMessage.jsx'
 function BossVictoryModal({ open, boss, onClose }) {
   if (!boss) return null
 
+  const handleClose = () => {
+    if (typeof onClose === 'function') onClose()
+  }
+
   return (
     <Modal
       open={open}
-      onClose={onClose}
+      onClose={handleClose}
       title="BOSS DEFEATED"
       eyebrow="RANKORA LEGENDARY VICTORY"
       footer={
         <div className="flex w-full items-center justify-between gap-3">
           <span className="font-mono text-xs text-slate-500">Bounty Claimed</span>
-          <Button onClick={onClose} variant="primary" className="min-w-36">
+          <Button onClick={handleClose} variant="primary" className="min-w-36">
             <Check size={16} /> CLAIM REWARD
           </Button>
         </div>

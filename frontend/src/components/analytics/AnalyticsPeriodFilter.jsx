@@ -10,7 +10,7 @@ function AnalyticsPeriodFilter({ periods, activePeriod, onSelectPeriod }) {
         <button
           key={p.id}
           type="button"
-          onClick={() => onSelectPeriod(p.id)}
+          onClick={() => onSelectPeriod?.(p.id)}
           className={`rounded-xl border px-3.5 py-1.5 font-mono text-xs font-semibold uppercase tracking-wider transition ${
             activePeriod === p.id
               ? 'border-cyan-300/60 bg-cyan-300/15 text-cyan-100 shadow-[0_0_20px_rgba(103,232,249,0.15)]'

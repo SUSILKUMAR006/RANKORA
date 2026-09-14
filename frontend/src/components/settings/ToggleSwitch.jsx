@@ -19,7 +19,7 @@ function ToggleSwitch({ checked, onChange, label, description, disabled = false 
         role="switch"
         aria-checked={checked}
         disabled={disabled}
-        onClick={() => onChange(!checked)}
+        onClick={() => onChange?.(!checked)}
         className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer items-center rounded-full border transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-cyan-300 focus:ring-offset-2 focus:ring-offset-rankora-950 disabled:cursor-not-allowed disabled:opacity-50 ${
           checked
             ? 'border-cyan-300/50 bg-cyan-400 shadow-[0_0_12px_rgba(103,232,249,0.3)]'
