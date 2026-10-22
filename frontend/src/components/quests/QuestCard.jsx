@@ -7,20 +7,32 @@ function QuestCard({ icon: Icon, title, description, difficulty = 'Common', xp =
   const complete = status === 'completed'
   const ResolvedIcon = Icon || Circle
   return (
-    <Card variant="interactive" className={complete ? 'opacity-70' : ''}>
+    <Card variant="interactive" tone={complete ? 'clear' : 'system'} className={complete ? 'opacity-80' : ''}>
       <div className="flex gap-4">
-        <span className="grid h-11 w-11 shrink-0 place-items-center rounded-xl border border-cyan-300/20 bg-cyan-300/10 text-cyan-200">
-          <ResolvedIcon size={19} />
+        <span
+          className={`grid h-11 w-11 shrink-0 place-items-center border ${
+            complete
+              ? 'border-clear-400/70 bg-clear-500/10 text-clear-300 shadow-[0_0_10px_rgba(52,217,156,0.35)]'
+              : 'border-edge-strong bg-void-950 text-system-300'
+          }`}
+        >
+          {complete ? <Check size={19} /> : <ResolvedIcon size={19} />}
         </span>
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-start justify-between gap-2">
-            <h3 className="font-display font-semibold text-white">{title}</h3>
+            <h3
+              className={`font-display text-base font-bold uppercase tracking-[0.08em] ${
+                complete ? 'text-frost-500 line-through decoration-clear-400/60' : 'text-frost-50'
+              }`}
+            >
+              {title}
+            </h3>
             <Badge tone={complete ? 'success' : 'difficulty'}>{complete ? 'Complete' : difficulty}</Badge>
           </div>
-          <p className="mt-2 text-sm leading-6 text-slate-400">{description}</p>
+          <p className="mt-2 text-sm leading-6 text-frost-400">{description}</p>
           <div className="mt-5 flex flex-wrap items-center justify-between gap-3">
-            <span className="flex items-center gap-1.5 font-mono text-xs text-amber-200">
-              <Zap size={14} />+{xp} XP
+            <span className="flex items-center gap-1.5 font-mono text-xs font-bold text-gold-300">
+              <Zap size={14} />+{xp} EXP
             </span>
             <Button variant={complete ? 'success' : 'secondary'} onClick={onAction} disabled={complete}>
               {complete ? <><Check size={15} /> Completed</> : 'Accept quest'}
@@ -33,4 +45,3 @@ function QuestCard({ icon: Icon, title, description, difficulty = 'Common', xp =
 }
 
 export default QuestCard
-

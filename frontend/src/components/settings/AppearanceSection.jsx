@@ -1,92 +1,85 @@
-import { Check, Eye, Moon, Palette, Sparkles } from 'lucide-react'
-import Card from '../common/Card.jsx'
+import { Check, Palette } from 'lucide-react'
+import SystemWindow from '../common/SystemWindow.jsx'
 import ToggleSwitch from './ToggleSwitch.jsx'
 
+// Theme ids are persisted settings values: keep them exactly as they are.
 const themes = [
   {
     id: 'dark-cyberpunk',
-    name: 'RANKORA Dark (Default)',
-    detail: 'Balanced dark futuristic interface with cyan and amber accents',
-    colorBox: 'from-[#071016] via-[#10242d] to-[#67e8f9]',
+    name: 'System Blue (Default)',
+    detail: 'The standard System interface: void-navy windows with electric-blue frames.',
+    swatch: ['bg-void-950', 'bg-void-800', 'bg-system-600', 'bg-system-400'],
   },
   {
     id: 'deep-obsidian',
-    name: 'Deep Obsidian',
-    detail: 'Ultra-dark OLED aesthetic with subtle monochrome borders',
-    colorBox: 'from-[#020508] via-[#080e14] to-[#94a3b8]',
+    name: 'Shadow Monarch',
+    detail: 'Ultra-dark OLED void with quiet monarch-purple borders.',
+    swatch: ['bg-void-950', 'bg-shadow-950', 'bg-shadow-700', 'bg-shadow-400'],
   },
   {
     id: 'cyber-neon',
-    name: 'Cyber Neon',
-    detail: 'High-contrast glowing violet and cyan matrix illumination',
-    colorBox: 'from-[#071016] via-[#1b1534] to-[#a78bfa]',
+    name: 'Red Gate',
+    detail: 'High-contrast dungeon-break glow: gate red over system blue.',
+    swatch: ['bg-void-950', 'bg-penalty-900', 'bg-penalty-500', 'bg-system-400'],
   },
 ]
 
 function AppearanceSection({ settings, onUpdate }) {
   return (
-    <Card variant="glass" className="space-y-5">
-      <div className="flex items-center gap-2.5 border-b border-white/10 pb-4">
-        <span className="grid h-8 w-8 place-items-center rounded-lg border border-violet-300/30 bg-violet-400/10 text-violet-200">
-          <Palette size={17} />
-        </span>
-        <div>
-          <p className="label-caps text-violet-300/80">VISUAL ENVIRONMENT</p>
-          <h2 className="font-display text-base font-semibold text-white">
-            APPEARANCE & THEME
-          </h2>
-        </div>
-      </div>
-
-      <div className="space-y-4">
-        <div>
-          <p className="label-caps text-slate-400">Interface Theme Palette</p>
-          <div className="mt-2.5 grid gap-3 sm:grid-cols-3">
-            {themes.map((theme) => {
-              const isSelected = (settings.theme || 'dark-cyberpunk') === theme.id
-              return (
-                <button
-                  type="button"
-                  key={theme.id}
-                  onClick={() => onUpdate({ theme: theme.id })}
-                  className={`relative flex flex-col justify-between rounded-xl border p-4 text-left transition ${
-                    isSelected
-                      ? 'border-cyan-300/60 bg-cyan-400/10 shadow-[0_0_20px_rgba(103,232,249,0.12)]'
-                      : 'border-white/10 bg-white/[0.02] hover:border-white/20 hover:bg-white/[0.04]'
-                  }`}
-                >
-                  <div>
-                    <div className="flex items-center justify-between">
-                      <div className={`h-4 w-12 rounded-full bg-gradient-to-r ${theme.colorBox} border border-white/10`} />
-                      {isSelected && (
-                        <span className="grid h-5 w-5 place-items-center rounded-full bg-cyan-300 text-rankora-950">
-                          <Check size={12} strokeWidth={3} />
-                        </span>
-                      )}
-                    </div>
-                    <h3 className="mt-3 font-display text-xs font-semibold text-white">
-                      {theme.name}
-                    </h3>
-                    <p className="mt-1 text-[0.68rem] leading-relaxed text-slate-400">
-                      {theme.detail}
-                    </p>
+    <SystemWindow
+      title="Appearance & Theme"
+      icon={<Palette size={13} />}
+      actions={<span className="label-caps hidden text-frost-600 sm:inline">Visual environment</span>}
+      bodyClassName="pb-1"
+    >
+      <div>
+        <p className="label-caps text-frost-400">Interface theme palette</p>
+        <div className="mt-3 grid gap-3 sm:grid-cols-3">
+          {themes.map((theme) => {
+            const isSelected = (settings.theme || 'dark-cyberpunk') === theme.id
+            return (
+              <button
+                type="button"
+                key={theme.id}
+                onClick={() => onUpdate({ theme: theme.id })}
+                aria-pressed={isSelected}
+                className={`relative flex flex-col rounded-xs border p-4 text-left transition-[border-color,background-color,box-shadow] duration-150 ${
+                  isSelected
+                    ? 'border-system-400 bg-system-500/10 shadow-[0_0_16px_-4px_rgba(30,144,255,0.6),inset_0_0_16px_-8px_rgba(30,144,255,0.5)]'
+                    : 'border-edge bg-void-950/50 hover:border-edge-strong hover:bg-void-850'
+                }`}
+              >
+                <div className="flex items-center justify-between gap-3">
+                  <div className="flex h-5 border border-edge-strong">
+                    {theme.swatch.map((swatch) => (
+                      <span key={swatch} className={`h-full w-4 ${swatch}`} />
+                    ))}
                   </div>
-                </button>
-              )
-            })}
-          </div>
-        </div>
-
-        <div className="border-t border-white/5 pt-2">
-          <ToggleSwitch
-            label="Ambient Glow & Particle Effects"
-            description="Enable radiant neon glows and ambient light effects on badges, cards, and modal windows."
-            checked={settings.glowEffects !== false}
-            onChange={(val) => onUpdate({ glowEffects: val })}
-          />
+                  {isSelected ? (
+                    <span className="grid h-5 w-5 place-items-center border border-system-400 bg-system-500/30 text-frost-50 shadow-[0_0_10px_rgba(30,144,255,0.7)]">
+                      <Check size={12} strokeWidth={3} />
+                    </span>
+                  ) : (
+                    <span className="h-5 w-5 border border-edge" />
+                  )}
+                </div>
+                <h3 className="mt-3 font-display text-sm font-bold uppercase tracking-[0.08em] text-frost-50">{theme.name}</h3>
+                <p className="mt-1 text-xs leading-5 text-frost-400">{theme.detail}</p>
+              </button>
+            )
+          })}
         </div>
       </div>
-    </Card>
+
+      <div className="mt-4 border-t border-edge/60">
+        <ToggleSwitch
+          label="Ambient Glow & Particle Effects"
+          description="Enable radiant glows and ambient light effects on badges, windows, and System pop-ups."
+          checked={settings.glowEffects !== false}
+          onChange={(val) => onUpdate({ glowEffects: val })}
+        />
+      </div>
+    </SystemWindow>
   )
 }
 

@@ -35,15 +35,17 @@ export function BudgetModal({
     <Modal
       open={open}
       onClose={onClose}
-      title="SET BUDGET & CURRENCY"
-      eyebrow="TREASURY PROTOCOL PARAMETERS"
+      title="Set Budget & Currency"
+      eyebrow="Treasury protocol parameters"
     >
-      <form onSubmit={handleSubmit} className="space-y-4">
+      <form onSubmit={handleSubmit} className="space-y-5">
         {/* Monthly Budget Target */}
         <label className="block">
-          <span className="label-caps text-slate-400">Monthly Spending Ceiling</span>
-          <div className="relative mt-1">
-            <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 font-mono text-xs text-cyan-300">
+          <span className="label-caps mb-1.5 flex items-center gap-1.5 text-frost-400">
+            <Target size={12} className="text-system-300" /> Monthly spending ceiling
+          </span>
+          <div className="relative">
+            <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 font-mono text-xs text-system-300">
               {currency}
             </span>
             <input
@@ -54,18 +56,19 @@ export function BudgetModal({
               value={budget}
               onChange={(e) => setBudget(e.target.value)}
               placeholder="2000"
-              className="h-10 w-full rounded-xl border border-white/10 bg-white/[0.03] pl-9 pr-3 font-mono text-sm text-white outline-none transition focus:border-cyan-300/50"
+              className="field pl-10! font-mono"
             />
           </div>
-          <p className="mt-1 text-[0.7rem] text-slate-500">
+          <p className="mt-2 flex items-start gap-1.5 text-xs text-frost-500">
+            <ShieldAlert size={13} className="mt-px shrink-0 text-gold-400" />
             System will trigger telemetry alerts when outflows approach or exceed this threshold.
           </p>
         </label>
 
         {/* Currency Selector */}
         <div>
-          <span className="label-caps text-slate-400">Preferred Currency Symbol</span>
-          <div className="mt-2 grid grid-cols-2 gap-2 sm:grid-cols-3">
+          <span className="label-caps mb-1.5 block text-frost-400">Preferred currency symbol</span>
+          <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
             {CURRENCIES.map((c) => {
               const isSelected = currency === c.symbol
               return (
@@ -73,14 +76,19 @@ export function BudgetModal({
                   type="button"
                   key={c.code}
                   onClick={() => setCurrency(c.symbol)}
-                  className={`flex items-center justify-between rounded-xl border p-2.5 font-mono text-xs transition ${
+                  aria-pressed={isSelected}
+                  className={`flex items-center justify-between border p-2.5 font-mono text-xs transition-[border-color,background-color,box-shadow,color] ${
                     isSelected
-                      ? 'border-cyan-300/50 bg-cyan-300/15 text-cyan-200 shadow-[0_0_12px_rgba(103,232,249,0.15)]'
-                      : 'border-white/10 bg-white/[0.02] text-slate-400 hover:border-white/20 hover:text-white'
+                      ? 'border-system-400 bg-system-500/15 text-frost-50 shadow-[0_0_12px_-2px_rgba(30,144,255,0.6)]'
+                      : 'border-edge bg-void-950/60 text-frost-400 hover:border-edge-strong hover:text-frost-100'
                   }`}
                 >
-                  <span className="font-bold text-white">{c.symbol}</span>
-                  <span className="text-[0.68rem] text-slate-500">{c.code}</span>
+                  <span className={`text-base font-bold ${isSelected ? 'text-frost-50 sys-glow' : 'text-frost-200'}`}>
+                    {c.symbol}
+                  </span>
+                  <span className={`label-caps text-[0.65rem] ${isSelected ? 'text-system-300' : 'text-frost-500'}`}>
+                    {c.code}
+                  </span>
                 </button>
               )
             })}
@@ -88,12 +96,12 @@ export function BudgetModal({
         </div>
 
         {/* Modal Actions */}
-        <div className="flex justify-end gap-2 border-t border-white/10 pt-3">
+        <div className="flex flex-wrap justify-end gap-2 border-t border-edge pt-4">
           <Button type="button" variant="ghost" onClick={onClose}>
-            CANCEL
+            Cancel
           </Button>
           <Button type="submit" variant="primary">
-            <Check size={15} /> UPDATE PROTOCOL
+            <Check size={15} /> Update protocol
           </Button>
         </div>
       </form>

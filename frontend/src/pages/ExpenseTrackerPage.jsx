@@ -10,6 +10,7 @@ import {
 } from 'lucide-react'
 import Button from '../components/common/Button.jsx'
 import Modal from '../components/common/Modal.jsx'
+import SectionHeader, { PageHeader } from '../components/common/SectionHeader.jsx'
 import BudgetModal from '../components/expenses/BudgetModal.jsx'
 import ExpenseCharts from '../components/expenses/ExpenseCharts.jsx'
 import ExpenseList from '../components/expenses/ExpenseList.jsx'
@@ -126,55 +127,39 @@ export function ExpenseTrackerPage() {
   return (
     <div className="space-y-8 pb-16">
       {/* Header */}
-      <motion.header
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.3 }}
-        className="flex flex-col gap-5 border-b border-white/10 pb-6 sm:flex-row sm:items-end sm:justify-between"
-      >
-        <div>
-          <div className="flex items-center gap-2">
-            <span className="grid h-6 w-6 place-items-center rounded-lg bg-cyan-400/10 text-cyan-300">
-              <Coins size={14} />
-            </span>
-            <p className="label-caps text-cyan-300/80">TREASURY CODEX / FINANCIAL TELEMETRY</p>
-          </div>
-          <h1 className="mt-3 font-display text-3xl font-bold tracking-tight text-white sm:text-4xl">
-            EXPENSE & TREASURY TRACKER
-          </h1>
-          <p className="mt-2 max-w-2xl text-sm leading-relaxed text-slate-400">
-            Monitor cashflow velocity, budget limits, category allocations, and income inflows with precision discipline.
-          </p>
-        </div>
+      <PageHeader
+        eyebrow="Treasury codex / Financial telemetry"
+        title="Inventory · Treasury"
+        description="Monitor cashflow velocity, budget limits, category allocations, and income inflows with precision discipline."
+        actions={
+          <>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleExportCSV}
+              disabled={expenses.length === 0}
+              title="Export CSV ledger"
+            >
+              <Download size={14} /> CSV
+            </Button>
 
-        {/* Header Action Buttons */}
-        <div className="flex flex-wrap items-center gap-2.5">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={handleExportCSV}
-            disabled={expenses.length === 0}
-            title="Export CSV ledger"
-          >
-            <Download size={14} /> CSV
-          </Button>
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={() => setBudgetModalOpen(true)}
+              title="Configure Budget & Currency"
+            >
+              <Settings2 size={14} /> Budget
+            </Button>
 
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => setBudgetModalOpen(true)}
-            title="Configure Budget & Currency"
-          >
-            <Settings2 size={14} /> BUDGET
-          </Button>
+            <Button onClick={handleOpenAdd}>
+              <Plus size={16} /> Record transaction
+            </Button>
+          </>
+        }
+      />
 
-          <Button onClick={handleOpenAdd}>
-            <Plus size={16} /> RECORD TRANSACTION
-          </Button>
-        </div>
-      </motion.header>
-
-      {/* 4 Holographic Summary Metric Cards */}
+      {/* Treasury stat tiles */}
       <ExpenseSummaryCards
         stats={stats}
         currency={currency}
@@ -189,18 +174,16 @@ export function ExpenseTrackerPage() {
       />
 
       {/* Transaction Feed & Search Filters */}
-      <section className="space-y-4">
-        <div className="flex items-center justify-between border-b border-white/10 pb-3">
-          <div className="flex items-center gap-2">
-            <span className="h-2 w-2 rounded-full bg-cyan-400" />
-            <h2 className="font-display text-lg font-semibold text-white">
-              TRANSACTION LEDGER
-            </h2>
-          </div>
-          <span className="font-mono text-xs text-slate-400">
-            {expenses.length} Records Logged
-          </span>
-        </div>
+      <section>
+        <SectionHeader
+          title="Transaction Ledger"
+          eyebrow="Inventory log"
+          actions={
+            <span className="ml-auto font-mono text-xs text-frost-400 sm:ml-0">
+              [<span className="text-system-300">{expenses.length}</span>] records logged
+            </span>
+          }
+        />
 
         <ExpenseList
           expenses={expenses}
@@ -236,21 +219,24 @@ export function ExpenseTrackerPage() {
       <Modal
         open={Boolean(deleteTarget)}
         onClose={() => setDeleteTarget(null)}
-        title="DELETE TRANSACTION?"
-        eyebrow="CONFIRM LEDGER PURGE"
+        title="Delete Transaction?"
+        eyebrow="Warning · Confirm ledger purge"
+        tone="penalty"
+        size="sm"
         footer={
           <>
             <Button variant="ghost" onClick={() => setDeleteTarget(null)}>
-              CANCEL
+              Cancel
             </Button>
             <Button variant="danger" onClick={handleConfirmDelete}>
-              <Trash2 size={15} /> PURGE
+              <Trash2 size={15} /> Purge
             </Button>
           </>
         }
       >
-        <p className="text-sm text-slate-300">
-          Are you sure you want to delete the transaction record "{deleteTarget?.title}"?
+        <p className="text-sm text-frost-300">
+          Are you sure you want to delete the transaction record{' '}
+          <span className="font-display font-bold uppercase tracking-[0.08em] text-frost-50">"{deleteTarget?.title}"</span>?
           This will update all category telemetry and budget stats immediately.
         </p>
       </Modal>
@@ -260,9 +246,10 @@ export function ExpenseTrackerPage() {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 0.4 }}
-        className="text-center font-mono text-[0.65rem] uppercase tracking-[0.2em] text-slate-700"
+        className="flex items-center justify-center gap-2 text-center font-mono text-[0.65rem] uppercase tracking-[0.2em] text-frost-600"
       >
-        Rankora Treasury Protocol · Live Inflow & Outflow Telemetry Active
+        <span className="h-1.5 w-1.5 shrink-0 rotate-45 bg-system-400/70 animate-sys-pulse" />
+        Rankora Treasury Protocol · Live Inflow &amp; Outflow Telemetry Active
       </motion.p>
     </div>
   )

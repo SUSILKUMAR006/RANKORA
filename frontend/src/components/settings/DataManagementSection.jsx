@@ -5,14 +5,13 @@ import {
   Database,
   Download,
   FileJson,
-  HardDrive,
   RotateCcw,
   Swords,
   Trash2,
 } from 'lucide-react'
 import Button from '../common/Button.jsx'
-import Card from '../common/Card.jsx'
 import Modal from '../common/Modal.jsx'
+import SystemWindow from '../common/SystemWindow.jsx'
 import { clearAllRankoraData, exportAllRankoraData } from '../../utils/settingsUtils.js'
 import { restoreDefaultQuests } from '../../hooks/useQuestCompletion.js'
 
@@ -47,32 +46,24 @@ function DataManagementSection({ onDataCleared }) {
 
   return (
     <>
-      <Card variant="glass" className="space-y-6">
-        <div className="flex items-center justify-between border-b border-white/10 pb-4">
-          <div className="flex items-center gap-2.5">
-            <span className="grid h-8 w-8 place-items-center rounded-lg border border-cyan-300/30 bg-cyan-400/10 text-cyan-200">
-              <Database size={17} />
-            </span>
-            <div>
-              <p className="label-caps text-cyan-300/80">BACKUP & LOCAL STORAGE</p>
-              <h2 className="font-display text-base font-semibold text-white">
-                DATA MANAGEMENT
-              </h2>
-            </div>
-          </div>
-        </div>
-
-        <div className="grid gap-4 sm:grid-cols-3">
+      <SystemWindow
+        title="Data Management"
+        icon={<Database size={13} />}
+        actions={<span className="label-caps hidden text-frost-600 sm:inline">Backup & local storage</span>}
+      >
+        <div className="grid gap-3 md:grid-cols-3">
           {/* Restore Defaults Card */}
-          <div className="flex flex-col justify-between rounded-xl border border-cyan-400/20 bg-cyan-950/10 p-4 transition hover:border-cyan-400/30">
+          <div className="sys-inset flex flex-col justify-between p-4 transition-colors hover:border-edge-strong">
             <div>
-              <div className="flex items-center gap-2 text-cyan-200">
-                <Swords size={18} />
-                <h3 className="font-display text-xs font-semibold text-white uppercase tracking-wider">
+              <div className="flex items-center gap-2.5">
+                <span className="grid h-7 w-7 shrink-0 place-items-center border border-system-400/70 text-system-200">
+                  <Swords size={14} />
+                </span>
+                <h3 className="font-display text-sm font-bold uppercase tracking-[0.08em] text-frost-50">
                   Restore Default Quests
                 </h3>
               </div>
-              <p className="mt-2 text-[0.72rem] leading-relaxed text-slate-400">
+              <p className="mt-3 text-xs leading-5 text-frost-400">
                 Restore the 7 standard daily discipline routine quests to their default configuration
                 without wiping your player stats.
               </p>
@@ -81,13 +72,13 @@ function DataManagementSection({ onDataCleared }) {
             <div className="mt-4">
               <Button
                 type="button"
-                variant="secondary"
+                variant={restoreSuccess ? 'success' : 'secondary'}
                 onClick={handleRestoreQuests}
                 className="w-full text-xs"
               >
                 {restoreSuccess ? (
                   <>
-                    <Check size={14} className="text-emerald-300" /> RESTORED
+                    <Check size={14} /> RESTORED
                   </>
                 ) : (
                   <>
@@ -99,15 +90,17 @@ function DataManagementSection({ onDataCleared }) {
           </div>
 
           {/* Export JSON Card */}
-          <div className="flex flex-col justify-between rounded-xl border border-white/10 bg-white/[0.02] p-4 transition hover:border-white/20">
+          <div className="sys-inset flex flex-col justify-between p-4 transition-colors hover:border-edge-strong">
             <div>
-              <div className="flex items-center gap-2 text-cyan-200">
-                <FileJson size={18} />
-                <h3 className="font-display text-xs font-semibold text-white uppercase tracking-wider">
+              <div className="flex items-center gap-2.5">
+                <span className="grid h-7 w-7 shrink-0 place-items-center border border-system-400/70 text-system-200">
+                  <FileJson size={14} />
+                </span>
+                <h3 className="font-display text-sm font-bold uppercase tracking-[0.08em] text-frost-50">
                   Export Data JSON
                 </h3>
               </div>
-              <p className="mt-2 text-[0.72rem] leading-relaxed text-slate-400">
+              <p className="mt-3 text-xs leading-5 text-frost-400">
                 Download a complete, offline JSON snapshot of your quests, XP trajectory,
                 achievements, failure history, and weekly boss progress.
               </p>
@@ -116,13 +109,13 @@ function DataManagementSection({ onDataCleared }) {
             <div className="mt-4 flex items-center justify-between">
               <Button
                 type="button"
-                variant="secondary"
+                variant={exportSuccess ? 'success' : 'secondary'}
                 onClick={handleExport}
                 className="w-full text-xs"
               >
                 {exportSuccess ? (
                   <>
-                    <Check size={14} className="text-emerald-300" /> DOWNLOADED
+                    <Check size={14} /> DOWNLOADED
                   </>
                 ) : (
                   <>
@@ -134,15 +127,18 @@ function DataManagementSection({ onDataCleared }) {
           </div>
 
           {/* Clear Data Card */}
-          <div className="flex flex-col justify-between rounded-xl border border-rose-400/20 bg-rose-950/10 p-4 transition hover:border-rose-400/30">
+          <div className="flex flex-col justify-between rounded-xs border border-penalty-500/40 bg-penalty-500/5 p-4 transition-colors hover:border-penalty-400/60">
             <div>
-              <div className="flex items-center gap-2 text-rose-300">
-                <AlertTriangle size={18} />
-                <h3 className="font-display text-xs font-semibold text-white uppercase tracking-wider">
+              <div className="flex items-center gap-2.5">
+                <span className="grid h-7 w-7 shrink-0 place-items-center border border-penalty-400/80 text-penalty-300">
+                  <AlertTriangle size={14} />
+                </span>
+                <h3 className="font-display text-sm font-bold uppercase tracking-[0.08em] text-frost-50">
                   Clear Local Data
                 </h3>
               </div>
-              <p className="mt-2 text-[0.72rem] leading-relaxed text-slate-400">
+              <p className="mt-3 text-xs leading-5 text-frost-400">
+                <span className="font-display font-bold uppercase tracking-[0.12em] text-penalty-300">Warning: </span>
                 Permanently purge all local progress records, quest logs, and achievements.
                 This action is irreversible and resets your system to awakening state.
               </p>
@@ -160,14 +156,15 @@ function DataManagementSection({ onDataCleared }) {
             </div>
           </div>
         </div>
-      </Card>
+      </SystemWindow>
 
       {/* Confirmation Modal */}
       <Modal
         open={clearModalOpen}
         onClose={() => setClearModalOpen(false)}
         title="PURGE ALL LOCAL DATA?"
-        eyebrow="CRITICAL SYSTEM ACTION"
+        eyebrow="Critical system action"
+        tone="penalty"
         footer={
           <>
             <Button variant="ghost" onClick={() => setClearModalOpen(false)}>
@@ -180,17 +177,24 @@ function DataManagementSection({ onDataCleared }) {
         }
       >
         <div className="space-y-3">
-          <p className="text-sm leading-relaxed text-slate-300">
+          <p className="text-sm leading-6 text-frost-200">
             You are about to permanently erase all locally stored RANKORA data, including:
           </p>
-          <ul className="list-disc space-y-1 pl-5 font-mono text-xs text-rose-200">
-            <li>Player level, rank, and XP trajectory</li>
-            <li>All completed and pending daily quests</li>
-            <li>Unlocked honors and achievement codex entries</li>
-            <li>Weekly boss progress and victory logs</li>
-            <li>Private progress photos and timeline records</li>
+          <ul className="sys-inset space-y-1.5 px-4 py-3 font-mono text-xs text-penalty-200">
+            {[
+              'Player level, rank, and XP trajectory',
+              'All completed and pending daily quests',
+              'Unlocked honors and achievement codex entries',
+              'Weekly boss progress and victory logs',
+              'Private progress photos and timeline records',
+            ].map((line) => (
+              <li key={line} className="flex items-start gap-2.5">
+                <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rotate-45 bg-penalty-400" />
+                {line}
+              </li>
+            ))}
           </ul>
-          <p className="text-xs text-slate-500 pt-2">
+          <p className="pt-2 text-xs text-frost-500">
             Tip: You can download a backup JSON above before proceeding.
           </p>
         </div>

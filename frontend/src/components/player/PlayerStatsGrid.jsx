@@ -1,53 +1,47 @@
 import { motion } from 'framer-motion'
-import { Award, Dumbbell, Shield, Sparkles } from 'lucide-react'
-import Card from '../common/Card.jsx'
+import { Sparkles } from 'lucide-react'
 import ProgressBar from '../common/ProgressBar.jsx'
+import SystemWindow from '../common/SystemWindow.jsx'
 
+// Keys are the tone names coming from STAT_METADATA; values are System tokens.
 const statToneStyles = {
   rose: {
-    bg: 'bg-rose-400/10 border-rose-400/25 text-rose-300',
+    bg: 'border-penalty-400/50 bg-penalty-500/10 text-penalty-300',
+    code: 'text-penalty-300',
     bar: 'boss',
   },
   emerald: {
-    bg: 'bg-emerald-400/10 border-emerald-400/25 text-emerald-300',
+    bg: 'border-clear-400/50 bg-clear-500/10 text-clear-300',
+    code: 'text-clear-300',
     bar: 'quest',
   },
   violet: {
-    bg: 'bg-violet-400/10 border-violet-400/25 text-violet-300',
+    bg: 'border-shadow-400/50 bg-shadow-500/10 text-shadow-300',
+    code: 'text-shadow-300',
     bar: 'statistics',
   },
   cyan: {
-    bg: 'bg-cyan-400/10 border-cyan-400/25 text-cyan-200',
+    bg: 'border-system-400/50 bg-system-500/10 text-system-200',
+    code: 'text-system-300',
     bar: 'xp',
   },
   amber: {
-    bg: 'bg-amber-400/10 border-amber-400/25 text-amber-300',
-    bar: 'boss',
+    bg: 'border-gold-400/50 bg-gold-500/10 text-gold-300',
+    code: 'text-gold-300',
+    bar: 'gold',
   },
 }
 
 function PlayerStatsGrid({ stats = [] }) {
   return (
-    <Card variant="glass" className="space-y-6">
-      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-white/10 pb-4">
-        <div className="flex items-center gap-2.5">
-          <span className="grid h-8 w-8 place-items-center rounded-lg border border-cyan-300/30 bg-cyan-400/10 text-cyan-200">
-            <Sparkles size={17} />
-          </span>
-          <div>
-            <p className="label-caps text-cyan-300/80">CORE ATTRIBUTES</p>
-            <h2 className="font-display text-base font-semibold text-white">
-              CHARACTER RPG STATS
-            </h2>
-          </div>
-        </div>
+    <SystemWindow
+      title="Stats"
+      icon={<Sparkles size={13} />}
+      actions={<span className="label-caps hidden text-frost-500 sm:inline">5 pillars of momentum</span>}
+    >
+      <p className="label-caps mb-4 text-frost-500">Core attributes · character RPG stats</p>
 
-        <span className="font-mono text-xs text-slate-500">
-          5 Pillars of Momentum
-        </span>
-      </div>
-
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
+      <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 sm:gap-3 lg:grid-cols-5">
         {stats.map((stat, index) => {
           const Icon = stat.icon
           const style = statToneStyles[stat.tone] || statToneStyles.cyan
@@ -55,54 +49,36 @@ function PlayerStatsGrid({ stats = [] }) {
           return (
             <motion.div
               key={stat.key}
-              initial={{ opacity: 0, y: 12 }}
-              animate={{ opacity: 1, y: 0 }}
+              initial={{ opacity: 0, x: -8 }}
+              animate={{ opacity: 1, x: 0 }}
               transition={{ delay: index * 0.05 }}
-              className="flex h-full flex-col justify-between rounded-2xl border border-white/10 bg-white/[0.02] p-4 transition hover:border-white/20 hover:bg-white/[0.04]"
+              className="sys-inset flex h-full flex-col justify-between p-3.5 transition-colors hover:border-edge-strong sm:p-4"
             >
               <div>
-                {/* Header: Icon & Code */}
                 <div className="flex items-start justify-between gap-2">
-                  <span
-                    className={`grid h-10 w-10 shrink-0 place-items-center rounded-xl border ${style.bg}`}
-                  >
-                    <Icon size={19} />
-                  </span>
-                  <span className="rounded-md bg-white/5 border border-white/10 px-2 py-0.5 font-mono text-xs font-bold text-white">
-                    {stat.code}
+                  <p className={`font-display text-lg font-bold tracking-[0.14em] ${style.code}`}>{stat.code}</p>
+                  <span className={`grid h-8 w-8 shrink-0 place-items-center border ${style.bg}`}>
+                    <Icon size={16} />
                   </span>
                 </div>
 
-                {/* Name & Value */}
-                <div className="mt-4">
-                  <p className="label-caps text-[0.62rem] text-slate-500">{stat.name}</p>
-                  <p className="font-mono text-2xl font-bold tracking-tight text-white">
-                    {stat.value}
-                  </p>
-                  <p className="mt-1 text-[0.72rem] leading-relaxed text-slate-400">
-                    {stat.description}
-                  </p>
-                </div>
+                <p className="mt-2 font-display text-5xl font-bold leading-none text-frost-50 sys-glow">{stat.value}</p>
+                <p className="label-caps mt-2 text-frost-400">{stat.name}</p>
+                <p className="mt-1 text-xs leading-5 text-frost-500">{stat.description}</p>
               </div>
 
-              {/* Progress Bar */}
-              <div className="mt-5 space-y-1.5 border-t border-white/5 pt-3">
-                <div className="flex justify-between font-mono text-[0.65rem] text-slate-500">
-                  <span>Power Level</span>
-                  <span>{stat.progress}%</span>
+              <div className="mt-4 space-y-1.5">
+                <div className="flex justify-between font-mono text-[0.65rem] text-frost-500">
+                  <span>Power level</span>
+                  <span className="text-frost-300">{stat.progress}%</span>
                 </div>
-                <ProgressBar
-                  value={stat.progress}
-                  max={100}
-                  tone={style.bar}
-                  className="w-full"
-                />
+                <ProgressBar value={stat.progress} max={100} tone={style.bar} size="sm" className="w-full" />
               </div>
             </motion.div>
           )
         })}
       </div>
-    </Card>
+    </SystemWindow>
   )
 }
 

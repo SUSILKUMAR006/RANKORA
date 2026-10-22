@@ -1,19 +1,7 @@
 import { motion } from 'framer-motion'
-import {
-  Award,
-  BookOpen,
-  Camera,
-  ChevronRight,
-  Flame,
-  LineChart,
-  Shield,
-  Skull,
-  Sparkles,
-  Trophy,
-  Zap,
-} from 'lucide-react'
+import { Award, BookOpen, Camera, ChevronRight, Skull, Trophy, Zap } from 'lucide-react'
 import { Link } from 'react-router-dom'
-import Card from '../common/Card.jsx'
+import SystemWindow from '../common/SystemWindow.jsx'
 
 function PlayerProgressSummary({ summary = {} }) {
   const totalXp = Number(summary.totalXp) || 0
@@ -30,7 +18,8 @@ function PlayerProgressSummary({ summary = {} }) {
       value: `${totalXp.toLocaleString()} XP`,
       detail: 'Cumulative experience accumulated across all quests and bosses',
       icon: Zap,
-      tone: 'text-cyan-300 bg-cyan-400/10 border-cyan-400/20',
+      tone: 'border-gold-400/50 bg-gold-500/10 text-gold-300',
+      valueTone: 'text-gold-300',
       link: '/analytics',
     },
     {
@@ -39,7 +28,8 @@ function PlayerProgressSummary({ summary = {} }) {
       value: `${achievementsUnlocked} / ${totalAchievements}`,
       detail: 'Codex achievements unlocked and inscribed',
       icon: Trophy,
-      tone: 'text-amber-300 bg-amber-400/10 border-amber-400/20',
+      tone: 'border-shadow-400/50 bg-shadow-500/10 text-shadow-300',
+      valueTone: 'text-shadow-200',
       link: '/achievements',
     },
     {
@@ -48,7 +38,8 @@ function PlayerProgressSummary({ summary = {} }) {
       value: `${bossesDefeated}`,
       detail: 'Weekly raid bosses defeated in combat',
       icon: Skull,
-      tone: 'text-rose-300 bg-rose-400/10 border-rose-400/20',
+      tone: 'border-penalty-400/50 bg-penalty-500/10 text-penalty-300',
+      valueTone: 'text-penalty-200',
       link: '/boss',
     },
     {
@@ -57,7 +48,8 @@ function PlayerProgressSummary({ summary = {} }) {
       value: `${checkpointsCount}`,
       detail: 'Private visual checkpoints logged to timeline',
       icon: Camera,
-      tone: 'text-violet-300 bg-violet-400/10 border-violet-400/20',
+      tone: 'border-system-400/50 bg-system-500/10 text-system-200',
+      valueTone: 'text-frost-50',
       link: '/progress',
     },
     {
@@ -66,79 +58,61 @@ function PlayerProgressSummary({ summary = {} }) {
       value: `${diaryEntriesCount}`,
       detail: 'Daily cognitive logs and reflection notes recorded',
       icon: BookOpen,
-      tone: 'text-emerald-300 bg-emerald-400/10 border-emerald-400/20',
+      tone: 'border-clear-400/50 bg-clear-500/10 text-clear-300',
+      valueTone: 'text-frost-50',
       link: '/diary',
     },
   ]
 
   return (
-    <Card variant="glass" className="space-y-6">
-      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-white/10 pb-4">
-        <div className="flex items-center gap-2.5">
-          <span className="grid h-8 w-8 place-items-center rounded-lg border border-amber-300/30 bg-amber-400/10 text-amber-200">
-            <Award size={17} />
-          </span>
-          <div>
-            <p className="label-caps text-amber-300/80">MILESTONE TALLIES</p>
-            <h2 className="font-display text-base font-semibold text-white">
-              PROGRESS SUMMARY
-            </h2>
-          </div>
-        </div>
+    <SystemWindow
+      title="Progress Summary"
+      icon={<Award size={13} />}
+      bodyClassName="p-0"
+      actions={<span className="label-caps hidden text-frost-500 sm:inline">Lifetime codex</span>}
+    >
+      <p className="label-caps border-b border-edge/70 px-5 py-3 text-frost-500">Milestone tallies</p>
 
-        <span className="font-mono text-xs text-slate-500">
-          Lifetime Codex
-        </span>
-      </div>
-
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
+      <div className="divide-y divide-edge/60">
         {summaryCards.map((card, index) => {
           const Icon = card.icon
           return (
             <motion.div
               key={card.id}
-              initial={{ opacity: 0, y: 12 }}
-              animate={{ opacity: 1, y: 0 }}
+              initial={{ opacity: 0, x: -8 }}
+              animate={{ opacity: 1, x: 0 }}
               transition={{ delay: index * 0.05 }}
             >
               <Link
                 to={card.link}
-                className="group flex h-full flex-col justify-between rounded-2xl border border-white/10 bg-white/[0.02] p-4 transition hover:border-white/20 hover:bg-white/[0.04]"
+                aria-label={`${card.label}: inspect module`}
+                className="group flex items-center gap-4 px-5 py-3.5 transition-colors hover:bg-system-500/5"
               >
-                <div>
-                  <div className="flex items-start justify-between gap-2">
-                    <span
-                      className={`grid h-9 w-9 shrink-0 place-items-center rounded-xl border ${card.tone}`}
-                    >
-                      <Icon size={17} />
-                    </span>
-                    <span className="text-slate-600 transition-transform group-hover:translate-x-0.5 group-hover:text-cyan-200">
-                      <ChevronRight size={15} />
-                    </span>
-                  </div>
+                <span className={`grid h-9 w-9 shrink-0 place-items-center border ${card.tone}`}>
+                  <Icon size={16} />
+                </span>
 
-                  <div className="mt-4">
-                    <p className="label-caps text-[0.62rem] text-slate-500">
-                      {card.label}
-                    </p>
-                    <p className="font-mono text-xl font-bold tracking-tight text-white">
-                      {card.value}
-                    </p>
-                    <p className="mt-1 text-[0.7rem] leading-relaxed text-slate-400">
-                      {card.detail}
-                    </p>
-                  </div>
+                <div className="min-w-0 flex-1">
+                  <p className="label-caps text-frost-300 transition-colors group-hover:text-system-200">{card.label}</p>
+                  <p className="mt-0.5 line-clamp-2 text-xs text-frost-500 sm:line-clamp-1">{card.detail}</p>
                 </div>
 
-                <div className="mt-4 border-t border-white/5 pt-2 text-[0.68rem] font-mono text-cyan-300/70 group-hover:text-cyan-200">
-                  Inspect Module →
+                <div className="flex shrink-0 items-center gap-3">
+                  <span className={`font-display text-xl font-bold sm:text-2xl ${card.valueTone}`}>{card.value}</span>
+                  <span className="hidden items-center gap-1 font-mono text-[0.68rem] text-system-300/70 transition-colors group-hover:text-system-200 md:inline-flex xl:hidden 2xl:inline-flex">
+                    Inspect module
+                  </span>
+                  <ChevronRight
+                    size={15}
+                    className="text-frost-600 transition-transform group-hover:translate-x-0.5 group-hover:text-system-200"
+                  />
                 </div>
               </Link>
             </motion.div>
           )
         })}
       </div>
-    </Card>
+    </SystemWindow>
   )
 }
 

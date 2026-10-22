@@ -1,9 +1,94 @@
 import { motion } from 'framer-motion'
-import { ArrowUpRight, Cpu, Sparkles } from 'lucide-react'
 import { NavLink } from 'react-router-dom'
 
+const copy = {
+  login: {
+    eyebrow: 'Player detected',
+    lines: ['Welcome back,', 'Player.'],
+    body: 'The System has been waiting. Your daily quests have been refreshed.',
+  },
+  register: {
+    eyebrow: 'Notification',
+    lines: ['You have acquired', 'the qualifications', 'to be a Player.'],
+    body: 'Will you accept? Turn daily actions into quests, earn EXP, and climb from E-Rank to S.',
+  },
+}
+
+const ranks = ['E', 'D', 'C', 'B', 'A', 'S']
+
 function AuthLayout({ children, mode }) {
-  return <div className="relative min-h-screen overflow-hidden bg-rankora-950 text-slate-100"><div className="pointer-events-none absolute inset-0 bg-[linear-gradient(rgba(103,232,249,0.06)_1px,transparent_1px),linear-gradient(90deg,rgba(103,232,249,0.06)_1px,transparent_1px)] bg-size-[52px_52px] opacity-40" /><div className="pointer-events-none absolute -left-32 top-1/4 h-96 w-96 rounded-full bg-cyan-400/10 blur-3xl" /><div className="pointer-events-none absolute -right-32 bottom-0 h-112 w-md rounded-full bg-violet-400/10 blur-3xl" /><div className="relative mx-auto flex min-h-screen w-full max-w-360 flex-col px-5 py-6 lg:grid lg:grid-cols-[1fr_minmax(25rem,31rem)] lg:items-center lg:gap-20 lg:px-12 lg:py-10 xl:grid-cols-[1fr_31rem] xl:gap-32"><header className="flex items-center justify-between lg:absolute lg:left-12 lg:right-12 lg:top-8"><NavLink to="/login" className="flex items-center gap-3"><span className="grid h-9 w-9 place-items-center rounded-xl bg-cyan-300 text-rankora-950 shadow-[0_0_24px_rgba(103,232,249,0.35)]"><Sparkles size={18} strokeWidth={2.5} /></span><span className="font-display text-lg font-bold tracking-[0.16em]">RANKORA</span></NavLink><span className="label-caps text-slate-600">{mode === 'login' ? 'System access' : 'Player identity'}</span></header><section className="flex flex-1 items-center py-14 lg:py-0"><motion.div initial={{ opacity: 0, x: -18 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.55, ease: 'easeOut' }} className="max-w-xl"><div className="mb-8 hidden h-px w-24 bg-linear-to-r from-cyan-300 to-transparent lg:block" /><p className="label-caps text-cyan-300/70">Authentication required</p><h1 className="mt-5 max-w-lg font-display text-4xl font-semibold leading-[1.05] tracking-tight text-white sm:text-6xl">FORGE YOUR <span className="text-cyan-200">PROGRESS.</span></h1><p className="mt-6 max-w-md text-base leading-7 text-slate-400">Turn your daily actions into quests. Earn XP. Build discipline. Rank up.</p><div className="mt-10 hidden items-center gap-8 border-t border-white/10 pt-6 sm:flex"><div><p className="label-caps text-slate-600">Protocol</p><p className="mt-2 flex items-center gap-2 font-mono text-xs text-slate-300"><Cpu size={14} className="text-cyan-300" />Progression online</p></div><div><p className="label-caps text-slate-600">Cycle</p><p className="mt-2 flex items-center gap-2 font-mono text-xs text-slate-300"><ArrowUpRight size={14} className="text-violet-300" />01 / Initiation</p></div></div></motion.div></section><section className="flex items-center justify-center pb-4 lg:pb-0">{children}</section></div></div>
+  const text = copy[mode] || copy.login
+
+  return (
+    <div className="relative min-h-screen overflow-hidden text-frost-200">
+      {/* Gate glow */}
+      <div className="pointer-events-none absolute left-1/2 top-[-20%] h-[70vh] w-[70vh] -translate-x-1/2 rounded-full bg-system-500/10 blur-[120px]" />
+      {/* Moving scan line */}
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-32 animate-sys-scan bg-linear-to-b from-transparent via-system-400/[0.04] to-transparent" />
+
+      <div className="relative mx-auto grid min-h-screen w-full max-w-360 gap-10 px-5 py-6 lg:grid-cols-[1fr_minmax(24rem,30rem)] lg:items-center lg:gap-20 lg:px-12">
+        <header className="flex items-center justify-between lg:absolute lg:left-12 lg:right-12 lg:top-8">
+          <NavLink to="/login" className="flex items-center gap-3">
+            <span className="relative grid h-9 w-9 place-items-center">
+              <span className="absolute inset-0 rotate-45 border border-system-400 bg-system-500/15 shadow-[0_0_16px_rgba(30,144,255,0.5)]" />
+              <span className="relative font-display text-lg font-bold text-frost-50 sys-glow">R</span>
+            </span>
+            <span className="sys-title text-xl tracking-[0.28em]">Rankora</span>
+          </NavLink>
+          <span className="label-caps text-frost-600">{mode === 'login' ? 'System access' : 'Player registration'}</span>
+        </header>
+
+        <section className="flex items-center pt-6 lg:pt-0">
+          <motion.div
+            initial={{ opacity: 0, x: -16 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+            className="max-w-xl"
+          >
+            <p className="label-caps flex items-center gap-2 text-system-300">
+              <span className="grid h-5 w-5 place-items-center border border-system-400 font-display text-xs font-bold text-system-200">!</span>
+              {text.eyebrow}
+            </p>
+            <h1 className="sys-title mt-5 text-4xl leading-[0.98] sm:text-6xl">
+              {text.lines.map((line, index) => (
+                <motion.span
+                  key={line}
+                  className="block"
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.15 + index * 0.12, duration: 0.4 }}
+                >
+                  {index === text.lines.length - 1 ? <span className="text-system-300">{line}</span> : line}
+                </motion.span>
+              ))}
+            </h1>
+            <p className="mt-6 max-w-md text-base leading-7 text-frost-400">{text.body}</p>
+
+            <div className="mt-10 hidden items-center gap-3 sm:flex">
+              <span className="label-caps mr-2 text-frost-600">Hunter ranks</span>
+              {ranks.map((rank, index) => (
+                <motion.span
+                  key={rank}
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 0.5 + index * 0.08 }}
+                  className={`grid h-8 w-8 place-items-center border font-display text-sm font-bold ${
+                    rank === 'S'
+                      ? 'border-gold-400 text-gold-200 shadow-[0_0_14px_rgba(255,194,51,0.5)]'
+                      : 'border-edge-strong text-frost-400'
+                  }`}
+                >
+                  {rank}
+                </motion.span>
+              ))}
+            </div>
+          </motion.div>
+        </section>
+
+        <section className="flex items-center justify-center pb-6 lg:pb-0">{children}</section>
+      </div>
+    </div>
+  )
 }
 
 export default AuthLayout

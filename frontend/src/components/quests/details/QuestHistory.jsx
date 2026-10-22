@@ -1,5 +1,35 @@
-import { Check, X } from 'lucide-react'
-import Badge from '../../common/Badge.jsx'
-import Card from '../../common/Card.jsx'
- function QuestHistory({ history }) { return <Card variant="glass"><p className="label-caps text-cyan-300/70">QUEST HISTORY</p>{history.length ? <div className="mt-4 divide-y divide-white/5">{history.map((item) => <div key={`${item.date}-${item.time || ''}-${item.status}`} className="flex items-center gap-3 py-3 first:pt-0 last:pb-0"><span className={item.status === 'COMPLETED' ? 'text-emerald-300' : 'text-rose-300'}>{item.status === 'COMPLETED' ? <Check size={17} /> : <X size={17} />}</span><span className="min-w-0 flex-1"><span className="block text-sm text-slate-300">{item.date}{item.time && <span className="ml-2 text-xs text-slate-600">{item.time}</span>}</span>{item.reason && <span className="text-xs text-slate-600">Reason: {item.reason}</span>}</span><Badge tone={item.status === 'COMPLETED' ? 'success' : 'danger'}>{item.status}</Badge><span className="w-16 text-right font-mono text-xs text-amber-200">{item.xp ? `+${item.xp} XP` : '—'}</span></div>)}</div> : <p className="mt-5 text-sm text-slate-500">NO PREVIOUS RECORDS</p>}</Card> }
+import { Check, History, X } from 'lucide-react'
+import SystemWindow from '../../common/SystemWindow.jsx'
+
+function QuestHistory({ history }) {
+  return (
+    <SystemWindow title="History" icon={<History size={13} />} bodyClassName="p-0">
+      {history.length ? (
+        <ol className="divide-y divide-edge/60 font-mono text-xs">
+          {history.map((item) => {
+            const completed = item.status === 'COMPLETED'
+            return (
+              <li key={`${item.date}-${item.time || ''}-${item.status}`} className="px-5 py-2.5">
+                <div className="flex flex-wrap items-center gap-x-2.5 gap-y-1">
+                  <span className="text-frost-500">
+                    [{item.date}
+                    {item.time && <span className="text-frost-600"> {item.time}</span>}]
+                  </span>
+                  <span className={`inline-flex items-center gap-1 font-bold ${completed ? 'text-clear-300' : 'text-penalty-300'}`}>
+                    {completed ? <Check size={13} /> : <X size={13} />}
+                    {item.status}
+                  </span>
+                  <span className="ml-auto text-gold-300">{item.xp ? `+${item.xp} EXP` : '—'}</span>
+                </div>
+                {item.reason && <p className="mt-1 text-frost-500">&gt; Reason: {item.reason}</p>}
+              </li>
+            )
+          })}
+        </ol>
+      ) : (
+        <p className="label-caps px-5 py-6 text-center text-frost-600">No previous records</p>
+      )}
+    </SystemWindow>
+  )
+}
 export default QuestHistory

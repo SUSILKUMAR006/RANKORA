@@ -4,32 +4,34 @@ import {
   ArrowLeft,
   BookOpen,
   Brain,
-  BriefcaseBusiness,
   Camera,
   Check,
-  Code2,
+  Clock,
   Dumbbell,
+  Eye,
   Flame,
   HeartPulse,
+  NotebookPen,
   Plus,
-  Scale,
   Shield,
-  Sparkles,
   Swords,
   Zap,
 } from 'lucide-react'
 import { Link, useNavigate } from 'react-router-dom'
+import Badge from '../components/common/Badge.jsx'
 import Button from '../components/common/Button.jsx'
-import Card from '../components/common/Card.jsx'
+import { PageHeader } from '../components/common/SectionHeader.jsx'
+import SystemWindow from '../components/common/SystemWindow.jsx'
 import { getStoredQuests, QUEST_STORAGE_KEY } from '../hooks/useQuestCompletion.js'
+import { rankColors } from '../theme/palette.js'
 import { addNotification } from '../utils/notificationUtils.js'
 
 const categories = [
-  { id: 'Fitness', label: 'Fitness / Workout', icon: Dumbbell, color: 'text-rose-300 bg-rose-400/10 border-rose-400/25' },
-  { id: 'Habit', label: 'Habit / Discipline', icon: Flame, color: 'text-amber-300 bg-amber-400/10 border-amber-400/25' },
-  { id: 'Knowledge', label: 'Studies / Reading', icon: BookOpen, color: 'text-violet-300 bg-violet-400/10 border-violet-400/25' },
-  { id: 'Health', label: 'Health / Nutrition', icon: HeartPulse, color: 'text-emerald-300 bg-emerald-400/10 border-emerald-400/25' },
-  { id: 'Mind', label: 'Mind / Self-Mastery', icon: Brain, color: 'text-cyan-300 bg-cyan-400/10 border-cyan-400/25' },
+  { id: 'Fitness', label: 'Fitness / Workout', icon: Dumbbell, color: 'text-penalty-300' },
+  { id: 'Habit', label: 'Habit / Discipline', icon: Flame, color: 'text-ember-400' },
+  { id: 'Knowledge', label: 'Studies / Reading', icon: BookOpen, color: 'text-shadow-300' },
+  { id: 'Health', label: 'Health / Nutrition', icon: HeartPulse, color: 'text-clear-300' },
+  { id: 'Mind', label: 'Mind / Self-Mastery', icon: Brain, color: 'text-system-300' },
 ]
 
 const difficulties = [
@@ -50,6 +52,37 @@ const statRewards = [
   { id: '+1 DISC', label: '+1 DISC (Discipline)' },
   { id: '+2 DISC', label: '+2 DISC (Discipline)' },
 ]
+
+// Presentation only: option lists for the tile pickers (same values as before).
+const questTypes = [
+  { value: 'Mandatory', label: 'Mandatory', detail: 'Daily anchor' },
+  { value: 'Optional', label: 'Optional', detail: 'Bonus yield' },
+]
+
+const verificationModes = [
+  { value: 'None', label: 'None', detail: 'One-click verification', icon: Shield },
+  { value: 'Photo Required', label: 'Photo Required', detail: 'Snapshot proof', icon: Camera },
+  { value: 'photo_note', label: 'Photo + Note', detail: 'Photo + reflection note', icon: NotebookPen },
+]
+
+// Difficulty tiles borrow hunter-rank colours: Easy = D, Normal = C, Hard = A.
+const difficultyAccent = { Easy: rankColors.D, Normal: rankColors.C, Hard: rankColors.A }
+
+const tileBase = 'relative rounded-xs border text-left transition-[background-color,border-color,box-shadow,color] duration-150'
+const tileSelected = 'border-system-400 bg-system-500/15 text-frost-50 shadow-[0_0_12px_-2px_rgba(30,144,255,0.6)]'
+const tileIdle = 'border-edge bg-void-950/50 text-frost-400 hover:border-edge-strong hover:text-frost-100'
+
+function FieldLabel({ children, as: Component = 'span' }) {
+  return <Component className="label-caps mb-1.5 block text-frost-400">{children}</Component>
+}
+
+function SelectedMark() {
+  return (
+    <span className="absolute right-1.5 top-1.5 grid h-4 w-4 place-items-center border border-system-400 bg-system-500/30 text-frost-50">
+      <Check size={10} strokeWidth={3} />
+    </span>
+  )
+}
 
 function CreateQuestPage() {
   const navigate = useNavigate()
@@ -134,55 +167,51 @@ function CreateQuestPage() {
     navigate('/quests')
   }
 
+  const previewCategory = categories.find((cat) => cat.id === form.category)
+  const PreviewIcon = previewCategory?.icon || Swords
+  const previewVerification = verificationModes.find((mode) => mode.value === form.verification)
+
   return (
-    <div className="mx-auto max-w-3xl space-y-8 pb-16">
-      {/* Header with Back Button */}
-      <motion.header
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="space-y-4 border-b border-white/10 pb-6"
-      >
+    <div className="mx-auto max-w-6xl space-y-7 pb-16">
+      <div className="space-y-4">
         <Link
           to="/quests"
-          className="inline-flex items-center gap-1.5 font-mono text-xs text-slate-400 transition hover:text-cyan-200"
+          className="label-caps group inline-flex items-center gap-1.5 text-frost-500 transition-colors hover:text-system-200"
         >
-          <ArrowLeft size={14} /> Back to Quests
+          <ArrowLeft size={14} className="transition-transform group-hover:-translate-x-0.5" /> Back to quests
         </Link>
-        <div>
-          <div className="flex items-center gap-2">
-            <span className="grid h-6 w-6 place-items-center rounded-lg bg-cyan-400/10 text-cyan-300">
-              <Plus size={14} />
-            </span>
-            <p className="label-caps text-cyan-300/80">TACTICAL DISCIPLINE PROTOCOL</p>
-          </div>
-          <h1 className="mt-3 font-display text-3xl font-bold tracking-tight text-white sm:text-4xl">
-            CREATE CUSTOM QUEST
-          </h1>
-          <p className="mt-2 text-sm text-slate-400 leading-relaxed">
-            Inscribe a new daily objective into your RANKORA mission roster.
-          </p>
-        </div>
-      </motion.header>
+        <PageHeader
+          eyebrow="Tactical discipline protocol"
+          title="Create custom quest"
+          description="Inscribe a new daily objective into your RANKORA mission roster."
+        />
+      </div>
 
-      <form onSubmit={handleSubmit} className="space-y-6">
-        <Card variant="glass" className="space-y-6">
+      <form onSubmit={handleSubmit} className="grid min-w-0 gap-6 lg:grid-cols-[minmax(0,1fr)_19rem]">
+        <SystemWindow
+          title="Create Quest"
+          align="center"
+          icon={<Plus size={14} />}
+          className="lg:col-start-1 lg:row-start-1 [--panel-glow:rgba(30,144,255,0.24)]"
+          bodyClassName="space-y-7 p-5 sm:p-7"
+        >
           {/* Quest Title */}
           <label className="block">
-            <span className="label-caps text-slate-400">Mission Title</span>
+            <FieldLabel>Mission Title</FieldLabel>
             <input
               type="text"
               required
               placeholder="e.g. READ 25 PAGES OF SYSTEM DESIGN"
               value={form.title}
               onChange={(e) => setForm({ ...form, title: e.target.value })}
-              className="mt-1 h-12 w-full rounded-xl border border-white/10 bg-white/[0.03] px-4 font-display text-sm text-white placeholder:text-slate-600 outline-none transition focus:border-cyan-300/50 focus:bg-white/[0.06]"
+              className="field font-display font-semibold tracking-[0.06em]"
             />
           </label>
 
           {/* Category Picker */}
-          <div>
-            <p className="label-caps text-slate-400">Discipline Category</p>
-            <div className="mt-2.5 grid grid-cols-2 gap-2.5 sm:grid-cols-3">
+          <fieldset>
+            <FieldLabel as="legend">Discipline Category</FieldLabel>
+            <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
               {categories.map((cat) => {
                 const isSelected = form.category === cat.id
                 const Icon = cat.icon
@@ -190,130 +219,227 @@ function CreateQuestPage() {
                   <button
                     type="button"
                     key={cat.id}
+                    aria-pressed={isSelected}
                     onClick={() => setForm({ ...form, category: cat.id })}
-                    className={`flex items-center gap-2.5 rounded-xl border p-3 text-left transition ${
-                      isSelected
-                        ? `${cat.color} ring-1 ring-cyan-300/50 shadow-[0_0_16px_rgba(103,232,249,0.15)]`
-                        : 'border-white/10 bg-white/[0.02] text-slate-400 hover:border-white/20 hover:text-white'
-                    }`}
+                    className={`${tileBase} flex min-h-14 items-center gap-2.5 p-3 ${isSelected ? tileSelected : tileIdle}`}
                   >
-                    <Icon size={16} />
-                    <span className="font-display text-xs font-semibold">{cat.label}</span>
+                    <span
+                      className={`grid h-7 w-7 shrink-0 place-items-center border ${
+                        isSelected ? 'border-system-400/70 bg-void-950' : 'border-edge bg-void-950'
+                      } ${cat.color}`}
+                    >
+                      <Icon size={15} />
+                    </span>
+                    <span className="min-w-0 pr-3 font-display text-xs font-bold uppercase leading-4 tracking-[0.08em]">
+                      {cat.label}
+                    </span>
+                    {isSelected && <SelectedMark />}
                   </button>
                 )
               })}
             </div>
-          </div>
+          </fieldset>
 
           {/* Difficulty & XP */}
-          <div>
-            <p className="label-caps text-slate-400">Difficulty & XP Yield</p>
-            <div className="mt-2.5 grid gap-3 sm:grid-cols-3">
+          <fieldset>
+            <FieldLabel as="legend">Difficulty & XP Yield</FieldLabel>
+            <div className="grid gap-2 sm:grid-cols-3">
               {difficulties.map((diff) => {
                 const isSelected = form.difficulty === diff.id
                 return (
                   <button
                     type="button"
                     key={diff.id}
+                    aria-pressed={isSelected}
                     onClick={() => handleDifficultyChange(diff)}
-                    className={`rounded-xl border p-3.5 text-left transition ${
+                    style={{ '--tile-accent': difficultyAccent[diff.id] }}
+                    className={`${tileBase} overflow-hidden p-3.5 ${
                       isSelected
-                        ? 'border-amber-300/60 bg-amber-400/10 shadow-[0_0_16px_rgba(251,191,36,0.15)]'
-                        : 'border-white/10 bg-white/[0.02] hover:border-white/20'
+                        ? 'border-(--tile-accent) bg-(--tile-accent)/10 text-frost-50 shadow-[0_0_14px_-3px_var(--tile-accent)]'
+                        : tileIdle
                     }`}
                   >
-                    <div className="flex items-center justify-between">
-                      <span className="font-display text-xs font-semibold text-white">
+                    <span
+                      className={`absolute inset-x-0 top-0 h-0.5 bg-(--tile-accent) ${isSelected ? 'opacity-100' : 'opacity-35'}`}
+                    />
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="flex items-center gap-2 font-display text-sm font-bold uppercase tracking-[0.12em]">
+                        <span className="h-1.5 w-1.5 rotate-45 bg-(--tile-accent)" />
                         {diff.label}
                       </span>
-                      <span className="font-mono text-xs font-bold text-amber-300">
-                        +{diff.xp} XP
-                      </span>
+                      <span className="font-mono text-xs font-bold text-gold-300">+{diff.xp} XP</span>
                     </div>
-                    <p className="mt-1 text-[0.68rem] text-slate-400">{diff.detail}</p>
+                    <p className="mt-1.5 text-xs text-frost-500">{diff.detail}</p>
                   </button>
                 )
               })}
             </div>
-          </div>
+          </fieldset>
 
-          {/* Stat Reward & Quest Type */}
-          <div className="grid gap-4 sm:grid-cols-2">
-            <label className="block">
-              <span className="label-caps text-slate-400">Attribute Reward</span>
-              <select
-                value={form.statReward}
-                onChange={(e) => setForm({ ...form, statReward: e.target.value })}
-                className="mt-1 h-11 w-full rounded-xl border border-white/10 bg-rankora-900 px-3 font-mono text-xs text-white outline-none focus:border-cyan-300/50"
-              >
-                {statRewards.map((sr) => (
-                  <option key={sr.id} value={sr.id}>
+          {/* Stat Reward */}
+          <fieldset>
+            <FieldLabel as="legend">Attribute Reward</FieldLabel>
+            <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 xl:grid-cols-5">
+              {statRewards.map((sr) => {
+                const isSelected = form.statReward === sr.id
+                return (
+                  <button
+                    type="button"
+                    key={sr.id}
+                    aria-pressed={isSelected}
+                    onClick={() => setForm({ ...form, statReward: sr.id })}
+                    className={`${tileBase} px-2.5 py-2 font-mono text-[0.7rem] leading-4 ${isSelected ? tileSelected : tileIdle}`}
+                  >
                     {sr.label}
-                  </option>
-                ))}
-              </select>
-            </label>
+                  </button>
+                )
+              })}
+            </div>
+          </fieldset>
 
-            <label className="block">
-              <span className="label-caps text-slate-400">Mission Type</span>
-              <select
-                value={form.type}
-                onChange={(e) => setForm({ ...form, type: e.target.value })}
-                className="mt-1 h-11 w-full rounded-xl border border-white/10 bg-rankora-900 px-3 font-mono text-xs text-white outline-none focus:border-cyan-300/50"
-              >
-                <option value="Mandatory">Mandatory (Daily Anchor)</option>
-                <option value="Optional">Optional (Bonus Yield)</option>
-              </select>
-            </label>
+          {/* Quest Type & Verification Mode */}
+          <div className="grid gap-6 md:grid-cols-[minmax(0,2fr)_minmax(0,3fr)]">
+            <fieldset>
+              <FieldLabel as="legend">Mission Type</FieldLabel>
+              <div className="grid grid-cols-2 gap-2">
+                {questTypes.map((option) => {
+                  const isSelected = form.type === option.value
+                  return (
+                    <button
+                      type="button"
+                      key={option.value}
+                      aria-pressed={isSelected}
+                      onClick={() => setForm({ ...form, type: option.value })}
+                      className={`${tileBase} p-3 ${isSelected ? tileSelected : tileIdle}`}
+                    >
+                      <span className="block font-display text-sm font-bold uppercase tracking-widest">{option.label}</span>
+                      <span className="mt-0.5 block text-xs text-frost-500">{option.detail}</span>
+                      {isSelected && <SelectedMark />}
+                    </button>
+                  )
+                })}
+              </div>
+            </fieldset>
+
+            <fieldset>
+              <FieldLabel as="legend">Verification Requirement</FieldLabel>
+              <div className="grid gap-2 sm:grid-cols-3">
+                {verificationModes.map((option) => {
+                  const isSelected = form.verification === option.value
+                  const Icon = option.icon
+                  return (
+                    <button
+                      type="button"
+                      key={option.value}
+                      aria-pressed={isSelected}
+                      onClick={() => setForm({ ...form, verification: option.value })}
+                      className={`${tileBase} flex items-center gap-2.5 p-3 sm:block ${isSelected ? tileSelected : tileIdle}`}
+                    >
+                      <Icon size={15} className={`shrink-0 ${isSelected ? 'text-system-300' : 'text-frost-500'}`} />
+                      <span className="min-w-0 sm:mt-1.5 sm:block">
+                        <span className="block font-display text-xs font-bold uppercase tracking-widest">{option.label}</span>
+                        <span className="mt-0.5 block text-[0.7rem] leading-4 text-frost-500">{option.detail}</span>
+                      </span>
+                      {isSelected && <SelectedMark />}
+                    </button>
+                  )
+                })}
+              </div>
+            </fieldset>
           </div>
 
-          {/* Verification Mode & Estimated Time */}
-          <div className="grid gap-4 sm:grid-cols-2">
-            <label className="block">
-              <span className="label-caps text-slate-400">Verification Requirement</span>
-              <select
-                value={form.verification}
-                onChange={(e) => setForm({ ...form, verification: e.target.value })}
-                className="mt-1 h-11 w-full rounded-xl border border-white/10 bg-rankora-900 px-3 font-mono text-xs text-white outline-none focus:border-cyan-300/50"
-              >
-                <option value="None">None (One-Click Verification)</option>
-                <option value="Photo Required">Photo Required (Snapshot Proof)</option>
-                <option value="photo_note">Photo + Reflection Note</option>
-              </select>
-            </label>
-
-            <label className="block">
-              <span className="label-caps text-slate-400">Estimated Duration</span>
-              <input
-                type="text"
-                placeholder="e.g. 45 Minutes"
-                value={form.estimatedTime}
-                onChange={(e) => setForm({ ...form, estimatedTime: e.target.value })}
-                className="mt-1 h-11 w-full rounded-xl border border-white/10 bg-white/[0.03] px-3 font-mono text-xs text-white outline-none focus:border-cyan-300/50"
-              />
-            </label>
-          </div>
+          {/* Estimated Time */}
+          <label className="block sm:max-w-xs">
+            <FieldLabel>Estimated Duration</FieldLabel>
+            <input
+              type="text"
+              placeholder="e.g. 45 Minutes"
+              value={form.estimatedTime}
+              onChange={(e) => setForm({ ...form, estimatedTime: e.target.value })}
+              className="field font-mono"
+            />
+          </label>
 
           {/* Objective Description */}
           <label className="block">
-            <span className="label-caps text-slate-400">Tactical Objective Description</span>
+            <FieldLabel>Tactical Objective Description</FieldLabel>
             <textarea
               rows={3}
               placeholder="Detail specific victory conditions for this quest..."
               value={form.objective}
               onChange={(e) => setForm({ ...form, objective: e.target.value })}
-              className="mt-1 w-full rounded-xl border border-white/10 bg-white/[0.03] p-3 font-sans text-sm text-white outline-none focus:border-cyan-300/50"
+              className="field resize-y leading-6"
             />
           </label>
-        </Card>
+        </SystemWindow>
+
+        {/* Live preview */}
+        <motion.aside
+          initial={{ opacity: 0, x: 8 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ delay: 0.12, duration: 0.3 }}
+          className="min-w-0 lg:sticky lg:top-24 lg:col-start-2 lg:row-span-2 lg:row-start-1 lg:self-start"
+        >
+          <SystemWindow title="Preview" icon={<Eye size={13} />} bodyClassName="p-0">
+            <div className="flex items-start gap-3.5 px-5 py-4">
+              <span className={`grid h-9 w-9 shrink-0 place-items-center border border-edge-strong bg-void-950 ${previewCategory?.color || 'text-system-300'}`}>
+                <PreviewIcon size={16} />
+              </span>
+              <div className="min-w-0 flex-1">
+                <h3
+                  className={`wrap-break-word font-display text-base font-bold uppercase leading-snug tracking-[0.08em] ${
+                    form.title.trim() ? 'text-frost-50' : 'text-frost-600'
+                  }`}
+                >
+                  {form.title.trim() || 'Untitled quest'}
+                </h3>
+                <p className="label-caps mt-0.5 text-frost-600">{form.category}</p>
+              </div>
+            </div>
+            {form.objective.trim() && (
+              <p className="border-t border-edge/60 px-5 py-3 text-xs leading-5 text-frost-400">{form.objective}</p>
+            )}
+            <dl className="divide-y divide-edge/60 border-t border-edge/60 text-xs">
+              <div className="flex items-center justify-between gap-3 px-5 py-2.5">
+                <dt className="label-caps text-frost-500">Reward</dt>
+                <dd className="flex items-center gap-1 font-mono font-bold text-gold-300">
+                  <Zap size={12} />+{Number(form.xp) || 35} EXP
+                </dd>
+              </div>
+              <div className="flex items-center justify-between gap-3 px-5 py-2.5">
+                <dt className="label-caps text-frost-500">Stat</dt>
+                <dd className="font-mono text-shadow-200">{form.statReward}</dd>
+              </div>
+              <div className="flex items-center justify-between gap-3 px-5 py-2.5">
+                <dt className="label-caps text-frost-500">Type</dt>
+                <dd className="font-mono text-frost-200">{form.type}</dd>
+              </div>
+              <div className="flex items-center justify-between gap-3 px-5 py-2.5">
+                <dt className="label-caps text-frost-500">Verification</dt>
+                <dd className="text-right font-mono text-frost-200">{previewVerification?.label || form.verification}</dd>
+              </div>
+              <div className="flex items-center justify-between gap-3 px-5 py-2.5">
+                <dt className="label-caps text-frost-500">Duration</dt>
+                <dd className="flex min-w-0 items-center gap-1 font-mono text-frost-200">
+                  <Clock size={12} className="shrink-0 text-system-400" />
+                  <span className="truncate">{form.estimatedTime || '—'}</span>
+                </dd>
+              </div>
+            </dl>
+            <div className="flex flex-wrap gap-2 border-t border-edge/60 px-5 py-3">
+              <Badge tone="difficulty">{form.difficulty}</Badge>
+              <Badge tone="category">{form.type} objective</Badge>
+            </div>
+          </SystemWindow>
+        </motion.aside>
 
         {/* Action Buttons */}
-        <div className="flex justify-end gap-3">
+        <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end lg:col-start-1 lg:row-start-2">
           <Button type="button" variant="ghost" onClick={() => navigate('/quests')}>
-            CANCEL
+            Cancel
           </Button>
-          <Button type="submit" variant="primary" className="min-w-44">
-            <Check size={16} /> INITIALIZE QUEST
+          <Button type="submit" variant="primary" className="sm:min-w-52">
+            <Check size={16} /> Initialize quest
           </Button>
         </div>
       </form>

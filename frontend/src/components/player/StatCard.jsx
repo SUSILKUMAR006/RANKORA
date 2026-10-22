@@ -7,19 +7,18 @@ function StatCard({ icon, name, value, change, progress, tone = 'statistics' }) 
   return (
     <Card variant="glass" className="min-w-0">
       <div className="flex items-start justify-between gap-3">
-        <div className="flex items-center gap-3">
-          <span className="grid h-10 w-10 place-items-center rounded-xl bg-white/[0.06] text-cyan-200">
-            <Icon size={19} />
+        <div className="flex min-w-0 items-center gap-3">
+          <span className="grid h-9 w-9 shrink-0 place-items-center border border-system-400/50 bg-system-500/10 text-system-200">
+            <Icon size={17} />
           </span>
-          <span className="label-caps text-slate-500">{name}</span>
+          <span className="label-caps truncate text-frost-500">{name}</span>
         </div>
-        {change && <span className="font-mono text-xs text-emerald-300">{change}</span>}
+        {change && <span className="shrink-0 font-mono text-xs text-clear-300">{change}</span>}
       </div>
-      <p className="mt-5 font-mono text-3xl font-medium tracking-tight text-white">{value}</p>
-      {progress !== undefined && <ProgressBar value={progress} tone={tone} className="mt-4" />}
+      <p className="mt-5 font-display text-4xl font-bold leading-none text-frost-50 sys-glow">{value}</p>
+      {progress !== undefined && <ProgressBar value={progress} tone={tone} size="sm" className="mt-4" />}
     </Card>
   )
 }
 
 export default StatCard
-

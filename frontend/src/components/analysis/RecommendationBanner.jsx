@@ -1,4 +1,4 @@
-import { CheckCircle, Lightbulb, Sparkles, TrendingUp, Zap } from 'lucide-react'
+import { Lightbulb } from 'lucide-react'
 import Badge from '../common/Badge.jsx'
 
 function RecommendationBanner({
@@ -9,81 +9,71 @@ function RecommendationBanner({
   impact = 'HIGH IMPACT',
   tone = 'cyan',
 }) {
+  // `tone` keeps its legacy keys; each maps onto a System colour role.
   const toneStyles = {
     cyan: {
-      border: 'border-cyan-400/30',
-      bg: 'bg-gradient-to-r from-cyan-950/40 via-rankora-900/40 to-cyan-950/20',
-      tagText: 'text-cyan-300',
-      iconBg: 'bg-cyan-400/10 text-cyan-200 border-cyan-400/25',
-      badgeTone: 'quest',
+      accent: 'bg-system-400',
+      tagText: 'text-system-300',
+      iconBg: 'border-system-400/60 bg-system-500/10 text-system-200',
+      badgeTone: 'status',
     },
     emerald: {
-      border: 'border-emerald-400/30',
-      bg: 'bg-gradient-to-r from-emerald-950/40 via-rankora-900/40 to-emerald-950/20',
-      tagText: 'text-emerald-300',
-      iconBg: 'bg-emerald-400/10 text-emerald-300 border-emerald-400/25',
+      accent: 'bg-clear-400',
+      tagText: 'text-clear-300',
+      iconBg: 'border-clear-400/60 bg-clear-500/10 text-clear-300',
       badgeTone: 'success',
     },
     violet: {
-      border: 'border-violet-400/30',
-      bg: 'bg-gradient-to-r from-violet-950/40 via-rankora-900/40 to-violet-950/20',
-      tagText: 'text-violet-300',
-      iconBg: 'bg-violet-400/10 text-violet-300 border-violet-400/25',
-      badgeTone: 'category',
+      accent: 'bg-shadow-400',
+      tagText: 'text-shadow-300',
+      iconBg: 'border-shadow-400/60 bg-shadow-500/10 text-shadow-300',
+      badgeTone: 'shadow',
     },
     rose: {
-      border: 'border-rose-400/30',
-      bg: 'bg-gradient-to-r from-rose-950/40 via-rankora-900/40 to-rose-950/20',
-      tagText: 'text-rose-300',
-      iconBg: 'bg-rose-400/10 text-rose-300 border-rose-400/25',
+      accent: 'bg-penalty-400',
+      tagText: 'text-penalty-300',
+      iconBg: 'border-penalty-400/60 bg-penalty-500/10 text-penalty-300',
       badgeTone: 'danger',
     },
     amber: {
-      border: 'border-amber-400/30',
-      bg: 'bg-gradient-to-r from-amber-950/40 via-rankora-900/40 to-amber-950/20',
-      tagText: 'text-amber-300',
-      iconBg: 'bg-amber-400/10 text-amber-300 border-amber-400/25',
-      badgeTone: 'warning',
+      accent: 'bg-gold-400',
+      tagText: 'text-gold-300',
+      iconBg: 'border-gold-400/60 bg-gold-500/10 text-gold-300',
+      badgeTone: 'difficulty',
     },
   }
 
   const currentStyle = toneStyles[tone] || toneStyles.cyan
+  const showTag = tag && String(tag).toUpperCase() !== 'SYSTEM RECOMMENDATION'
 
   return (
-    <div
-      className={`relative overflow-hidden rounded-2xl border ${currentStyle.border} ${currentStyle.bg} p-5 backdrop-blur-md transition`}
-    >
-      <div className="flex flex-wrap items-center justify-between gap-2 border-b border-white/10 pb-3">
-        <div className="flex items-center gap-2">
-          <span
-            className={`grid h-7 w-7 place-items-center rounded-lg border ${currentStyle.iconBg}`}
-          >
-            <Lightbulb size={15} />
+    <div className="sys-inset relative overflow-hidden p-4 pl-5 sm:p-5 sm:pl-6">
+      <span className={`absolute inset-y-0 left-0 w-0.5 ${currentStyle.accent}`} />
+      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-edge/60 pb-3">
+        <div className="flex min-w-0 items-center gap-2.5">
+          <span className={`grid h-7 w-7 shrink-0 place-items-center border ${currentStyle.iconBg}`}>
+            <Lightbulb size={14} />
           </span>
-          <div>
-            <p className={`label-caps text-[0.6rem] font-bold ${currentStyle.tagText}`}>
-              SYSTEM RECOMMENDATION · {tag}
+          <div className="min-w-0">
+            <p className={`label-caps text-[0.62rem] ${currentStyle.tagText}`}>
+              System recommendation{showTag ? ` · ${tag}` : ''}
             </p>
-            <h4 className="font-display text-xs font-semibold text-white tracking-wide">
-              {title}
-            </h4>
+            <h4 className="font-display text-sm font-bold uppercase tracking-widest text-frost-50">{title}</h4>
           </div>
         </div>
 
-        <Badge tone={currentStyle.badgeTone} className="font-mono text-[0.6rem]">
-          {impact}
-        </Badge>
+        <Badge tone={currentStyle.badgeTone}>{impact}</Badge>
       </div>
 
-      <div className="mt-3 space-y-2">
+      <div className="mt-3 space-y-2.5">
         {insight && (
-          <p className="font-mono text-xs leading-relaxed text-slate-400">
-            <span className="text-white font-semibold">SIGNAL DETECTED:</span> {insight}
+          <p className="font-mono text-xs leading-relaxed text-frost-400">
+            <span className="font-bold text-frost-100">SIGNAL DETECTED:</span> {insight}
           </p>
         )}
-        <div className="rounded-xl border border-white/5 bg-black/30 p-3">
-          <p className="text-xs leading-relaxed text-slate-200">
-            <span className="font-bold text-cyan-300 font-mono">ACTION PROTOCOL: </span>
+        <div className="border border-edge/60 bg-void-950/70 px-3 py-2.5">
+          <p className="text-xs leading-relaxed text-frost-200">
+            <span className={`font-mono font-bold ${currentStyle.tagText}`}>ACTION PROTOCOL: </span>
             {recommendation}
           </p>
         </div>

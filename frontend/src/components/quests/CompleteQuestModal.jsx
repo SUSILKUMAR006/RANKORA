@@ -19,6 +19,8 @@ function CompleteQuestModal({ quest, open, processing, onClose, onConfirm }) {
       onClose={processing ? undefined : handleClose}
       title="COMPLETE QUEST?"
       eyebrow="RANKORA SYSTEM"
+      tone="gold"
+      size="sm"
       footer={
         <>
           <Button variant="ghost" onClick={handleClose} disabled={processing}>
@@ -30,25 +32,25 @@ function CompleteQuestModal({ quest, open, processing, onClose, onConfirm }) {
         </>
       }
     >
-      <p className="text-sm text-slate-300">You are about to complete this mission.</p>
-      <div className="mt-5 space-y-3 rounded-xl border border-white/10 bg-white/[0.03] p-4 text-sm">
-        <div className="flex justify-between gap-3">
-          <span className="text-slate-500">Quest</span>
-          <span className="text-right text-white font-semibold">{quest.title}</span>
+      <p className="text-center text-sm text-frost-300">You are about to complete this mission.</p>
+      <dl className="sys-inset mt-5 divide-y divide-edge/60 text-sm">
+        <div className="flex items-baseline justify-between gap-3 px-4 py-2.5">
+          <dt className="label-caps text-frost-500">Quest</dt>
+          <dd className="text-right font-display font-bold uppercase tracking-[0.08em] text-frost-50">{quest.title}</dd>
         </div>
-        <div className="flex justify-between gap-3">
-          <span className="text-slate-500">Difficulty</span>
-          <span className="text-amber-200">{quest.difficulty}</span>
+        <div className="flex items-baseline justify-between gap-3 px-4 py-2.5">
+          <dt className="label-caps text-frost-500">Difficulty</dt>
+          <dd className="label-caps text-gold-200">{quest.difficulty}</dd>
         </div>
-        <div className="flex justify-between gap-3">
-          <span className="text-slate-500">XP reward</span>
-          <span className="font-mono text-cyan-200">+{quest.xp} XP</span>
+        <div className="flex items-baseline justify-between gap-3 px-4 py-2.5">
+          <dt className="label-caps text-frost-500">EXP reward</dt>
+          <dd className="font-mono font-bold text-gold-300 sys-glow">+{quest.xp} EXP</dd>
         </div>
-        <div className="flex justify-between gap-3">
-          <span className="text-slate-500">Stat reward</span>
-          <span className="font-mono text-violet-200">{formatStatReward(quest.statReward)}</span>
+        <div className="flex items-baseline justify-between gap-3 px-4 py-2.5">
+          <dt className="label-caps text-frost-500">Stat reward</dt>
+          <dd className="font-mono text-shadow-200">{formatStatReward(quest.statReward)}</dd>
         </div>
-      </div>
+      </dl>
     </Modal>
   )
 }

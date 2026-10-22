@@ -1,17 +1,15 @@
 import { motion } from 'framer-motion'
 
+// System toggle: square track and square knob. Off = dark void slot,
+// on = charged system-blue slot with a glowing knob.
 function ToggleSwitch({ checked, onChange, label, description, disabled = false }) {
   return (
-    <div className="flex items-center justify-between gap-4 py-2.5">
+    <div className="flex items-center justify-between gap-4 py-3.5">
       <div className="min-w-0 flex-1">
-        <label className="font-display text-sm font-medium text-white cursor-pointer select-none">
+        <label className="cursor-pointer select-none font-display text-sm font-bold uppercase tracking-[0.08em] text-frost-50">
           {label}
         </label>
-        {description && (
-          <p className="mt-0.5 text-xs text-slate-400 leading-relaxed">
-            {description}
-          </p>
-        )}
+        {description && <p className="mt-1 text-xs leading-5 text-frost-400">{description}</p>}
       </div>
 
       <button
@@ -20,17 +18,18 @@ function ToggleSwitch({ checked, onChange, label, description, disabled = false 
         aria-checked={checked}
         disabled={disabled}
         onClick={() => onChange?.(!checked)}
-        className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer items-center rounded-full border transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-cyan-300 focus:ring-offset-2 focus:ring-offset-rankora-950 disabled:cursor-not-allowed disabled:opacity-50 ${
+        className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer items-center rounded-xs border transition-[background-color,border-color,box-shadow] duration-200 disabled:cursor-not-allowed disabled:opacity-40 ${
           checked
-            ? 'border-cyan-300/50 bg-cyan-400 shadow-[0_0_12px_rgba(103,232,249,0.3)]'
-            : 'border-white/10 bg-white/[0.08]'
+            ? 'border-system-400 bg-system-500/40 shadow-[0_0_14px_-2px_rgba(30,144,255,0.7),inset_0_0_8px_rgba(30,144,255,0.35)]'
+            : 'border-edge bg-void-800 hover:border-edge-strong'
         }`}
       >
         <motion.span
-          layout
-          transition={{ type: 'spring', stiffness: 500, damping: 30 }}
-          className={`inline-block h-4 w-4 rounded-full transition-colors ${
-            checked ? 'bg-rankora-950 translate-x-5.5' : 'bg-slate-400 translate-x-1'
+          initial={false}
+          animate={{ x: checked ? 23 : 3 }}
+          transition={{ type: 'spring', stiffness: 500, damping: 32 }}
+          className={`inline-block h-4 w-4 transition-colors ${
+            checked ? 'bg-frost-50 shadow-[0_0_10px_rgba(74,174,255,0.95)]' : 'bg-frost-500'
           }`}
         />
       </button>

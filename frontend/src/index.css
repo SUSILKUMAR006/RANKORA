@@ -1,25 +1,198 @@
-@import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Space+Grotesk:wght@400;500;600;700&family=Crimson+Pro:ital,wght@0,400;0,500;0,600;1,400&family=Cormorant+Garamond:wght@600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;700&display=swap');
 @import "tailwindcss";
 
+/*
+ * RANKORA — "The System" design system (Solo Leveling inspired).
+ * Void-navy surfaces, electric system-blue frames, condensed caps headings.
+ * See frontend/DESIGN.md for usage rules.
+ */
 @theme {
-	--color-rankora-950: #071016;
-	--color-rankora-900: #0b1820;
-	--color-rankora-850: #10242d;
-	--color-rankora-cyan: #67e8f9;
-	--color-rankora-violet: #a78bfa;
-	--color-rankora-amber: #fbbf24;
-	--color-rankora-rose: #fb7185;
-	--font-display: 'Space Grotesk', sans-serif;
-	--font-mono: 'DM Mono', monospace;
+	/* Surfaces: the void */
+	--color-void-950: #03050a;
+	--color-void-900: #060a14;
+	--color-void-850: #0a1120;
+	--color-void-800: #0f192e;
+	--color-void-700: #16233d;
+	--color-void-600: #1f3152;
+
+	/* Frame edges */
+	--color-edge: #1a3a63;
+	--color-edge-strong: #2b5a92;
+
+	/* Text: frost */
+	--color-frost-50: #f0f7ff;
+	--color-frost-100: #dfeeff;
+	--color-frost-200: #c3d8f0;
+	--color-frost-300: #9fb8d6;
+	--color-frost-400: #7e95b4;
+	--color-frost-500: #5b6f8c;
+	--color-frost-600: #42526b;
+	--color-frost-700: #2d3a4f;
+
+	/* Primary: system blue */
+	--color-system-50: #ebf6ff;
+	--color-system-100: #d2ebff;
+	--color-system-200: #a9d8ff;
+	--color-system-300: #7cc4ff;
+	--color-system-400: #4aaeff;
+	--color-system-500: #1e90ff;
+	--color-system-600: #1372d9;
+	--color-system-700: #0f58a8;
+	--color-system-800: #0c3f78;
+	--color-system-900: #0a2a50;
+	--color-system-950: #061a33;
+
+	/* Shadow monarch: purple (achievements, shadows, special) */
+	--color-shadow-50: #f4efff;
+	--color-shadow-100: #e6dbff;
+	--color-shadow-200: #cfbaff;
+	--color-shadow-300: #b694ff;
+	--color-shadow-400: #9b6bff;
+	--color-shadow-500: #7f45f5;
+	--color-shadow-600: #6630d4;
+	--color-shadow-700: #4e24a3;
+	--color-shadow-800: #361a70;
+	--color-shadow-900: #221247;
+	--color-shadow-950: #140a2b;
+
+	/* Penalty: red (failure, boss, warnings) */
+	--color-penalty-50: #fff0f1;
+	--color-penalty-100: #ffd9dc;
+	--color-penalty-200: #ffb3b9;
+	--color-penalty-300: #ff8590;
+	--color-penalty-400: #ff4d5e;
+	--color-penalty-500: #f02a3e;
+	--color-penalty-600: #c81a2e;
+	--color-penalty-700: #9a1424;
+	--color-penalty-800: #6a0f1a;
+	--color-penalty-900: #420a11;
+	--color-penalty-950: #26050a;
+
+	/* Clear: green (completed, success) */
+	--color-clear-50: #ebfff6;
+	--color-clear-100: #ccffe8;
+	--color-clear-200: #9cf7d1;
+	--color-clear-300: #66ecb7;
+	--color-clear-400: #34d99c;
+	--color-clear-500: #16b87f;
+	--color-clear-600: #0e9367;
+	--color-clear-700: #0c7052;
+	--color-clear-800: #0a4d39;
+	--color-clear-900: #073326;
+	--color-clear-950: #041d16;
+
+	/* Gold: S-rank, rewards, XP gains */
+	--color-gold-50: #fffaeb;
+	--color-gold-100: #fff0c7;
+	--color-gold-200: #ffe294;
+	--color-gold-300: #ffd25c;
+	--color-gold-400: #ffc233;
+	--color-gold-500: #f0a312;
+	--color-gold-600: #c9800b;
+	--color-gold-700: #99600c;
+	--color-gold-800: #66400b;
+	--color-gold-900: #402908;
+	--color-gold-950: #261804;
+
+	/* Ember: A-rank, streaks */
+	--color-ember-300: #ffb27a;
+	--color-ember-400: #ff8a3d;
+	--color-ember-500: #f26b1d;
+
+	/* Legacy aliases — old class names resolve on-palette (safety net only) */
+	--color-white: var(--color-frost-50);
+	--color-rankora-950: var(--color-void-950);
+	--color-rankora-900: var(--color-void-900);
+	--color-rankora-850: var(--color-void-850);
+	--color-rankora-cyan: var(--color-system-400);
+	--color-rankora-violet: var(--color-shadow-300);
+	--color-rankora-amber: var(--color-gold-400);
+	--color-rankora-rose: var(--color-penalty-400);
+
+	--color-slate-100: var(--color-frost-100);
+	--color-slate-200: var(--color-frost-200);
+	--color-slate-300: var(--color-frost-300);
+	--color-slate-400: var(--color-frost-400);
+	--color-slate-500: var(--color-frost-500);
+	--color-slate-600: var(--color-frost-600);
+	--color-slate-700: var(--color-frost-700);
+	--color-slate-800: var(--color-void-700);
+	--color-slate-900: var(--color-void-850);
+	--color-slate-950: var(--color-void-950);
+
+	--color-cyan-100: var(--color-system-100);
+	--color-cyan-200: var(--color-system-200);
+	--color-cyan-300: var(--color-system-300);
+	--color-cyan-400: var(--color-system-400);
+	--color-cyan-500: var(--color-system-500);
+	--color-cyan-950: var(--color-system-950);
+	--color-blue-300: var(--color-system-300);
+	--color-blue-400: var(--color-system-400);
+	--color-blue-500: var(--color-system-500);
+	--color-sky-400: var(--color-system-400);
+
+	--color-violet-200: var(--color-shadow-200);
+	--color-violet-300: var(--color-shadow-300);
+	--color-violet-400: var(--color-shadow-400);
+	--color-violet-500: var(--color-shadow-500);
+	--color-violet-950: var(--color-shadow-950);
+	--color-fuchsia-400: var(--color-shadow-400);
+	--color-indigo-300: var(--color-shadow-300);
+	--color-indigo-400: var(--color-shadow-400);
+
+	--color-amber-100: var(--color-gold-100);
+	--color-amber-200: var(--color-gold-200);
+	--color-amber-300: var(--color-gold-300);
+	--color-amber-400: var(--color-gold-400);
+	--color-amber-500: var(--color-gold-500);
+	--color-amber-900: var(--color-gold-900);
+	--color-amber-950: var(--color-gold-950);
+	--color-orange-200: var(--color-ember-300);
+	--color-orange-300: var(--color-ember-300);
+	--color-orange-400: var(--color-ember-400);
+
+	--color-emerald-100: var(--color-clear-100);
+	--color-emerald-200: var(--color-clear-200);
+	--color-emerald-300: var(--color-clear-300);
+	--color-emerald-400: var(--color-clear-400);
+	--color-emerald-500: var(--color-clear-500);
+	--color-emerald-950: var(--color-clear-950);
+
+	--color-rose-100: var(--color-penalty-100);
+	--color-rose-200: var(--color-penalty-200);
+	--color-rose-300: var(--color-penalty-300);
+	--color-rose-400: var(--color-penalty-400);
+	--color-rose-500: var(--color-penalty-500);
+	--color-rose-950: var(--color-penalty-950);
+
+	/* Type */
+	--font-display: 'Rajdhani', 'Arial Narrow', sans-serif;
+	--font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
+	--font-mono: 'JetBrains Mono', ui-monospace, monospace;
+
+	/* Motion */
+	--animate-sys-pulse: sys-pulse 2.4s ease-in-out infinite;
+	--animate-sys-scan: sys-scan 6s linear infinite;
+
+	@keyframes sys-pulse {
+		0%, 100% { opacity: 1; }
+		50% { opacity: 0.55; }
+	}
+	@keyframes sys-scan {
+		0% { transform: translateY(-100%); }
+		100% { transform: translateY(100vh); }
+	}
 }
 
 :root {
-	font-family: var(--font-display);
-	color: #e2e8f0;
-	background: #071016;
+	font-family: var(--font-sans);
+	color: var(--color-frost-200);
+	background: var(--color-void-950);
+	color-scheme: dark;
 	font-synthesis: none;
 	text-rendering: optimizeLegibility;
 	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
 }
 
 * { box-sizing: border-box; }
@@ -28,44 +201,173 @@ body {
 	min-height: 100vh;
 	margin: 0;
 	overflow-x: clip;
-	background: radial-gradient(circle at 80% 0%, rgba(18, 92, 105, 0.22), transparent 32rem), #071016;
+	background:
+		radial-gradient(ellipse 80% 50% at 50% -10%, rgba(30, 144, 255, 0.14), transparent 70%),
+		radial-gradient(ellipse 60% 40% at 100% 100%, rgba(127, 69, 245, 0.06), transparent 70%),
+		var(--color-void-950);
+	background-attachment: fixed;
+}
+
+/* Faint scanlines over the whole app — the System's "screen" */
+body::after {
+	content: '';
+	position: fixed;
+	inset: 0;
+	z-index: 100;
+	pointer-events: none;
+	background: repeating-linear-gradient(0deg, rgba(120, 180, 255, 0.018) 0 1px, transparent 1px 3px);
+}
+
+::selection {
+	background: color-mix(in srgb, var(--color-system-500) 40%, transparent);
+	color: var(--color-frost-50);
 }
 
 button, a { -webkit-tap-highlight-color: transparent; }
 
-@utility glass-panel {
-	background: linear-gradient(135deg, rgba(20, 42, 51, 0.68), rgba(7, 16, 22, 0.72));
-	border: 1px solid rgba(148, 163, 184, 0.14);
-	box-shadow: 0 18px 50px rgba(0, 0, 0, 0.22), inset 0 1px rgba(255, 255, 255, 0.04);
-	backdrop-filter: blur(18px);
+:focus-visible {
+	outline: 1px solid var(--color-system-300);
+	outline-offset: 2px;
+	box-shadow: 0 0 0 3px rgba(30, 144, 255, 0.25);
 }
 
-@utility glow-border {
-	border-color: color-mix(in srgb, var(--color-rankora-cyan) 40%, transparent);
-	box-shadow: 0 0 28px rgba(103, 232, 249, 0.12), inset 0 1px rgba(255, 255, 255, 0.05);
+.font-mono { font-variant-numeric: tabular-nums; }
+
+/*
+ * System window. Four corner brackets drawn with background layers,
+ * a thin frame, and a cold inner glow. Accent colour is driven by
+ * --panel-accent / --panel-edge / --panel-glow (see tone-* utilities).
+ */
+@utility sys-panel {
+	--_a: var(--panel-accent, var(--color-system-400));
+	--_e: var(--panel-edge, var(--color-edge));
+	--_g: var(--panel-glow, rgba(30, 144, 255, 0.16));
+	position: relative;
+	border: 1px solid var(--_e);
+	border-radius: 2px;
+	background:
+		linear-gradient(var(--_a) 0 0) top left / 14px 2px no-repeat,
+		linear-gradient(var(--_a) 0 0) top left / 2px 14px no-repeat,
+		linear-gradient(var(--_a) 0 0) top right / 14px 2px no-repeat,
+		linear-gradient(var(--_a) 0 0) top right / 2px 14px no-repeat,
+		linear-gradient(var(--_a) 0 0) bottom left / 14px 2px no-repeat,
+		linear-gradient(var(--_a) 0 0) bottom left / 2px 14px no-repeat,
+		linear-gradient(var(--_a) 0 0) bottom right / 14px 2px no-repeat,
+		linear-gradient(var(--_a) 0 0) bottom right / 2px 14px no-repeat,
+		linear-gradient(180deg, rgba(14, 32, 62, 0.78) 0%, rgba(6, 10, 20, 0.92) 100%);
+	box-shadow:
+		0 0 0 1px rgba(0, 0, 0, 0.5),
+		0 0 28px -6px var(--_g),
+		inset 0 0 36px -12px var(--_g);
+	backdrop-filter: blur(8px);
 }
 
+/* Quieter frame for nested blocks inside a window */
+@utility sys-inset {
+	border: 1px solid color-mix(in srgb, var(--color-edge) 70%, transparent);
+	border-radius: 2px;
+	background: rgba(3, 5, 10, 0.55);
+}
+
+/* Accent tones for sys-panel (and anything reading --panel-accent) */
+@utility tone-system {
+	--panel-accent: var(--color-system-400);
+	--panel-edge: var(--color-edge);
+	--panel-glow: rgba(30, 144, 255, 0.16);
+}
+@utility tone-penalty {
+	--panel-accent: var(--color-penalty-400);
+	--panel-edge: color-mix(in srgb, var(--color-penalty-500) 45%, var(--color-void-800));
+	--panel-glow: rgba(240, 42, 62, 0.2);
+}
+@utility tone-shadow {
+	--panel-accent: var(--color-shadow-400);
+	--panel-edge: color-mix(in srgb, var(--color-shadow-500) 45%, var(--color-void-800));
+	--panel-glow: rgba(127, 69, 245, 0.2);
+}
+@utility tone-gold {
+	--panel-accent: var(--color-gold-400);
+	--panel-edge: color-mix(in srgb, var(--color-gold-500) 40%, var(--color-void-800));
+	--panel-glow: rgba(255, 194, 51, 0.16);
+}
+@utility tone-clear {
+	--panel-accent: var(--color-clear-400);
+	--panel-edge: color-mix(in srgb, var(--color-clear-500) 40%, var(--color-void-800));
+	--panel-glow: rgba(52, 217, 156, 0.15);
+}
+
+/* Window title: condensed caps with a cold glow */
+@utility sys-title {
+	font-family: var(--font-display);
+	font-weight: 700;
+	text-transform: uppercase;
+	letter-spacing: 0.12em;
+	color: var(--color-frost-50);
+	text-shadow: 0 0 14px rgba(74, 174, 255, 0.55);
+}
+
+/* Any text that should glow in its own colour */
+@utility sys-glow {
+	text-shadow: 0 0 12px currentColor;
+}
+
+/* Small uppercase label / eyebrow */
 @utility label-caps {
-	font-family: var(--font-mono);
-	font-size: 0.68rem;
+	font-family: var(--font-display);
+	font-size: 0.75rem;
+	font-weight: 600;
 	line-height: 1rem;
-	letter-spacing: 0.16em;
+	letter-spacing: 0.18em;
 	text-transform: uppercase;
 }
 
-/* Custom sleek dark scrollbar */
-::-webkit-scrollbar {
-	width: 6px;
-	height: 6px;
-}
-::-webkit-scrollbar-track {
-	background: rgba(7, 16, 22, 0.7);
-}
-::-webkit-scrollbar-thumb {
-	background: rgba(103, 232, 249, 0.25);
-	border-radius: 9999px;
-}
-::-webkit-scrollbar-thumb:hover {
-	background: rgba(103, 232, 249, 0.5);
+/* Glowing horizontal rule that fades out */
+@utility sys-rule {
+	height: 1px;
+	border: 0;
+	background: linear-gradient(90deg, var(--panel-accent, var(--color-system-400)), transparent);
+	opacity: 0.6;
 }
 
+/* Form field */
+@utility field {
+	width: 100%;
+	border-radius: 2px;
+	border: 1px solid var(--color-edge);
+	background: rgba(3, 5, 10, 0.7);
+	padding: 0.625rem 0.75rem;
+	font-size: 0.875rem;
+	color: var(--color-frost-100);
+	transition: border-color 150ms, box-shadow 150ms;
+
+	&::placeholder { color: var(--color-frost-600); }
+	&:hover { border-color: var(--color-edge-strong); }
+	&:focus {
+		outline: none;
+		border-color: var(--color-system-400);
+		box-shadow: 0 0 0 3px rgba(30, 144, 255, 0.15), 0 0 16px rgba(30, 144, 255, 0.15);
+	}
+}
+
+/* Legacy names kept so un-migrated markup stays on-system */
+@utility glass-panel {
+	border: 1px solid var(--color-edge);
+	background: linear-gradient(180deg, rgba(14, 32, 62, 0.7), rgba(6, 10, 20, 0.9));
+	box-shadow: 0 0 24px -8px rgba(30, 144, 255, 0.18);
+}
+@utility glow-border {
+	border-color: var(--color-system-400);
+	box-shadow: 0 0 28px -4px rgba(30, 144, 255, 0.3), inset 0 0 30px -12px rgba(30, 144, 255, 0.3);
+}
+
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: var(--color-void-950); }
+::-webkit-scrollbar-thumb { background: var(--color-edge-strong); }
+::-webkit-scrollbar-thumb:hover { background: var(--color-system-500); }
+
+@media (prefers-reduced-motion: reduce) {
+	*, *::before, *::after {
+		animation-duration: 0.01ms !important;
+		transition-duration: 0.01ms !important;
+	}
+}

@@ -1,23 +1,16 @@
-import { Bell, Skull, Trophy, Zap } from 'lucide-react'
-import Card from '../common/Card.jsx'
+import { Bell } from 'lucide-react'
+import SystemWindow from '../common/SystemWindow.jsx'
 import ToggleSwitch from './ToggleSwitch.jsx'
 
 function NotificationSettingsSection({ settings, onUpdate }) {
   return (
-    <Card variant="glass" className="space-y-4">
-      <div className="flex items-center gap-2.5 border-b border-white/10 pb-4">
-        <span className="grid h-8 w-8 place-items-center rounded-lg border border-cyan-300/30 bg-cyan-400/10 text-cyan-200">
-          <Bell size={17} />
-        </span>
-        <div>
-          <p className="label-caps text-cyan-300/80">TELEMETRY & ALERTS</p>
-          <h2 className="font-display text-base font-semibold text-white">
-            NOTIFICATION CHANNELS
-          </h2>
-        </div>
-      </div>
-
-      <div className="divide-y divide-white/5">
+    <SystemWindow
+      title="Notification Channels"
+      icon={<Bell size={13} />}
+      actions={<span className="label-caps hidden text-frost-600 sm:inline">Telemetry & alerts</span>}
+      bodyClassName="py-1"
+    >
+      <div className="divide-y divide-edge/60">
         <ToggleSwitch
           label="System Telemetry Notifications"
           description="Receive in-app alerts for quest completions, level advancements, and character state changes."
@@ -39,7 +32,7 @@ function NotificationSettingsSection({ settings, onUpdate }) {
           onChange={(val) => onUpdate({ bossNotifications: val })}
         />
       </div>
-    </Card>
+    </SystemWindow>
   )
 }
 

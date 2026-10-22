@@ -1,32 +1,43 @@
 import { useEffect, useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
-import {
-  AlertTriangle,
-  BookOpen,
-  Calendar,
-  Check,
-  Edit3,
-  Feather,
-  Flame,
-  Lock,
-  Plus,
-  Search,
-  Sparkles,
-  Tag,
-  Trash2,
-  TrendingUp,
-  X,
-  Zap,
-} from 'lucide-react'
+import { BookOpen, Check, Feather, Plus, Search, Trash2, X } from 'lucide-react'
 import Badge from '../components/common/Badge.jsx'
 import Button from '../components/common/Button.jsx'
 import Card from '../components/common/Card.jsx'
 import Modal from '../components/common/Modal.jsx'
+import { PageHeader } from '../components/common/SectionHeader.jsx'
 import { diaryService } from '../services/diaryService.js'
 import {
   formatDiaryDate,
   getStoredDiaryEntries,
 } from '../utils/diaryUtils.js'
+
+// Mood → coloured square chip (presentation only).
+const moodChip = {
+  1: { box: 'border-penalty-400/60 bg-penalty-500/10 text-penalty-200', dot: 'bg-penalty-400 shadow-[0_0_6px_rgba(255,77,94,0.8)]' },
+  2: { box: 'border-ember-400/60 bg-ember-500/10 text-ember-300', dot: 'bg-ember-400 shadow-[0_0_6px_rgba(255,138,61,0.8)]' },
+  3: { box: 'border-edge-strong bg-void-850 text-frost-300', dot: 'bg-frost-400' },
+  4: { box: 'border-system-400/60 bg-system-500/10 text-system-200', dot: 'bg-system-400 shadow-[0_0_6px_rgba(74,174,255,0.8)]' },
+  5: { box: 'border-clear-400/60 bg-clear-500/10 text-clear-200', dot: 'bg-clear-400 shadow-[0_0_6px_rgba(52,217,156,0.8)]' },
+}
+
+const tabActive = 'border-system-400 bg-system-500/15 text-frost-50 shadow-[0_0_12px_-2px_rgba(30,144,255,0.6)]'
+const tabIdle = 'border-edge text-frost-400 hover:border-edge-strong hover:text-frost-100'
+
+function formatLogTime(value) {
+  if (!value) return null
+  const d = new Date(value)
+  if (Number.isNaN(d.getTime())) return null
+  return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false })
+}
+
+function Bracketed({ children }) {
+  return (
+    <>
+      <span className="text-system-400">[</span> {children} <span className="text-system-400">]</span>
+    </>
+  )
+}
 
 const availableTags = ['Workout', 'Discipline', 'Reading', 'Nutrition', 'Hydration', 'Mindset', 'Recovery', 'Milestone']
 
@@ -124,82 +135,64 @@ function DiaryPage() {
   return (
     <div className="space-y-8 pb-16">
       {/* Header */}
-      <motion.header
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.3 }}
-        className="flex flex-wrap items-end justify-between gap-4 border-b border-white/10 pb-6"
-      >
-        <div>
-          <div className="flex items-center gap-2">
-            <span className="grid h-6 w-6 place-items-center rounded-lg bg-cyan-400/10 text-cyan-200">
-              <BookOpen size={14} />
-            </span>
-            <p className="label-caps text-cyan-300/80">COGNITIVE CODEX / REFLECTIONS</p>
-          </div>
-          <h1 className="mt-3 font-display text-3xl font-bold tracking-tight text-white sm:text-4xl">
-            DAILY DIARY & LOG
-          </h1>
-          <p className="mt-2 max-w-2xl text-sm leading-relaxed text-slate-400">
-            Write your daily reflections, workout notes, mindset breakthroughs, and progress records.
-          </p>
-        </div>
-
-        <Button onClick={() => setModalOpen(true)}>
-          <Plus size={16} /> WRITE TODAY'S DIARY
-        </Button>
-      </motion.header>
+      <PageHeader
+        eyebrow="Records / Reflections"
+        title={<Bracketed>Hunter&rsquo;s Log</Bracketed>}
+        description="Write your daily reflections, workout notes, mindset breakthroughs, and progress records."
+        actions={
+          <Button onClick={() => setModalOpen(true)}>
+            <Plus size={16} /> Write today&rsquo;s log
+          </Button>
+        }
+      />
 
       {/* Metrics Summary */}
       <div className="grid gap-4 sm:grid-cols-3">
         <Card variant="highlighted">
-          <p className="label-caps text-cyan-300/80">TOTAL REFLECTIONS</p>
+          <p className="label-caps text-system-300">Total reflections</p>
           <div className="mt-2 flex items-baseline gap-2">
-            <span className="font-mono text-3xl font-bold text-white">
+            <span className="font-display text-4xl font-bold leading-none text-frost-50 sys-glow">
               {entries.length}
             </span>
-            <span className="text-xs text-slate-500">entries recorded</span>
+            <span className="label-caps text-frost-500">entries recorded</span>
           </div>
         </Card>
 
-        <Card variant="glass">
-          <p className="label-caps text-slate-400">LATEST ENTRY</p>
-          <p className="mt-2 font-display text-base font-semibold text-white truncate">
+        <Card>
+          <p className="label-caps text-frost-500">Latest entry</p>
+          <p className="mt-2 truncate font-display text-base font-bold uppercase tracking-[0.08em] text-frost-50">
             {entries[0]?.title || 'No reflections yet'}
           </p>
-          <p className="text-xs text-slate-500 font-mono">
+          <p className="mt-0.5 font-mono text-xs text-frost-500">
             {entries[0] ? formatDiaryDate(entries[0].date) : 'Awaiting your first entry'}
           </p>
         </Card>
 
-        <Card variant="glass">
-          <p className="label-caps text-slate-400">ACTIVE THEMES</p>
-          <div className="mt-2 flex flex-wrap gap-1.5">
+        <Card>
+          <p className="label-caps text-frost-500">Active themes</p>
+          <div className="mt-2.5 flex flex-wrap gap-1.5">
             {availableTags.slice(0, 4).map((tag) => (
-              <span
-                key={tag}
-                className="rounded-md border border-white/10 bg-white/[0.02] px-2 py-0.5 font-mono text-[0.62rem] text-slate-400"
-              >
+              <Badge key={tag} tone="category">
                 {tag}
-              </span>
+              </Badge>
             ))}
           </div>
         </Card>
       </div>
 
       {/* Filter and Search Bar */}
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div className="relative min-w-48 flex-1 sm:max-w-xs">
+      <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+        <div className="relative w-full lg:max-w-xs">
           <Search
             size={15}
-            className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-500"
+            className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-frost-500"
           />
           <input
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search diary entries..."
-            className="h-10 w-full rounded-xl border border-white/10 bg-white/[0.03] pl-9 pr-3 text-xs text-white placeholder-slate-500 outline-none transition focus:border-cyan-300/50"
+            placeholder="Search log entries..."
+            className="field pl-9"
           />
         </div>
 
@@ -208,10 +201,8 @@ function DiaryPage() {
           <button
             type="button"
             onClick={() => setSelectedTag('All')}
-            className={`rounded-lg px-2.5 py-1.5 font-mono text-xs transition ${
-              selectedTag === 'All'
-                ? 'border border-cyan-300/50 bg-cyan-300/10 text-cyan-200'
-                : 'border border-white/10 bg-white/[0.02] text-slate-500 hover:text-white'
+            className={`rounded-xs border px-2.5 py-1.5 font-display text-xs font-bold uppercase tracking-[0.14em] transition-[border-color,background-color,color,box-shadow] ${
+              selectedTag === 'All' ? tabActive : tabIdle
             }`}
           >
             All
@@ -221,10 +212,8 @@ function DiaryPage() {
               key={tag}
               type="button"
               onClick={() => setSelectedTag(tag)}
-              className={`rounded-lg px-2.5 py-1.5 font-mono text-xs transition ${
-                selectedTag === tag
-                  ? 'border border-cyan-300/50 bg-cyan-300/10 text-cyan-200'
-                  : 'border border-white/10 bg-white/[0.02] text-slate-500 hover:text-white'
+              className={`rounded-xs border px-2.5 py-1.5 font-display text-xs font-bold uppercase tracking-[0.14em] transition-[border-color,background-color,color,box-shadow] ${
+                selectedTag === tag ? tabActive : tabIdle
               }`}
             >
               {tag}
@@ -233,98 +222,105 @@ function DiaryPage() {
         </div>
       </div>
 
-      {/* Timeline Entries Feed */}
+      {/* Log Entries Feed */}
       {filteredEntries.length > 0 ? (
         <div className="space-y-4">
-          {filteredEntries.map((entry, index) => (
-            <motion.div
-              key={entry._id || entry.id || index}
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: index * 0.04 }}
-            >
-              <Card variant="glass" className="space-y-4 p-5 sm:p-6 transition hover:border-white/20">
-                <div className="flex flex-wrap items-start justify-between gap-3 border-b border-white/10 pb-3.5">
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <span className="font-mono text-xs text-cyan-300">
-                        {formatDiaryDate(entry.date)}
-                      </span>
-                      <span className="rounded bg-white/5 px-2 py-0.5 font-mono text-[0.65rem] text-slate-400">
-                        Energy: {moodLabels[entry.mood] || 'Steady'}
-                      </span>
+          {filteredEntries.map((entry, index) => {
+            const mood = moodChip[entry.mood] || moodChip[3]
+            const time = formatLogTime(entry.createdAt)
+            return (
+              <motion.article
+                key={entry._id || entry.id || index}
+                initial={{ opacity: 0, x: -8 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: Math.min(index, 8) * 0.04 }}
+                className="sys-panel min-w-0"
+              >
+                {/* Log stamp strip */}
+                <header className="flex flex-wrap items-center gap-x-3 gap-y-2 border-b border-edge px-4 py-2.5 sm:px-5">
+                  <span className="h-1.5 w-1.5 shrink-0 rotate-45 bg-system-400 shadow-[0_0_8px_rgba(74,174,255,0.9)]" />
+                  <span className="font-mono text-xs text-system-300">
+                    LOG · {formatDiaryDate(entry.date)}
+                    {time && <span className="text-frost-500"> · {time}</span>}
+                  </span>
+                  <span
+                    className={`inline-flex items-center gap-1.5 rounded-xs border px-2 py-0.5 font-display text-[0.7rem] font-bold uppercase leading-4 tracking-[0.14em] ${mood.box}`}
+                  >
+                    <span className={`h-2 w-2 shrink-0 ${mood.dot}`} />
+                    Energy: {moodLabels[entry.mood] || 'Steady'}
+                  </span>
+                  <button
+                    type="button"
+                    aria-label="Delete entry"
+                    onClick={() => setDeleteTarget(entry)}
+                    className="ml-auto border border-transparent p-1.5 text-frost-500 transition-colors hover:border-penalty-400/60 hover:bg-penalty-500/10 hover:text-penalty-200"
+                  >
+                    <Trash2 size={15} />
+                  </button>
+                </header>
+
+                <div className="space-y-4 p-4 sm:p-6">
+                  <h2 className="font-display text-lg font-bold uppercase tracking-[0.08em] text-frost-50 sm:text-xl">
+                    {entry.title}
+                  </h2>
+
+                  <p className="whitespace-pre-line text-[0.95rem] leading-7 text-frost-200">
+                    {entry.content}
+                  </p>
+
+                  {(entry.keyWin || entry.obstacle) && (
+                    <div className="grid gap-3 sm:grid-cols-2">
+                      {entry.keyWin && (
+                        <div className="sys-inset px-3.5 py-3">
+                          <span className="label-caps flex items-center gap-2 text-clear-300"><span className="h-1.5 w-1.5 rotate-45 bg-clear-400" />Key breakthrough</span>
+                          <p className="mt-1 text-sm leading-6 text-frost-200">{entry.keyWin}</p>
+                        </div>
+                      )}
+                      {entry.obstacle && (
+                        <div className="sys-inset px-3.5 py-3">
+                          <span className="label-caps flex items-center gap-2 text-penalty-300"><span className="h-1.5 w-1.5 rotate-45 bg-penalty-400" />Resistance encountered</span>
+                          <p className="mt-1 text-sm leading-6 text-frost-200">{entry.obstacle}</p>
+                        </div>
+                      )}
                     </div>
-                    <h2 className="mt-1 font-display text-lg font-semibold text-white">
-                      {entry.title}
-                    </h2>
-                  </div>
+                  )}
 
-                  <div className="flex items-center gap-2">
-                    <button
-                      type="button"
-                      aria-label="Delete entry"
-                      onClick={() => setDeleteTarget(entry)}
-                      className="rounded-lg p-2 text-slate-500 transition hover:bg-rose-400/10 hover:text-rose-300"
-                    >
-                      <Trash2 size={16} />
-                    </button>
-                  </div>
+                  {entry.tags && entry.tags.length > 0 && (
+                    <div className="flex flex-wrap gap-1.5 border-t border-edge/60 pt-4">
+                      {entry.tags.map((t) => (
+                        <Badge key={t} tone="category">
+                          #{t}
+                        </Badge>
+                      ))}
+                    </div>
+                  )}
                 </div>
-
-                <p className="whitespace-pre-line text-sm leading-relaxed text-slate-300">
-                  {entry.content}
-                </p>
-
-                {(entry.keyWin || entry.obstacle) && (
-                  <div className="grid gap-3 rounded-xl border border-white/5 bg-white/[0.01] p-3.5 sm:grid-cols-2 text-xs">
-                    {entry.keyWin && (
-                      <div>
-                        <span className="label-caps text-emerald-400">Key Breakthrough</span>
-                        <p className="mt-0.5 text-slate-300">{entry.keyWin}</p>
-                      </div>
-                    )}
-                    {entry.obstacle && (
-                      <div>
-                        <span className="label-caps text-amber-400">Resistance Encountered</span>
-                        <p className="mt-0.5 text-slate-300">{entry.obstacle}</p>
-                      </div>
-                    )}
-                  </div>
-                )}
-
-                {entry.tags && entry.tags.length > 0 && (
-                  <div className="flex flex-wrap gap-1.5 pt-1">
-                    {entry.tags.map((t) => (
-                      <Badge key={t} tone="category" className="text-[0.65rem]">
-                        #{t}
-                      </Badge>
-                    ))}
-                  </div>
-                )}
-              </Card>
-            </motion.div>
-          ))}
+              </motion.article>
+            )
+          })}
         </div>
       ) : (
-        <Card variant="glass" className="py-16 text-center">
-          <BookOpen size={36} className="mx-auto text-slate-600 mb-3" />
-          <h2 className="font-display text-lg font-semibold text-white">
-            YOUR DIARY IS WAITING
+        <Card className="px-6 py-14 text-center">
+          <span className="mx-auto mb-4 grid h-12 w-12 place-items-center border border-edge-strong bg-void-950 text-system-300">
+            <BookOpen size={22} />
+          </span>
+          <h2 className="font-display text-lg font-bold uppercase tracking-[0.14em] text-frost-50">
+            Your log is waiting
           </h2>
-          <p className="mx-auto mt-2 max-w-md text-xs text-slate-400">
+          <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-frost-400">
             Write down your daily details, feelings, and workout achievements. Only entries you write will appear here.
           </p>
-          <Button onClick={() => setModalOpen(true)} className="mt-5 mx-auto">
-            <Plus size={16} /> WRITE FIRST ENTRY
+          <Button onClick={() => setModalOpen(true)} className="mx-auto mt-6">
+            <Plus size={16} /> Write first entry
           </Button>
         </Card>
       )}
 
-      {/* Inscribe Entry Modal — styled as an open book/journal page */}
+      {/* Write Entry window */}
       <AnimatePresence>
         {modalOpen && (
           <motion.div
-            className="fixed inset-0 z-50 grid place-items-center bg-black/70 p-4 backdrop-blur-sm"
+            className="fixed inset-0 z-50 grid place-items-center bg-void-950/80 p-3 backdrop-blur-[3px] sm:p-4"
             role="dialog"
             aria-modal="true"
             aria-label="Write Diary Entry"
@@ -334,83 +330,55 @@ function DiaryPage() {
             onClick={() => setModalOpen(false)}
           >
             <motion.div
-              className="relative max-h-[calc(100vh-2rem)] w-full max-w-5xl overflow-y-auto rounded-[6px] bg-[#0c0e14] shadow-[0_35px_90px_rgba(0,0,0,0.75),0_0_60px_rgba(56,80,110,0.15)]"
-              initial={{ opacity: 0, scale: 0.94, rotateX: -6, y: 16 }}
-              animate={{ opacity: 1, scale: 1, rotateX: 0, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95, y: 12 }}
-              transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
+              className="sys-panel max-h-[calc(100vh-1.5rem)] w-full max-w-4xl overflow-y-auto [--panel-glow:rgba(30,144,255,0.35)]"
+              initial={{ scaleY: 0.02, scaleX: 0.6, opacity: 0 }}
+              animate={{ scaleY: 1, scaleX: 1, opacity: 1, transition: { scaleX: { duration: 0.16 }, scaleY: { delay: 0.12, duration: 0.26, ease: [0.16, 1, 0.3, 1] }, opacity: { duration: 0.1 } } }}
+              exit={{ scaleY: 0.02, opacity: 0, transition: { duration: 0.16 } }}
               onClick={(event) => event.stopPropagation()}
             >
-              {/* moonlit ribbon bookmark */}
-              <div className="pointer-events-none absolute -top-1 right-16 h-16 w-5 bg-gradient-to-b from-slate-300 to-slate-500 shadow-[0_0_12px_rgba(203,213,225,0.4)] [clip-path:polygon(0_0,100%_0,100%_100%,50%_75%,0_100%)]" />
-
-              <button
-                type="button"
-                aria-label="Close diary"
-                onClick={() => setModalOpen(false)}
-                className="absolute right-4 top-4 z-20 rounded-full border border-amber-300/25 bg-[#12141c]/90 p-1.5 text-amber-200/80 transition hover:bg-[#1a1d28] hover:text-amber-100"
-              >
-                <X size={16} />
-              </button>
-
-              <form
-                onSubmit={handleSubmit}
-                className="relative grid grid-cols-1 sm:grid-cols-2"
-                style={{ fontFamily: "'Crimson Pro', serif" }}
-              >
-                {/* center spine/fold */}
-                <div className="pointer-events-none absolute inset-y-0 left-1/2 hidden w-8 -translate-x-1/2 bg-gradient-to-r from-black/50 via-black/10 to-black/50 sm:block" />
-                <div className="pointer-events-none absolute inset-y-3 left-1/2 hidden w-px -translate-x-1/2 bg-amber-200/10 sm:block" />
-
-                {/* LEFT PAGE — details */}
-                <div
-                  className="relative rounded-l-[6px] bg-[#11131c] px-8 pb-8 pt-9 sm:pr-10"
-                  style={{
-                    backgroundImage:
-                      'radial-gradient(ellipse at top left, rgba(120,140,190,0.08), transparent 55%), repeating-linear-gradient(0deg, rgba(203,213,225,0.035) 0px, rgba(203,213,225,0.035) 1px, transparent 1px, transparent 32px)',
-                  }}
+              <header className="relative border-b border-edge px-12 py-4 text-center">
+                <p className="label-caps flex items-center justify-center gap-2 text-system-400">
+                  <Feather size={13} /> System
+                </p>
+                <h2 className="sys-title mt-1 text-lg sm:text-xl">
+                  <Bracketed>New log entry</Bracketed>
+                </h2>
+                <button
+                  type="button"
+                  aria-label="Close diary"
+                  onClick={() => setModalOpen(false)}
+                  className="absolute right-3 top-3 border border-transparent p-1.5 text-frost-500 transition-colors hover:border-edge hover:text-frost-50"
                 >
-                  <div className="flex items-center gap-2 text-amber-300/70">
-                    <Feather size={15} />
-                    <p className="font-mono text-[0.65rem] uppercase tracking-[0.2em]">
-                      Daily Codex &amp; Log
-                    </p>
-                  </div>
-                  <h2
-                    className="mt-2 text-[1.9rem] leading-none text-amber-100 sm:text-[2.1rem] [text-shadow:0_0_18px_rgba(251,191,36,0.25)]"
-                    style={{ fontFamily: "'Cormorant Garamond', serif" }}
-                  >
-                    Entry Details
-                  </h2>
-                  <div className="mt-3 h-px w-full bg-gradient-to-r from-amber-200/30 via-amber-200/10 to-transparent" />
+                  <X size={16} />
+                </button>
+              </header>
 
-                  <div className="mt-6 space-y-5">
-                    <div className="grid gap-5 grid-cols-2">
+              <form onSubmit={handleSubmit}>
+                <div className="grid lg:grid-cols-[minmax(0,1fr)_minmax(0,1.45fr)]">
+                  {/* Details */}
+                  <div className="space-y-5 border-b border-edge p-4 sm:p-6 lg:border-b-0 lg:border-r">
+                    <p className="label-caps text-frost-500">Entry details</p>
+
+                    <div className="grid grid-cols-1 gap-4 min-[420px]:grid-cols-2">
                       <label className="block">
-                        <span className="font-mono text-[0.65rem] uppercase tracking-[0.16em] text-amber-200/50">
-                          Date
-                        </span>
+                        <span className="label-caps mb-1.5 block text-frost-400">Date</span>
                         <input
                           type="date"
                           value={form.date}
                           onChange={(e) => setForm({ ...form, date: e.target.value })}
-                          className="mt-1.5 h-10 w-full border-0 border-b-2 border-amber-200/20 bg-transparent px-1 text-sm text-amber-100 outline-none transition focus:border-amber-300/60"
-                          style={{ colorScheme: 'dark' }}
+                          className="field font-mono"
                         />
                       </label>
 
                       <label className="block">
-                        <span className="font-mono text-[0.65rem] uppercase tracking-[0.16em] text-amber-200/50">
-                          Energy &amp; Mood
-                        </span>
+                        <span className="label-caps mb-1.5 block text-frost-400">Energy &amp; mood</span>
                         <select
                           value={form.mood}
                           onChange={(e) => setForm({ ...form, mood: Number(e.target.value) })}
-                          className="mt-1.5 h-10 w-full border-0 border-b-2 border-amber-200/20 bg-transparent px-1 text-sm text-amber-100 outline-none transition focus:border-amber-300/60"
-                          style={{ colorScheme: 'dark' }}
+                          className="field"
                         >
                           {[1, 2, 3, 4, 5].map((val) => (
-                            <option key={val} value={val} className="bg-[#11131c] text-amber-100">
+                            <option key={val} value={val} className="bg-void-900 text-frost-100">
                               {moodLabels[val]}
                             </option>
                           ))}
@@ -419,36 +387,30 @@ function DiaryPage() {
                     </div>
 
                     <label className="block">
-                      <span className="font-mono text-[0.65rem] uppercase tracking-[0.16em] text-emerald-300/70">
-                        Key Win / Breakthrough
-                      </span>
+                      <span className="label-caps mb-1.5 block text-clear-300">Key win / breakthrough</span>
                       <input
                         type="text"
                         placeholder="e.g. Completed all 7 routine habits & read 12 pages"
                         value={form.keyWin}
                         onChange={(e) => setForm({ ...form, keyWin: e.target.value })}
-                        className="mt-1.5 h-10 w-full border-0 border-b-2 border-amber-200/20 bg-transparent px-1 text-sm text-amber-100 outline-none transition placeholder:text-amber-200/25 focus:border-emerald-300/60"
+                        className="field"
                       />
                     </label>
 
                     <label className="block">
-                      <span className="font-mono text-[0.65rem] uppercase tracking-[0.16em] text-rose-300/70">
-                        Obstacle / Resistance
-                      </span>
+                      <span className="label-caps mb-1.5 block text-penalty-300">Obstacle / resistance</span>
                       <input
                         type="text"
                         placeholder="e.g. Resisted afternoon cravings and fatigue"
                         value={form.obstacle}
                         onChange={(e) => setForm({ ...form, obstacle: e.target.value })}
-                        className="mt-1.5 h-10 w-full border-0 border-b-2 border-amber-200/20 bg-transparent px-1 text-sm text-amber-100 outline-none transition placeholder:text-amber-200/25 focus:border-rose-300/60"
+                        className="field"
                       />
                     </label>
 
                     <div>
-                      <p className="font-mono text-[0.65rem] uppercase tracking-[0.16em] text-amber-200/50">
-                        Categories &amp; Tags
-                      </p>
-                      <div className="mt-2.5 flex flex-wrap gap-2">
+                      <p className="label-caps mb-2 text-frost-400">Categories &amp; tags</p>
+                      <div className="flex flex-wrap gap-1.5">
                         {availableTags.map((tag) => {
                           const isSelected = form.tags.includes(tag)
                           return (
@@ -456,86 +418,54 @@ function DiaryPage() {
                               type="button"
                               key={tag}
                               onClick={() => handleToggleTag(tag)}
-                              className={`rounded-full border px-3 py-1 font-mono text-[0.65rem] uppercase tracking-wide transition ${
-                                isSelected
-                                  ? 'border-amber-300/60 bg-amber-400/15 text-amber-200 shadow-[0_0_10px_rgba(251,191,36,0.2)]'
-                                  : 'border-amber-200/15 bg-transparent text-amber-200/40 hover:border-amber-200/40 hover:text-amber-200/70'
+                              aria-pressed={isSelected}
+                              className={`inline-flex items-center gap-1 rounded-xs border px-2.5 py-1 font-display text-xs font-bold uppercase tracking-[0.14em] transition-[border-color,background-color,color,box-shadow] ${
+                                isSelected ? tabActive : tabIdle
                               }`}
                             >
+                              {isSelected && <Check size={11} strokeWidth={3} />}
                               {tag}
                             </button>
                           )
                         })}
                       </div>
                     </div>
+                  </div>
 
-                    {/* page number */}
-                    <p className="pt-4 text-center font-mono text-[0.6rem] text-amber-200/25">
-                      — left page —
-                    </p>
+                  {/* Write */}
+                  <div className="space-y-5 p-4 sm:p-6">
+                    <label className="block">
+                      <span className="label-caps mb-1.5 block text-system-300">Today&rsquo;s page</span>
+                      <input
+                        type="text"
+                        placeholder="e.g. Day 1: 5:30 AM Wakeup & Heavy Chest Session"
+                        value={form.title}
+                        onChange={(e) => setForm({ ...form, title: e.target.value })}
+                        className="field font-display text-lg font-bold uppercase tracking-[0.08em] placeholder:normal-case placeholder:tracking-normal"
+                      />
+                    </label>
+
+                    <label className="block">
+                      <span className="label-caps mb-1.5 block text-frost-400">Dear diary&hellip;</span>
+                      <textarea
+                        required
+                        rows={14}
+                        placeholder="Write your daily details, workout notes, diet, reading progress, and reflections..."
+                        value={form.content}
+                        onChange={(e) => setForm({ ...form, content: e.target.value })}
+                        className="field min-h-64 resize-y text-[0.95rem] leading-7"
+                      />
+                    </label>
                   </div>
                 </div>
 
-                {/* RIGHT PAGE — write */}
-                <div
-                  className="relative rounded-r-[6px] bg-[#0f1119] px-8 pb-8 pt-9 sm:pl-10"
-                  style={{
-                    backgroundImage:
-                      'radial-gradient(ellipse at top right, rgba(120,140,190,0.08), transparent 55%), repeating-linear-gradient(0deg, rgba(203,213,225,0.035) 0px, rgba(203,213,225,0.035) 1px, transparent 1px, transparent 32px)',
-                  }}
-                >
-                  <p className="font-mono text-[0.65rem] uppercase tracking-[0.2em] text-amber-300/70">
-                    Today&rsquo;s Page
-                  </p>
-                  <label className="mt-2 block">
-                    <input
-                      type="text"
-                      placeholder="e.g. Day 1: 5:30 AM Wakeup & Heavy Chest Session"
-                      value={form.title}
-                      onChange={(e) => setForm({ ...form, title: e.target.value })}
-                      className="h-10 w-full border-0 bg-transparent p-0 text-[1.9rem] leading-none text-amber-100 outline-none transition placeholder:text-amber-200/25 sm:text-[2.1rem] [text-shadow:0_0_18px_rgba(251,191,36,0.25)]"
-                      style={{ fontFamily: "'Cormorant Garamond', serif" }}
-                    />
-                  </label>
-                  <div className="mt-3 h-px w-full bg-gradient-to-r from-amber-200/30 via-amber-200/10 to-transparent" />
-
-                  <label className="mt-6 block">
-                    <span className="font-mono text-[0.65rem] uppercase tracking-[0.16em] text-amber-200/50">
-                      Dear Diary&hellip;
-                    </span>
-                    <textarea
-                      required
-                      rows={14}
-                      placeholder="Write your daily details, workout notes, diet, reading progress, and reflections..."
-                      value={form.content}
-                      onChange={(e) => setForm({ ...form, content: e.target.value })}
-                      className="mt-1.5 w-full resize-none border-0 bg-transparent p-0 text-base leading-8 text-amber-100/90 outline-none transition placeholder:text-amber-200/25"
-                      style={{
-                        backgroundImage:
-                          'repeating-linear-gradient(0deg, transparent, transparent 31px, rgba(203,213,225,0.1) 31px, rgba(203,213,225,0.1) 32px)',
-                        backgroundPositionY: '4px',
-                      }}
-                    />
-                  </label>
-
-                  <div className="mt-6 flex items-center justify-between border-t border-amber-200/15 pt-5">
-                    <p className="font-mono text-[0.6rem] text-amber-200/25">— right page —</p>
-                    <div className="flex gap-3">
-                      <button
-                        type="button"
-                        onClick={() => setModalOpen(false)}
-                        className="rounded-sm px-4 py-2 font-mono text-xs uppercase tracking-wide text-amber-200/50 transition hover:text-amber-100"
-                      >
-                        Cancel
-                      </button>
-                      <button
-                        type="submit"
-                        className="flex items-center gap-2 rounded-sm bg-amber-400/90 px-5 py-2 font-mono text-xs uppercase tracking-wide text-[#0c0e14] shadow-[0_0_20px_rgba(251,191,36,0.35)] transition hover:bg-amber-300"
-                      >
-                        <Check size={14} /> Save to Diary
-                      </button>
-                    </div>
-                  </div>
+                <div className="flex flex-wrap justify-end gap-3 border-t border-edge px-4 py-4 sm:px-6">
+                  <Button type="button" variant="ghost" onClick={() => setModalOpen(false)}>
+                    Cancel
+                  </Button>
+                  <Button type="submit">
+                    <Check size={15} /> Save to log
+                  </Button>
                 </div>
               </form>
             </motion.div>
@@ -547,21 +477,24 @@ function DiaryPage() {
       <Modal
         open={Boolean(deleteTarget)}
         onClose={() => setDeleteTarget(null)}
-        title="DELETE REFLECTION?"
-        eyebrow="CONFIRM ACTION"
+        title="Delete log entry?"
+        eyebrow="Confirm action"
+        tone="penalty"
+        size="sm"
         footer={
           <>
             <Button variant="ghost" onClick={() => setDeleteTarget(null)}>
-              CANCEL
+              Cancel
             </Button>
             <Button variant="danger" onClick={handleConfirmDelete}>
-              <Trash2 size={15} /> DELETE
+              <Trash2 size={15} /> Delete
             </Button>
           </>
         }
       >
-        <p className="text-sm text-slate-300">
-          Are you sure you want to delete the entry "{deleteTarget?.title}"? This action cannot be undone.
+        <p className="text-sm leading-6 text-frost-300">
+          Are you sure you want to delete the entry &ldquo;<span className="text-frost-50">{deleteTarget?.title}</span>&rdquo;? This
+          action cannot be undone.
         </p>
       </Modal>
     </div>

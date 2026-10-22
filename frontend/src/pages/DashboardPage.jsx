@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
+import SystemMessage from '../components/common/SystemMessage.jsx'
 import DashboardHeader from '../components/dashboard/DashboardHeader.jsx'
 import PlayerStatusCard from '../components/dashboard/PlayerStatusCard.jsx'
 import QuestPreview from '../components/dashboard/QuestPreview.jsx'
@@ -66,47 +67,58 @@ function DashboardPage() {
   }, [])
 
   return (
-    <div className="space-y-10 pb-8">
+    <div className="space-y-8 pb-8">
       <DashboardHeader playerName={player.playerName || fallbackPlayer.playerName} />
 
       {syncFailed && (
-        <div className="rounded-2xl border border-amber-400/30 bg-amber-950/20 p-3 text-xs text-amber-200">
-          Could not reach the server — showing your last saved data. Progress made now may not be recorded until connection is restored.
-        </div>
+        <SystemMessage
+          tone="penalty"
+          eyebrow="Warning · Connection lost"
+          title="Server unreachable"
+          message="Could not reach the server — showing your last saved data. Progress made now may not be recorded until connection is restored."
+        />
       )}
 
+      {/* Primary window: player status */}
       <PlayerStatusCard player={player} />
 
-      {/* Daily Workout Split Protocol & Exercise Checklist */}
-      <section>
-        <DailyWorkoutCard onQuestCompleted={handleRefresh} />
-      </section>
-
-      <div className="grid gap-5 lg:grid-cols-[1.05fr_0.95fr]">
+      {/* Today at a glance */}
+      <div className="grid items-start gap-6 lg:grid-cols-2">
         <TodayProgress quests={quests} />
         <WeeklyOverview weekly={weekly} streak={getEffectiveStreak(player)} />
       </div>
 
-      <QuestPreview quests={quests.slice(0, 6)} />
+      {/* Daily Workout Split Protocol & Exercise Checklist + Daily Quests */}
+      <div className="grid items-start gap-6 xl:grid-cols-2">
+        <DailyWorkoutCard onQuestCompleted={handleRefresh} />
+        <QuestPreview quests={quests.slice(0, 6)} />
+      </div>
 
-      <div className="grid gap-5 xl:grid-cols-[1.1fr_0.9fr]">
-        <SystemAnalysisCard analysis={dashboardData.analysis} />
+      {/* Boss + rewards / commands */}
+      <div className="grid items-start gap-6 lg:grid-cols-2">
         <WeeklyBossCard boss={boss} />
+        <div className="space-y-6">
+          <RecentAchievement achievement={recentAchievement} />
+          <QuickActions actions={quickActions} />
+        </div>
       </div>
 
-      <div className="grid gap-5 xl:grid-cols-[0.9fr_1.1fr]">
-        <QuickActions actions={quickActions} />
-        <RecentAchievement achievement={recentAchievement} />
-      </div>
+      <SystemAnalysisCard analysis={dashboardData.analysis} />
 
-      <motion.p
+      <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 0.5 }}
-        className="text-center font-mono text-[0.65rem] uppercase tracking-[0.2em] text-slate-700"
+        className="flex items-center gap-3"
       >
-        RANKORA TELEMETRY · LIVE DATA ACTIVE
-      </motion.p>
+        <span className="h-px flex-1 bg-linear-to-r from-transparent to-edge" />
+        <p className="label-caps flex items-center gap-2 text-center text-[0.62rem] text-frost-600">
+          <span className="h-1 w-1 rotate-45 animate-sys-pulse bg-system-400" />
+          The System is observing your progress
+          <span className="h-1 w-1 rotate-45 animate-sys-pulse bg-system-400" />
+        </p>
+        <span className="h-px flex-1 bg-linear-to-l from-transparent to-edge" />
+      </motion.div>
     </div>
   )
 }

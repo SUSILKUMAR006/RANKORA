@@ -95,44 +95,47 @@ export function ExpenseModal({
     <Modal
       open={open}
       onClose={onClose}
-      title={initialData ? 'EDIT TRANSACTION' : 'RECORD TRANSACTION'}
-      eyebrow="FINANCIAL TELEMETRY & TREASURY"
+      title={initialData ? 'Edit Transaction' : 'Record Transaction'}
+      eyebrow="Treasury · Inventory log"
+      size="lg"
     >
-      <form onSubmit={handleSubmit} className="space-y-4">
+      <form onSubmit={handleSubmit} className="space-y-5">
         {/* Type Selector (Expense vs Income) */}
-        <div className="grid grid-cols-2 gap-2 rounded-xl border border-white/10 bg-white/[0.02] p-1.5">
+        <div className="grid grid-cols-2 gap-2">
           <button
             type="button"
             onClick={() => handleTypeChange('expense')}
-            className={`flex items-center justify-center gap-2 rounded-lg py-2 font-mono text-xs transition ${
+            aria-pressed={!isIncome}
+            className={`flex min-w-0 items-center justify-center gap-2 border px-2 py-2.5 font-display text-xs font-bold uppercase tracking-[0.14em] transition-[border-color,background-color,box-shadow,color] ${
               !isIncome
-                ? 'border border-rose-400/30 bg-rose-400/15 text-rose-200 shadow-[0_0_12px_rgba(251,113,133,0.15)]'
-                : 'text-slate-400 hover:text-white'
+                ? 'border-penalty-400 bg-penalty-500/15 text-penalty-100 shadow-[0_0_14px_-2px_rgba(240,42,62,0.55)]'
+                : 'border-edge bg-void-950/60 text-frost-400 hover:border-edge-strong hover:text-frost-100'
             }`}
           >
-            <ArrowDownRight size={14} className="text-rose-400" />
-            <span>RESOURCE OUTFLOW</span>
+            <ArrowDownRight size={14} className="shrink-0 text-penalty-400" />
+            <span className="truncate">Resource outflow</span>
           </button>
 
           <button
             type="button"
             onClick={() => handleTypeChange('income')}
-            className={`flex items-center justify-center gap-2 rounded-lg py-2 font-mono text-xs transition ${
+            aria-pressed={isIncome}
+            className={`flex min-w-0 items-center justify-center gap-2 border px-2 py-2.5 font-display text-xs font-bold uppercase tracking-[0.14em] transition-[border-color,background-color,box-shadow,color] ${
               isIncome
-                ? 'border border-cyan-400/30 bg-cyan-400/15 text-cyan-200 shadow-[0_0_12px_rgba(103,232,249,0.15)]'
-                : 'text-slate-400 hover:text-white'
+                ? 'border-system-400 bg-system-500/15 text-frost-50 shadow-[0_0_14px_-2px_rgba(30,144,255,0.6)]'
+                : 'border-edge bg-void-950/60 text-frost-400 hover:border-edge-strong hover:text-frost-100'
             }`}
           >
-            <ArrowUpRight size={14} className="text-cyan-400" />
-            <span>TREASURY INFLOW</span>
+            <ArrowUpRight size={14} className="shrink-0 text-system-400" />
+            <span className="truncate">Treasury inflow</span>
           </button>
         </div>
 
         {/* Title & Amount */}
-        <div className="grid gap-3 sm:grid-cols-2">
+        <div className="grid gap-4 sm:grid-cols-2">
           <label className="block">
-            <span className="label-caps text-slate-400">
-              {isIncome ? 'Source / Bounty Title' : 'Merchant / Title'} *
+            <span className="label-caps mb-1.5 block text-frost-400">
+              {isIncome ? 'Source / Bounty Title' : 'Merchant / Title'} <span className="text-penalty-400">*</span>
             </span>
             <input
               type="text"
@@ -140,14 +143,16 @@ export function ExpenseModal({
               placeholder={isIncome ? 'e.g. Freelance Milestone / Contract' : 'e.g. Whey Protein, Gym Pass'}
               value={form.title}
               onChange={(e) => setForm({ ...form, title: e.target.value })}
-              className="mt-1 h-10 w-full rounded-xl border border-white/10 bg-white/[0.03] px-3 font-display text-sm text-white outline-none transition focus:border-cyan-300/50"
+              className="field"
             />
           </label>
 
           <label className="block">
-            <span className="label-caps text-slate-400">Amount ({currency}) *</span>
-            <div className="relative mt-1">
-              <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 font-mono text-xs text-slate-500">
+            <span className="label-caps mb-1.5 block text-frost-400">
+              Amount ({currency}) <span className="text-penalty-400">*</span>
+            </span>
+            <div className="relative">
+              <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 font-mono text-xs text-system-300">
                 {currency}
               </span>
               <input
@@ -158,16 +163,16 @@ export function ExpenseModal({
                 placeholder="0.00"
                 value={form.amount}
                 onChange={(e) => setForm({ ...form, amount: e.target.value })}
-                className="h-10 w-full rounded-xl border border-white/10 bg-white/[0.03] pl-8 pr-3 font-mono text-sm text-white outline-none transition focus:border-cyan-300/50"
+                className="field pl-9! font-mono"
               />
             </div>
           </label>
         </div>
 
-        {/* Category Selector Chips */}
+        {/* Category Selector Tiles */}
         <div>
-          <span className="label-caps text-slate-400">Classification Category</span>
-          <div className="mt-1.5 flex flex-wrap gap-1.5 max-h-32 overflow-y-auto pr-1">
+          <span className="label-caps mb-1.5 block text-frost-400">Classification category</span>
+          <div className="grid max-h-44 grid-cols-1 gap-1.5 overflow-y-auto pr-1 min-[400px]:grid-cols-2 sm:grid-cols-3">
             {activeCategories.map((cat) => {
               const isSelected = form.category === cat.name
               return (
@@ -175,21 +180,31 @@ export function ExpenseModal({
                   type="button"
                   key={cat.name}
                   onClick={() => setForm({ ...form, category: cat.name })}
-                  className={`flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 font-mono text-[0.68rem] transition ${
+                  aria-pressed={isSelected}
+                  className={`flex min-w-0 items-center gap-2 border px-2.5 py-2 text-left transition-[border-color,background-color,box-shadow,color] ${
                     isSelected
-                      ? 'border bg-white/10 text-white shadow-[0_0_10px_rgba(255,255,255,0.1)]'
-                      : 'border border-white/10 bg-white/[0.02] text-slate-400 hover:text-white'
+                      ? 'text-frost-50'
+                      : 'border-edge bg-void-950/60 text-frost-400 hover:border-edge-strong hover:text-frost-100'
                   }`}
-                  style={{
-                    borderColor: isSelected ? cat.color : undefined,
-                    color: isSelected ? cat.color : undefined,
-                  }}
+                  style={
+                    isSelected
+                      ? {
+                          borderColor: cat.color,
+                          backgroundColor: `${cat.color}1f`,
+                          boxShadow: `0 0 14px -3px ${cat.color}, inset 0 0 10px -4px ${cat.color}`,
+                        }
+                      : undefined
+                  }
                 >
                   <span
-                    className="h-2 w-2 rounded-full"
-                    style={{ backgroundColor: cat.color }}
+                    className="h-2.5 w-2.5 shrink-0"
+                    style={{
+                      backgroundColor: cat.color,
+                      boxShadow: isSelected ? `0 0 8px ${cat.color}` : undefined,
+                    }}
                   />
-                  <span>{cat.name}</span>
+                  <span className="label-caps truncate text-[0.68rem] tracking-[0.12em]">{cat.name}</span>
+                  {isSelected && <Check size={12} className="ml-auto shrink-0" style={{ color: cat.color }} />}
                 </button>
               )
             })}
@@ -197,23 +212,23 @@ export function ExpenseModal({
         </div>
 
         {/* Date & Payment Method */}
-        <div className="grid gap-3 sm:grid-cols-2">
+        <div className="grid gap-4 sm:grid-cols-2">
           <label className="block">
-            <span className="label-caps text-slate-400">Date</span>
+            <span className="label-caps mb-1.5 block text-frost-400">Date</span>
             <input
               type="date"
               value={form.date}
               onChange={(e) => setForm({ ...form, date: e.target.value })}
-              className="mt-1 h-10 w-full rounded-xl border border-white/10 bg-white/[0.03] px-3 font-mono text-xs text-white outline-none focus:border-cyan-300/50"
+              className="field font-mono"
             />
           </label>
 
           <label className="block">
-            <span className="label-caps text-slate-400">Payment Protocol</span>
+            <span className="label-caps mb-1.5 block text-frost-400">Payment protocol</span>
             <select
               value={form.paymentMethod}
               onChange={(e) => setForm({ ...form, paymentMethod: e.target.value })}
-              className="mt-1 h-10 w-full rounded-xl border border-white/10 bg-rankora-900 px-3 font-mono text-xs text-white outline-none focus:border-cyan-300/50"
+              className="field font-mono"
             >
               {PAYMENT_METHODS.map((m) => (
                 <option key={m} value={m}>
@@ -226,35 +241,38 @@ export function ExpenseModal({
 
         {/* Notes / Description */}
         <label className="block">
-          <span className="label-caps text-slate-400">Notes / Remarks</span>
+          <span className="label-caps mb-1.5 block text-frost-400">Notes / Remarks</span>
           <textarea
             rows={2}
             placeholder="Details, purpose, breakdown or receipt notes..."
             value={form.notes}
             onChange={(e) => setForm({ ...form, notes: e.target.value })}
-            className="mt-1 w-full rounded-xl border border-white/10 bg-white/[0.03] p-2.5 font-sans text-xs text-white outline-none focus:border-cyan-300/50 placeholder:text-slate-500"
+            className="field resize-y"
           />
         </label>
 
         {/* Tags */}
         <label className="block">
-          <span className="label-caps text-slate-400">Custom Tags (Comma Separated)</span>
-          <input
-            type="text"
-            placeholder="e.g. Fuel, Focus, Software, Monthly"
-            value={form.tags}
-            onChange={(e) => setForm({ ...form, tags: e.target.value })}
-            className="mt-1 h-9 w-full rounded-xl border border-white/10 bg-white/[0.03] px-3 font-mono text-xs text-white outline-none focus:border-cyan-300/50 placeholder:text-slate-600"
-          />
+          <span className="label-caps mb-1.5 block text-frost-400">Custom tags (comma separated)</span>
+          <div className="relative">
+            <Tag size={13} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-frost-500" />
+            <input
+              type="text"
+              placeholder="e.g. Fuel, Focus, Software, Monthly"
+              value={form.tags}
+              onChange={(e) => setForm({ ...form, tags: e.target.value })}
+              className="field pl-9! font-mono"
+            />
+          </div>
         </label>
 
         {/* Modal Actions */}
-        <div className="flex justify-end gap-2 border-t border-white/10 pt-3">
+        <div className="flex flex-wrap justify-end gap-2 border-t border-edge pt-4">
           <Button type="button" variant="ghost" onClick={onClose}>
-            CANCEL
+            Cancel
           </Button>
           <Button type="submit" variant="primary">
-            <Check size={15} /> {initialData ? 'UPDATE RECORD' : 'SAVE TRANSACTION'}
+            <Check size={15} /> {initialData ? 'Update record' : 'Save transaction'}
           </Button>
         </div>
       </form>

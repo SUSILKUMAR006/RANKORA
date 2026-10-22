@@ -3,6 +3,7 @@ import { getStoredQuests } from '../hooks/useQuestCompletion.js'
 import { getStoredFailures } from './failureUtils.js'
 import { calculateLifetimeXp } from './achievementUtils.js'
 import { getDailyLog } from './dailyLogUtils.js'
+import { palette } from '../theme/palette.js'
 
 export const PERIODS = [
   { id: '7d', label: '7 Days', days: 7 },
@@ -12,12 +13,12 @@ export const PERIODS = [
 ]
 
 export const CATEGORY_COLORS = {
-  Mind: '#fbbf24', // Amber
-  Health: '#34d399', // Emerald
-  Fitness: '#fb7185', // Rose
-  Career: '#67e8f9', // Cyan
-  Knowledge: '#a78bfa', // Violet
-  General: '#94a3b8', // Slate
+  Mind: palette.gold,
+  Health: palette.clear,
+  Fitness: palette.ember,
+  Career: palette.system,
+  Knowledge: palette.shadow,
+  General: palette.frost400,
 }
 
 export function getAnalyticsData(periodId = '7d') {

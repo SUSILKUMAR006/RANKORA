@@ -5,6 +5,7 @@ import {
   BookOpen,
   Brain,
   BriefcaseBusiness,
+  Camera,
   Check,
   CheckCircle2,
   ChevronRight,
@@ -20,6 +21,7 @@ import {
   Shield,
   Sparkles,
   Swords,
+  X,
   XCircle,
   Zap,
 } from 'lucide-react'
@@ -27,6 +29,9 @@ import { Link, useNavigate } from 'react-router-dom'
 import Badge from '../components/common/Badge.jsx'
 import Button from '../components/common/Button.jsx'
 import Card from '../components/common/Card.jsx'
+import { PageHeader } from '../components/common/SectionHeader.jsx'
+import { EmptyState } from '../components/common/States.jsx'
+import SystemWindow from '../components/common/SystemWindow.jsx'
 import QuestFailureModal from '../components/quests/QuestFailureModal.jsx'
 import QuestVerificationModal from '../components/quests/QuestVerificationModal.jsx'
 import XPRewardAnimation from '../components/quests/XPRewardAnimation.jsx'
@@ -169,58 +174,59 @@ function QuestsPage() {
     return true
   })
 
+
+  const statusTabs = [
+    { id: 'All', label: 'All', count: quests.length },
+    { id: 'pending', label: 'Pending', count: pendingCount },
+    { id: 'completed', label: 'Completed', count: completedCount },
+    { id: 'failed', label: 'Failed', count: failedCount },
+  ]
+
+  const tabClass = (active) =>
+    `inline-flex min-h-9 items-center gap-1.5 rounded-xs border px-3 py-1.5 font-display text-xs font-bold uppercase tracking-[0.14em] transition-[background-color,border-color,box-shadow,color] duration-150 ${
+      active
+        ? 'border-system-400 bg-system-500/15 text-frost-50 shadow-[0_0_12px_-2px_rgba(30,144,255,0.6)]'
+        : 'border-edge text-frost-400 hover:border-edge-strong hover:text-frost-100'
+    }`
+
   return (
     <div className="space-y-8 pb-16">
       {/* Header */}
-      <motion.header
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.3 }}
-        className="flex flex-col gap-4 border-b border-white/10 pb-6 sm:flex-row sm:items-end sm:justify-between"
-      >
-        <div>
-          <div className="flex items-center gap-2">
-            <span className="grid h-6 w-6 place-items-center rounded-lg bg-cyan-400/10 text-cyan-300">
-              <Swords size={14} />
-            </span>
-            <p className="label-caps text-cyan-300/80">DAILY DISCIPLINE PROTOCOL</p>
-          </div>
-          <h1 className="mt-3 font-display text-3xl font-bold tracking-tight text-white sm:text-4xl">
-            DAILY QUESTS
-          </h1>
-          <p className="mt-2 max-w-2xl text-sm leading-relaxed text-slate-400">
-            Execute mission objectives to earn XP, strengthen core RPG attributes,
-            maintain streaks, and deal direct damage to the weekly raid boss.
-          </p>
-        </div>
-
-        <div className="flex flex-wrap items-center gap-2.5">
-          <Button
-            type="button"
-            variant="ghost"
-            onClick={handleRestoreDefaults}
-            className="border border-white/10 hover:border-cyan-300/30 text-xs text-slate-300 hover:text-white"
-            title="Restore all default routine quests"
-          >
-            <RotateCcw size={14} /> RESTORE DEFAULTS
-          </Button>
-          <Link to="/quests/create">
-            <Button variant="primary">
-              <Plus size={16} /> CREATE QUEST
+      <PageHeader
+        eyebrow="Daily Discipline Protocol"
+        title="Daily Quests"
+        description="Execute mission objectives to earn XP, strengthen core RPG attributes, maintain streaks, and deal direct damage to the weekly raid boss."
+        actions={
+          <>
+            <Button
+              type="button"
+              variant="secondary"
+              onClick={handleRestoreDefaults}
+              className="text-xs"
+              title="Restore all default routine quests"
+            >
+              <RotateCcw size={14} /> RESTORE DEFAULTS
             </Button>
-          </Link>
-        </div>
-      </motion.header>
+            <Link to="/quests/create">
+              <Button variant="primary">
+                <Plus size={16} /> CREATE QUEST
+              </Button>
+            </Link>
+          </>
+        }
+      />
 
       {/* Sync Error Banner */}
       {syncError && (
         <motion.div
           initial={{ opacity: 0, y: -6 }}
           animate={{ opacity: 1, y: 0 }}
-          className="flex items-center gap-3 rounded-2xl border border-rose-400/30 bg-rose-950/20 p-4 text-rose-200"
+          className="sys-panel tone-penalty flex items-start gap-3 px-4 py-3.5"
         >
-          <AlertTriangle size={18} className="shrink-0 text-rose-300" />
-          <p className="text-xs leading-relaxed">{syncError}</p>
+          <AlertTriangle size={18} className="mt-0.5 shrink-0 text-penalty-400" />
+          <p className="text-xs leading-relaxed text-penalty-200">
+            <span className="font-display font-bold uppercase tracking-[0.14em] text-penalty-300">Warning:</span> {syncError}
+          </p>
         </motion.div>
       )}
 
@@ -229,16 +235,14 @@ function QuestsPage() {
         <motion.div
           initial={{ opacity: 0, scale: 0.98 }}
           animate={{ opacity: 1, scale: 1 }}
-          className="flex items-center gap-3.5 rounded-2xl border border-emerald-400/30 bg-emerald-950/20 p-4 text-emerald-200 shadow-[0_0_20px_rgba(52,211,153,0.1)]"
+          className="sys-panel tone-clear flex items-center gap-3.5 px-4 py-4"
         >
-          <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-emerald-400/15 text-emerald-300">
+          <span className="grid h-10 w-10 shrink-0 place-items-center border border-clear-400/60 bg-clear-500/10 text-clear-300 shadow-[0_0_12px_-2px_rgba(52,217,156,0.45)]">
             <Sparkles size={18} />
           </span>
-          <div>
-            <p className="font-display text-xs font-bold uppercase tracking-wider text-emerald-300">
-              SUNDAY REST & RECOVERY PROTOCOL ACTIVE
-            </p>
-            <p className="mt-0.5 text-xs text-slate-300 leading-relaxed">
+          <div className="min-w-0">
+            <p className="label-caps text-clear-300">Sunday rest &amp; recovery protocol active</p>
+            <p className="mt-1 text-xs leading-relaxed text-frost-300">
               Scheduled neural and physical recovery day. Gym training is optional today to support tissue repair.
             </p>
           </div>
@@ -246,29 +250,29 @@ function QuestsPage() {
       )}
 
       {/* Summary KPI Cards */}
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
         <Card variant="highlighted" className="p-4">
-          <p className="label-caps text-cyan-300/80">TOTAL MISSIONS</p>
-          <p className="mt-1 font-mono text-2xl font-bold text-white">{quests.length}</p>
-          <p className="mt-0.5 text-[0.68rem] text-slate-400">Active roster</p>
+          <p className="label-caps text-system-300">Total missions</p>
+          <p className="mt-1 font-display text-3xl font-bold leading-none text-frost-50 sys-glow">{quests.length}</p>
+          <p className="mt-1.5 text-[0.68rem] text-frost-500">Active roster</p>
         </Card>
 
-        <Card variant="glass" className="p-4">
-          <p className="label-caps text-emerald-300/80">COMPLETED TODAY</p>
-          <p className="mt-1 font-mono text-2xl font-bold text-emerald-300">{completedCount}</p>
-          <p className="mt-0.5 text-[0.68rem] text-slate-400">Objectives verified</p>
+        <Card variant="standard" tone="clear" className="p-4">
+          <p className="label-caps text-clear-300">Completed today</p>
+          <p className="mt-1 font-display text-3xl font-bold leading-none text-clear-300">{completedCount}</p>
+          <p className="mt-1.5 text-[0.68rem] text-frost-500">Objectives verified</p>
         </Card>
 
-        <Card variant="glass" className="p-4">
-          <p className="label-caps text-amber-300/80">PENDING OBJECTIVES</p>
-          <p className="mt-1 font-mono text-2xl font-bold text-amber-300">{pendingCount}</p>
-          <p className="mt-0.5 text-[0.68rem] text-slate-400">Awaiting execution</p>
+        <Card variant="standard" className="p-4">
+          <p className="label-caps text-frost-400">Pending objectives</p>
+          <p className="mt-1 font-display text-3xl font-bold leading-none text-frost-50">{pendingCount}</p>
+          <p className="mt-1.5 text-[0.68rem] text-frost-500">Awaiting execution</p>
         </Card>
 
-        <Card variant="glass" className="p-4">
-          <p className="label-caps text-violet-300/80">REMAINING XP YIELD</p>
-          <p className="mt-1 font-mono text-2xl font-bold text-violet-300">+{xpAvailable} XP</p>
-          <p className="mt-0.5 text-[0.68rem] text-slate-400">Available to claim</p>
+        <Card variant="standard" tone="gold" className="p-4">
+          <p className="label-caps text-gold-300">Remaining EXP yield</p>
+          <p className="mt-1 font-mono text-2xl font-bold leading-tight text-gold-300 sys-glow">+{xpAvailable}</p>
+          <p className="mt-1 text-[0.68rem] text-frost-500">XP available to claim</p>
         </Card>
       </div>
 
@@ -278,189 +282,214 @@ function QuestsPage() {
       </section>
 
       {/* Filter and Search Controls */}
-      <div className="space-y-4">
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+      <div className="space-y-3">
+        <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
           {/* Status Tabs */}
-          <div className="flex items-center gap-1 rounded-xl border border-white/10 bg-white/[0.02] p-1 text-xs">
-            {[
-              { id: 'All', label: 'All', count: quests.length },
-              { id: 'pending', label: 'Pending', count: pendingCount },
-              { id: 'completed', label: 'Completed', count: completedCount },
-              { id: 'failed', label: 'Failed', count: failedCount },
-            ].map((tab) => (
+          <div className="flex flex-wrap items-center gap-1.5" aria-label="Filter by status">
+            {statusTabs.map((tab) => (
               <button
                 key={tab.id}
                 type="button"
                 onClick={() => setStatusFilter(tab.id)}
-                className={`rounded-lg px-3 py-1.5 font-mono text-xs font-semibold transition ${
-                  statusFilter === tab.id
-                    ? 'border border-cyan-300/40 bg-cyan-400/15 text-cyan-100 shadow-[0_0_12px_rgba(103,232,249,0.15)]'
-                    : 'text-slate-400 hover:text-white'
-                }`}
+                aria-pressed={statusFilter === tab.id}
+                className={tabClass(statusFilter === tab.id)}
               >
-                {tab.label} ({tab.count})
+                {tab.label}
+                <span className={`font-mono text-[0.7rem] ${statusFilter === tab.id ? 'text-system-200' : 'text-frost-600'}`}>
+                  [{tab.count}]
+                </span>
               </button>
             ))}
           </div>
 
           {/* Search Input */}
-          <div className="relative w-full sm:w-72">
-            <Search size={14} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500" />
+          <div className="relative w-full md:w-72">
+            <Search size={14} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-frost-500" />
             <input
               type="text"
               placeholder="Search daily quests..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="h-10 w-full rounded-xl border border-white/10 bg-white/[0.03] pl-9 pr-4 font-mono text-xs text-white placeholder:text-slate-600 outline-none transition focus:border-cyan-300/50 focus:bg-white/[0.06]"
+              className="field h-10 pl-9! font-mono text-xs!"
             />
           </div>
         </div>
 
-        {/* Category Pills */}
-        <div className="flex flex-wrap items-center gap-1.5">
-          {categories.map((cat) => (
-            <button
-              key={cat}
-              type="button"
-              onClick={() => setCategoryFilter(cat)}
-              className={`rounded-lg px-3 py-1 font-mono text-xs transition ${
-                categoryFilter === cat
-                  ? 'border border-white/20 bg-white/10 text-white font-semibold shadow-[0_0_10px_rgba(255,255,255,0.1)]'
-                  : 'border border-white/5 bg-white/[0.02] text-slate-400 hover:text-white'
-              }`}
-            >
-              {cat}
-            </button>
-          ))}
+        {/* Category Tabs */}
+        <div className="flex flex-wrap items-center gap-1.5" aria-label="Filter by category">
+          <span className="label-caps mr-1 text-frost-600">Category</span>
+          {categories.map((cat) => {
+            const CategoryIcon = categoryIcons[cat]
+            return (
+              <button
+                key={cat}
+                type="button"
+                onClick={() => setCategoryFilter(cat)}
+                aria-pressed={categoryFilter === cat}
+                className={`${tabClass(categoryFilter === cat)} min-h-8 px-2.5 py-1`}
+              >
+                {CategoryIcon && <CategoryIcon size={12} />}
+                {cat}
+              </button>
+            )
+          })}
         </div>
       </div>
 
-      {/* Quest Cards Grid */}
-      {filteredQuests.length > 0 ? (
-        <div className="grid gap-4 md:grid-cols-2">
-          {filteredQuests.map((quest, index) => {
-            const isCompleted = quest.status === 'completed'
-            const isFailed = quest.status === 'failed' && isToday(quest.failedAt)
-            const Icon = getQuestIcon(quest) || categoryIcons[quest.category] || Swords
+      {/* Quest Board */}
+      <SystemWindow
+        title="Daily Quest"
+        icon={<span className="font-display text-sm font-bold">!</span>}
+        bodyClassName="p-0"
+        actions={
+          <span className="font-mono text-xs text-frost-400">
+            <span className="hidden sm:inline">Showing </span>
+            {filteredQuests.length}
+          </span>
+        }
+      >
+        <div className="flex flex-wrap items-center justify-between gap-2 border-b border-edge/70 px-4 py-3 sm:px-5">
+          <p className="label-caps text-frost-400">Goals</p>
+          <p className="font-mono text-sm text-frost-200">
+            [<span className="text-clear-300">{completedCount}</span>/{quests.length}] cleared
+          </p>
+        </div>
 
-            return (
-              <motion.div
-                key={quest.id}
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: index * 0.04 }}
-              >
-                <Card
-                  variant={isCompleted ? 'highlighted' : 'glass'}
-                  className={`flex h-full flex-col justify-between p-5 transition ${
-                    isCompleted
-                      ? 'border-emerald-400/30 bg-emerald-950/10'
-                      : isFailed
-                      ? 'border-rose-400/30 bg-rose-950/10'
-                      : 'hover:border-white/20'
+        {filteredQuests.length > 0 ? (
+          <div className="divide-y divide-edge/60">
+            {filteredQuests.map((quest, index) => {
+              const isCompleted = quest.status === 'completed'
+              const isFailed = quest.status === 'failed' && isToday(quest.failedAt)
+              const Icon = getQuestIcon(quest) || categoryIcons[quest.category] || Swords
+              const needsProof = quest.verification && String(quest.verification).toLowerCase() !== 'none'
+
+              return (
+                <motion.div
+                  key={quest.id}
+                  initial={{ opacity: 0, x: -8 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: index * 0.04 }}
+                  className={`flex flex-col gap-3 px-4 py-4 transition-colors sm:flex-row sm:items-center sm:gap-5 sm:px-5 ${
+                    isCompleted ? 'bg-clear-500/3' : isFailed ? 'bg-penalty-500/5' : 'hover:bg-system-500/5'
                   }`}
                 >
-                  <div>
-                    {/* Card Top: Badges & Rewards */}
-                    <div className="flex items-start justify-between gap-3">
-                      <div className="flex flex-wrap items-center gap-2">
-                        <span className="grid h-8 w-8 shrink-0 place-items-center rounded-lg border border-cyan-300/30 bg-cyan-400/10 text-cyan-200">
-                          <Icon size={16} />
-                        </span>
-                        <div>
-                          <span className="rounded bg-white/5 px-2 py-0.5 font-mono text-[0.62rem] text-slate-400 uppercase">
-                            {quest.category}
-                          </span>
-                          <span className="ml-1.5 font-mono text-[0.62rem] text-slate-500">
-                            · {quest.difficulty}
-                          </span>
-                        </div>
-                      </div>
+                  {/* Status square + quest info */}
+                  <div className="flex min-w-0 flex-1 gap-3.5">
+                    <span
+                      className={`grid h-10 w-10 shrink-0 place-items-center border ${
+                        isCompleted
+                          ? 'border-clear-400/70 bg-clear-500/10 text-clear-300 shadow-[0_0_10px_rgba(52,217,156,0.35)]'
+                          : isFailed
+                          ? 'border-penalty-400/70 bg-penalty-500/10 text-penalty-300'
+                          : 'border-edge-strong bg-void-950 text-system-300'
+                      }`}
+                    >
+                      {isCompleted ? <Check size={17} /> : isFailed ? <X size={17} /> : <Icon size={17} />}
+                    </span>
 
-                      <div className="flex items-center gap-1.5 font-mono text-xs">
-                        <span className="rounded-md border border-cyan-300/30 bg-cyan-400/10 px-2 py-0.5 font-bold text-cyan-200">
-                          +{quest.xp} XP
+                    <div className="min-w-0 flex-1">
+                      <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+                        <Link to={`/quests/${quest.id}`} className="group min-w-0">
+                          <h3
+                            className={`font-display text-base font-bold uppercase tracking-[0.08em] transition-colors group-hover:text-system-200 ${
+                              isCompleted || isFailed ? 'text-frost-500' : 'text-frost-50'
+                            } ${isCompleted ? 'line-through decoration-clear-400/60' : ''}`}
+                          >
+                            {quest.title}
+                          </h3>
+                        </Link>
+                        <span className="label-caps text-frost-600">
+                          {quest.category} · {quest.difficulty}
                         </span>
-                        {quest.statReward && quest.statReward !== 'NONE' && (
-                          <span className="rounded-md border border-violet-300/30 bg-violet-400/10 px-2 py-0.5 font-bold text-violet-200">
-                            {quest.statReward}
+                      </div>
+                      <p className="mt-1 line-clamp-2 text-xs leading-relaxed text-frost-400">
+                        {quest.description || quest.shortDescription}
+                      </p>
+
+                      {/* Meta info: Time & Verification */}
+                      <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 font-mono text-[0.68rem] text-frost-500">
+                        <span className="flex items-center gap-1">
+                          <Clock size={12} /> {quest.estimatedTime || '30 Mins'}
+                        </span>
+                        {needsProof && (
+                          <span className="flex items-center gap-1 text-gold-300">
+                            <Camera size={12} /> Proof Required
                           </span>
                         )}
                       </div>
                     </div>
+                  </div>
 
-                    {/* Quest Title & Description */}
-                    <div className="mt-4">
-                      <Link to={`/quests/${quest.id}`} className="group">
-                        <h3 className="font-display text-base font-semibold text-white group-hover:text-cyan-200 transition">
-                          {quest.title}
-                        </h3>
-                      </Link>
-                      <p className="mt-1.5 text-xs text-slate-400 leading-relaxed line-clamp-2">
-                        {quest.description || quest.shortDescription}
-                      </p>
-                    </div>
-
-                    {/* Meta info: Time & Verification */}
-                    <div className="mt-4 flex flex-wrap items-center gap-3 font-mono text-[0.68rem] text-slate-500 border-t border-white/5 pt-3">
-                      <span className="flex items-center gap-1">
-                        <Clock size={12} /> {quest.estimatedTime || '30 Mins'}
-                      </span>
-                      {quest.verification && String(quest.verification).toLowerCase() !== 'none' && (
-                        <span className="flex items-center gap-1 text-violet-300">
-                          <Sparkles size={11} /> Proof Required
+                  {/* Rewards + actions */}
+                  <div className="flex flex-col gap-2.5 border-t border-edge/40 pt-3 sm:items-end sm:border-t-0 sm:pt-0">
+                    <div className="flex flex-wrap items-center gap-2 sm:justify-end">
+                      <span className="font-mono text-sm font-bold text-gold-300">+{quest.xp} EXP</span>
+                      {quest.statReward && quest.statReward !== 'NONE' && (
+                        <span className="rounded-xs border border-shadow-400/50 bg-shadow-500/10 px-2 py-0.5 font-mono text-xs font-bold text-shadow-200">
+                          {quest.statReward}
                         </span>
                       )}
                     </div>
-                  </div>
 
-                  {/* Action Buttons */}
-                  <div className="mt-5 flex items-center justify-between gap-2 border-t border-white/5 pt-4">
-                    <Link
-                      to={`/quests/${quest.id}`}
-                      className="inline-flex items-center gap-1 font-mono text-xs text-slate-400 hover:text-cyan-200 transition"
-                    >
-                      <Eye size={14} /> Details
-                    </Link>
+                    <div className="flex items-center justify-between gap-2 sm:justify-end">
+                      <Link
+                        to={`/quests/${quest.id}`}
+                        className="label-caps inline-flex items-center gap-1 px-1 text-frost-400 transition-colors hover:text-system-200"
+                      >
+                        <Eye size={14} /> Details
+                      </Link>
 
-                    {isCompleted ? (
-                      <span className="inline-flex items-center gap-1.5 rounded-lg border border-emerald-400/40 bg-emerald-400/15 px-3 py-1 font-mono text-xs font-semibold text-emerald-300 shadow-[0_0_12px_rgba(52,211,153,0.2)]">
-                        <Check size={14} /> COMPLETED
-                      </span>
-                    ) : isFailed ? (
-                      <span className="inline-flex items-center gap-1.5 rounded-lg border border-rose-400/40 bg-rose-400/15 px-3 py-1 font-mono text-xs font-semibold text-rose-300">
-                        <XCircle size={14} /> FAILED
-                      </span>
-                    ) : (
-                      <div className="flex items-center gap-2">
-                        <button
-                          type="button"
-                          onClick={() => setFailureQuest(quest)}
-                          className="rounded-lg border border-rose-400/20 bg-rose-400/5 px-2.5 py-1 font-mono text-xs text-rose-300 hover:bg-rose-400/15 transition"
-                        >
-                          FAIL
-                        </button>
-                        <Button
-                          type="button"
-                          variant="primary"
-                          className="text-xs px-3.5 py-1"
-                          onClick={() => handleExecute(quest)}
-                        >
-                          <Check size={14} /> COMPLETE
-                        </Button>
-                      </div>
-                    )}
+                      {isCompleted ? (
+                        <Badge tone="success">
+                          <Check size={12} /> Completed
+                        </Badge>
+                      ) : isFailed ? (
+                        <Badge tone="danger">
+                          <XCircle size={12} /> Failed
+                        </Badge>
+                      ) : (
+                        <div className="flex items-center gap-2">
+                          <Button
+                            type="button"
+                            variant="danger"
+                            className="min-h-9 px-3 py-1 text-xs"
+                            onClick={() => setFailureQuest(quest)}
+                          >
+                            FAIL
+                          </Button>
+                          <Button
+                            type="button"
+                            variant="primary"
+                            className="min-h-9 px-3.5 py-1 text-xs"
+                            onClick={() => handleExecute(quest)}
+                          >
+                            <Check size={14} /> COMPLETE
+                          </Button>
+                        </div>
+                      )}
+                    </div>
                   </div>
-                </Card>
-              </motion.div>
-            )
-          })}
-        </div>
-      ) : (
-        <Card variant="glass" className="py-12 text-center text-slate-500 font-mono text-xs">
-          No quests match current filter. Click "CREATE QUEST" to add a custom objective.
-        </Card>
-      )}
+                </motion.div>
+              )
+            })}
+          </div>
+        ) : (
+          <div className="p-4 sm:p-5">
+            <EmptyState
+              title="No quests match current filter"
+              description='Click "CREATE QUEST" to add a custom objective.'
+            />
+          </div>
+        )}
+
+        <p className="flex items-center gap-2 border-t border-penalty-500/30 bg-penalty-500/5 px-4 py-3 text-xs text-penalty-200 sm:px-5">
+          <AlertTriangle size={14} className="shrink-0 text-penalty-400" />
+          <span>
+            <span className="font-display font-bold uppercase tracking-[0.14em] text-penalty-300">Warning:</span> failed quests
+            are permanently recorded in your failure history.
+          </span>
+        </p>
+      </SystemWindow>
 
       {/* Verification Modal */}
       {verificationQuest && (
@@ -495,11 +524,7 @@ function QuestsPage() {
 
       {/* XP Reward Animation Popup */}
       {xpAnimation && (
-        <XPRewardAnimation
-          xp={xpAnimation.xp}
-          title={xpAnimation.title}
-          onComplete={() => setXpAnimation(null)}
-        />
+        <XPRewardAnimation amount={xpAnimation.xp} visible />
       )}
     </div>
   )

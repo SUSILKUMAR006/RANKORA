@@ -10,23 +10,30 @@ import {
   XAxis,
   YAxis,
 } from 'recharts'
-import Card from '../common/Card.jsx'
+import { Activity, PieChart as PieChartIcon } from 'lucide-react'
+import { EmptyState } from '../common/States.jsx'
+import SystemWindow from '../common/SystemWindow.jsx'
+import { chartTheme, palette } from '../../theme/palette.js'
 import { formatCurrency } from '../../utils/expenseUtils.js'
+
+const tooltipBox =
+  'border border-system-400 bg-void-900/95 px-3 py-2 font-mono text-xs shadow-[0_0_20px_rgba(30,144,255,0.25)]'
 
 function CustomCategoryTooltip({ active, payload, currency = '$' }) {
   if (active && payload && payload.length) {
     const data = payload[0].payload
     return (
-      <div className="rounded-xl border border-white/15 bg-rankora-950/95 p-3 shadow-xl backdrop-blur-md">
-        <p className="font-display text-xs font-semibold" style={{ color: data.color }}>
+      <div className={tooltipBox}>
+        <p className="flex items-center gap-2 font-display text-xs font-bold uppercase tracking-widest" style={{ color: data.color }}>
+          <span className="h-2 w-2" style={{ backgroundColor: data.color }} />
           {data.name}
         </p>
-        <div className="mt-1.5 space-y-0.5 font-mono text-xs text-slate-300">
+        <div className="mt-1.5 space-y-0.5 text-frost-300">
           <p>
-            Amount: <span className="font-bold text-white">{formatCurrency(data.amount, currency)}</span>
+            Amount: <span className="font-bold text-frost-50">{formatCurrency(data.amount, currency)}</span>
           </p>
           <p>
-            Allocation: <span className="font-bold text-cyan-200">{data.percentage}%</span>
+            Allocation: <span className="font-bold text-system-200">{data.percentage}%</span>
           </p>
         </div>
       </div>
@@ -38,16 +45,15 @@ function CustomCategoryTooltip({ active, payload, currency = '$' }) {
 function CustomVelocityTooltip({ active, payload, label, currency = '$' }) {
   if (active && payload && payload.length) {
     return (
-      <div className="rounded-xl border border-white/15 bg-rankora-950/95 p-3 shadow-xl backdrop-blur-md font-mono text-xs">
-        <p className="text-slate-400 mb-1 border-b border-white/10 pb-1">{label}</p>
+      <div className={tooltipBox}>
+        <p className="mb-1 border-b border-edge pb-1 font-display font-bold uppercase tracking-widest text-frost-50">{label}</p>
         {payload.map((entry) => (
           <div key={entry.dataKey} className="flex items-center justify-between gap-4 py-0.5">
-            <span style={{ color: entry.color }} className="capitalize">
-              {entry.name || entry.dataKey}:
+            <span style={{ color: entry.color }} className="flex items-center gap-1.5 uppercase">
+              <span className="h-2 w-2" style={{ backgroundColor: entry.color }} />
+              {entry.name || entry.dataKey}
             </span>
-            <span className="font-bold text-white">
-              {formatCurrency(entry.value, currency)}
-            </span>
+            <span className="font-bold text-frost-50">{formatCurrency(entry.value, currency)}</span>
           </div>
         ))}
       </div>
@@ -63,19 +69,12 @@ export function ExpenseCharts({ categoryBreakdown = [], velocityData = [], curre
   return (
     <div className="grid gap-6 lg:grid-cols-2">
       {/* 1. Category Allocation Donut Chart */}
-      <Card variant="glass" className="space-y-4 p-5 sm:p-6">
-        <div className="flex flex-wrap items-center justify-between gap-2 border-b border-white/10 pb-3">
-          <div>
-            <p className="label-caps text-cyan-300/80">RESOURCE ALLOCATION</p>
-            <h2 className="mt-1 font-display text-base font-semibold text-white">
-              CATEGORY BREAKDOWN
-            </h2>
-          </div>
-          <span className="font-mono text-xs text-slate-500">
-            {categoryBreakdown.length} Categories
-          </span>
-        </div>
-
+      <SystemWindow
+        title="Resource Allocation"
+        icon={<PieChartIcon size={13} />}
+        actions={<span className="font-mono text-xs text-frost-500">[{categoryBreakdown.length}] categories</span>}
+      >
+        <p className="label-caps mb-4 text-frost-500">Category breakdown</p>
         {hasCategories ? (
           <div className="grid items-center gap-4 sm:grid-cols-[1fr_1.1fr]">
             <div className="h-56 w-full">
@@ -86,18 +85,13 @@ export function ExpenseCharts({ categoryBreakdown = [], velocityData = [], curre
                     data={categoryBreakdown}
                     cx="50%"
                     cy="50%"
-                    innerRadius={52}
+                    innerRadius={56}
                     outerRadius={80}
-                    paddingAngle={4}
+                    paddingAngle={2}
                     dataKey="amount"
                   >
                     {categoryBreakdown.map((entry) => (
-                      <Cell
-                        key={`cell-${entry.name}`}
-                        fill={entry.color}
-                        stroke="rgba(7, 16, 22, 0.8)"
-                        strokeWidth={2}
-                      />
+                      <Cell key={`cell-${entry.name}`} fill={entry.color} stroke={palette.void950} strokeWidth={2} />
                     ))}
                   </Pie>
                 </PieChart>
@@ -105,88 +99,69 @@ export function ExpenseCharts({ categoryBreakdown = [], velocityData = [], curre
             </div>
 
             {/* Category Legend */}
-            <div className="max-h-56 space-y-1.5 overflow-y-auto pr-1">
+            <div className="sys-inset max-h-56 divide-y divide-edge/60 overflow-y-auto">
               {categoryBreakdown.map((item) => (
                 <div
                   key={item.name}
-                  className="flex items-center justify-between rounded-lg border border-white/5 bg-white/[0.02] px-3 py-1.5 text-xs transition hover:border-white/10 hover:bg-white/[0.04]"
+                  className="flex items-center justify-between gap-3 px-3 py-2 text-xs transition-colors hover:bg-system-500/5"
                 >
                   <div className="flex min-w-0 items-center gap-2">
-                    <span
-                      className="h-2.5 w-2.5 shrink-0 rounded-full"
-                      style={{ backgroundColor: item.color }}
-                    />
-                    <span className="truncate font-medium text-slate-200">{item.name}</span>
+                    <span className="h-2.5 w-2.5 shrink-0" style={{ backgroundColor: item.color }} />
+                    <span className="label-caps truncate text-[0.7rem] text-frost-200">{item.name}</span>
                   </div>
-                  <div className="flex shrink-0 items-center gap-2.5 font-mono text-slate-400">
-                    <span className="text-white">{formatCurrency(item.amount, currency)}</span>
-                    <span className="text-cyan-300 font-semibold">{item.percentage}%</span>
+                  <div className="flex shrink-0 items-center gap-2.5 font-mono">
+                    <span className="text-frost-50">{formatCurrency(item.amount, currency)}</span>
+                    <span className="w-9 text-right font-semibold text-system-300">{item.percentage}%</span>
                   </div>
                 </div>
               ))}
             </div>
           </div>
         ) : (
-          <div className="flex h-56 flex-col items-center justify-center text-center text-slate-500">
-            <p className="font-mono text-xs">No expense categories logged yet.</p>
-            <p className="mt-1 text-[0.7rem]">Add an expense to generate category telemetry.</p>
-          </div>
+          <EmptyState title="No expense categories logged yet" description="Add an expense to generate category telemetry." />
         )}
-      </Card>
+      </SystemWindow>
 
       {/* 2. Cashflow Velocity Area Chart */}
-      <Card variant="glass" className="space-y-4 p-5 sm:p-6">
-        <div className="flex flex-wrap items-center justify-between gap-2 border-b border-white/10 pb-3">
-          <div>
-            <p className="label-caps text-violet-300/80">CASHFLOW VELOCITY</p>
-            <h2 className="mt-1 font-display text-base font-semibold text-white">
-              14-DAY INFLOW & OUTFLOW
-            </h2>
-          </div>
-          <div className="flex items-center gap-3 font-mono text-[0.65rem]">
-            <span className="flex items-center gap-1 text-cyan-300">
-              <span className="h-2 w-2 rounded-full bg-cyan-400" /> Inflow
+      <SystemWindow
+        title="Cashflow Velocity"
+        icon={<Activity size={13} />}
+      >
+        <div className="mb-4 flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
+          <p className="label-caps text-frost-500">14-day inflow &amp; outflow</p>
+          <div className="flex items-center gap-3 font-mono text-[0.65rem] uppercase">
+            <span className="flex items-center gap-1.5 text-system-300">
+              <span className="h-2 w-2 bg-system-400" /> Inflow
             </span>
-            <span className="flex items-center gap-1 text-rose-300">
-              <span className="h-2 w-2 rounded-full bg-rose-400" /> Outflow
+            <span className="flex items-center gap-1.5 text-penalty-300">
+              <span className="h-2 w-2 bg-penalty-400" /> Outflow
             </span>
           </div>
         </div>
-
         <div className="h-56 w-full">
           <ResponsiveContainer width="100%" height="100%">
-            <AreaChart data={velocityData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+            <AreaChart data={velocityData} margin={{ top: 10, right: 10, left: -16, bottom: 0 }}>
               <defs>
                 <linearGradient id="incomeGrad" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#38bdf8" stopOpacity={0.4} />
-                  <stop offset="95%" stopColor="#38bdf8" stopOpacity={0.0} />
+                  <stop offset="0%" stopColor={palette.system} stopOpacity={0.35} />
+                  <stop offset="100%" stopColor={palette.system} stopOpacity={0} />
                 </linearGradient>
                 <linearGradient id="expenseGrad" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#fb7185" stopOpacity={0.4} />
-                  <stop offset="95%" stopColor="#fb7185" stopOpacity={0.0} />
+                  <stop offset="0%" stopColor={palette.penalty} stopOpacity={0.35} />
+                  <stop offset="100%" stopColor={palette.penalty} stopOpacity={0} />
                 </linearGradient>
               </defs>
-              <CartesianGrid strokeDasharray="3 3" stroke="rgba(255, 255, 255, 0.05)" vertical={false} />
-              <XAxis
-                dataKey="label"
-                stroke="#64748b"
-                tick={{ fill: '#64748b', fontSize: 10, fontFamily: 'var(--font-mono)' }}
-                tickLine={false}
-                axisLine={false}
-              />
-              <YAxis
-                stroke="#64748b"
-                tick={{ fill: '#64748b', fontSize: 10, fontFamily: 'var(--font-mono)' }}
-                tickLine={false}
-                axisLine={false}
-              />
-              <Tooltip content={<CustomVelocityTooltip currency={currency} />} />
+              <CartesianGrid {...chartTheme.grid} />
+              <XAxis dataKey="label" {...chartTheme.axis} tick={{ ...chartTheme.axis.tick, fontSize: 10 }} minTickGap={12} />
+              <YAxis {...chartTheme.axis} tick={{ ...chartTheme.axis.tick, fontSize: 10 }} axisLine={false} />
+              <Tooltip content={<CustomVelocityTooltip currency={currency} />} cursor={chartTheme.tooltip.cursor} />
               <Area
                 type="monotone"
                 dataKey="income"
                 name="Inflow"
-                stroke="#38bdf8"
+                stroke={palette.system}
                 strokeWidth={2}
+                dot={false}
                 fillOpacity={1}
                 fill="url(#incomeGrad)"
               />
@@ -194,15 +169,16 @@ export function ExpenseCharts({ categoryBreakdown = [], velocityData = [], curre
                 type="monotone"
                 dataKey="expense"
                 name="Outflow"
-                stroke="#fb7185"
+                stroke={palette.penalty}
                 strokeWidth={2}
+                dot={false}
                 fillOpacity={1}
                 fill="url(#expenseGrad)"
               />
             </AreaChart>
           </ResponsiveContainer>
         </div>
-      </Card>
+      </SystemWindow>
     </div>
   )
 }

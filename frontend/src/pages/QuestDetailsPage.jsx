@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion'
-import { Terminal } from 'lucide-react'
+import { AlertTriangle, Terminal } from 'lucide-react'
 import { useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import Button from '../components/common/Button.jsx'
@@ -24,6 +24,7 @@ import QuestObjective from '../components/quests/details/QuestObjective.jsx'
 import QuestProgress from '../components/quests/details/QuestProgress.jsx'
 import QuestReward from '../components/quests/details/QuestReward.jsx'
 import RelatedQuests from '../components/quests/details/RelatedQuests.jsx'
+import VerificationRequirement from '../components/quests/details/VerificationRequirement.jsx'
 import { mockQuests } from '../data/mockQuests.js'
 import { useQuestCompletion } from '../hooks/useQuestCompletion.js'
 import { useQuestVerification } from '../hooks/useQuestVerification.js'
@@ -52,13 +53,11 @@ function QuestDetailsPage() {
           title="QUEST NOT FOUND"
           description="The requested objective does not exist."
         />
-        <button
-          type="button"
-          onClick={() => navigate('/quests')}
-          className="mx-auto mt-6 block rounded-xl border border-white/10 bg-white/[0.05] px-4 py-3 text-sm text-slate-200 transition hover:border-cyan-300/30 hover:text-cyan-200"
-        >
-          RETURN TO QUESTS
-        </button>
+        <div className="mt-6 flex justify-center">
+          <Button type="button" variant="secondary" onClick={() => navigate('/quests')}>
+            Return to quests
+          </Button>
+        </div>
       </div>
     )
 
@@ -158,11 +157,11 @@ function QuestDetailsPage() {
         onAction={handleAction}
         onFailure={() => setFailureOpen(true)}
       />
-      <div className="grid min-w-0 gap-6 xl:grid-cols-[minmax(0,1.25fr)_minmax(20rem,0.75fr)]">
+      <div className="grid min-w-0 gap-6 xl:grid-cols-[minmax(0,1.3fr)_minmax(20rem,0.7fr)]">
         <motion.div
-          initial={{ opacity: 0, y: 12 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.08 }}
+          initial={{ opacity: 0, x: -8 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ delay: 0.08, duration: 0.3 }}
           className="min-w-0 space-y-6"
         >
           {quest.status === 'completed' && (
@@ -171,18 +170,19 @@ function QuestDetailsPage() {
           {quest.status === 'failed' && <FailureResult quest={quest} />}
           {quest.status === 'pending_verification' && <VerificationPending />}
           {actionState === 'error' && (
-            <Card
-              variant="standard"
-              className="border-rose-300/20 bg-rose-400/[0.04]"
-            >
-              <p className="label-caps text-rose-200/80">SYSTEM ERROR</p>
-              <p className="mt-2 text-sm text-slate-400">
-                {syncError || 'Quest data could not be located.'}
-              </p>
+            <Card tone="penalty" className="flex gap-3">
+              <AlertTriangle size={18} className="mt-0.5 shrink-0 text-penalty-400" />
+              <div className="min-w-0">
+                <p className="label-caps text-penalty-300">System error</p>
+                <p className="mt-1.5 text-sm text-frost-300">
+                  {syncError || 'Quest data could not be located.'}
+                </p>
+              </div>
             </Card>
           )}
           {failureRecorded && quest.status === 'failed' && (
             <SystemMessage
+              tone="penalty"
               eyebrow="RANKORA SYSTEM"
               title="MISSION FAILURE RECORDED"
               message="Failure data has been stored for future analysis."
@@ -190,9 +190,13 @@ function QuestDetailsPage() {
           )}
           <QuestMissionBrief description={quest.description} />
           <QuestObjective quest={quest} />
-          <QuestProgress quest={quest} />
+          <div className="grid min-w-0 gap-6 lg:grid-cols-2 xl:grid-cols-1 2xl:grid-cols-2">
+            <QuestReward quest={quest} />
+            <VerificationRequirement required={Boolean(requiresVerification)} />
+          </div>
           <SystemMessage
             eyebrow="RANKORA SYSTEM"
+            tone={quest.status === 'failed' ? 'penalty' : quest.status === 'pending_verification' ? 'gold' : 'system'}
             title={
               quest.status === 'completed'
                 ? 'MISSION COMPLETE'
@@ -214,38 +218,38 @@ function QuestDetailsPage() {
                 : "Complete this quest before today's cycle ends."
             }
           />
-          <QuestHistory history={quest.history} />
-          <FailureSummary questId={quest.id} history={quest.history} />
           <FailureHistory history={quest.history} />
-          {related.length > 0 && <RelatedQuests quests={related} />}
         </motion.div>
         <motion.aside
-          initial={{ opacity: 0, x: 12 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.14 }}
-          className="min-w-0 space-y-6 xl:sticky xl:top-24 xl:self-start"
+          initial={{ opacity: 0, x: 8 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ delay: 0.14, duration: 0.3 }}
+          className="min-w-0 space-y-6"
         >
-          <QuestReward quest={quest} />
-          <QuestInformation quest={quest} />
+          <QuestProgress quest={quest} />
           {!requiresVerification &&
           quest.status !== 'failed' &&
           quest.status !== 'pending_verification' ? (
-            <Card
-              variant="standard"
-              className="border-cyan-300/15 bg-cyan-300/[0.03]"
-            >
-              <p className="label-caps text-cyan-200/70">COMPLETION PROTOCOL</p>
-              <p className="mt-3 text-sm leading-6 text-slate-400">
+            <Card variant="highlighted" className="p-4">
+              <p className="label-caps flex items-center gap-2 text-system-300">
+                <span className="h-1.5 w-1.5 rotate-45 bg-system-400 shadow-[0_0_8px_rgba(74,174,255,0.9)]" />
+                Completion protocol
+              </p>
+              <p className="mt-2 text-sm leading-6 text-frost-300">
                 Confirm this objective when your mission is complete.
               </p>
             </Card>
           ) : null}
-          <Card variant="standard" className="hidden xl:block">
-            <p className="flex items-center gap-2 label-caps text-slate-600">
+          <QuestInformation quest={quest} />
+          <QuestHistory history={quest.history} />
+          <FailureSummary questId={quest.id} history={quest.history} />
+          {related.length > 0 && <RelatedQuests quests={related} />}
+          <Card variant="inset" className="hidden p-4 xl:block">
+            <p className="label-caps flex items-center gap-2 text-frost-500">
               <Terminal size={14} />
               Mission protocol
             </p>
-            <p className="mt-3 text-sm leading-6 text-slate-500">
+            <p className="mt-2 text-sm leading-6 text-frost-500">
               Review the objective parameters before beginning your run.
             </p>
           </Card>
@@ -281,32 +285,34 @@ function QuestDetailsPage() {
       {levelUp && (
         <Modal
           open
+          tone="gold"
           title="LEVEL UP"
           eyebrow="RANKORA SYSTEM"
           onClose={() => setLevelUp(null)}
-          footer={<Button onClick={() => setLevelUp(null)}>CONTINUE</Button>}
+          footer={<Button onClick={() => setLevelUp(null)}>Continue</Button>}
         >
           <div className="text-center">
-            <p className="font-mono text-4xl text-cyan-200">
-              LEVEL {levelUp.newLevel}
+            <p className="label-caps text-gold-300">Level</p>
+            <p className="mt-1 font-display text-6xl font-bold leading-none text-frost-50 sys-glow">
+              {levelUp.newLevel}
             </p>
-            <p className="mt-3 text-slate-400">Your power has increased.</p>
-            <div className="mt-6 grid grid-cols-3 gap-3 border-t border-white/10 pt-5">
-              <div>
-                <p className="label-caps text-slate-600">Previous</p>
-                <p className="mt-2 font-mono text-xl text-white">
+            <p className="mt-3 text-frost-300">Your power has increased.</p>
+            <div className="mt-6 grid grid-cols-3 gap-2 sm:gap-3">
+              <div className="sys-inset px-2 py-3">
+                <p className="label-caps text-frost-500">Previous</p>
+                <p className="mt-1 font-display text-2xl font-bold text-frost-300">
                   {levelUp.previousLevel}
                 </p>
               </div>
-              <div>
-                <p className="label-caps text-slate-600">New level</p>
-                <p className="mt-2 font-mono text-xl text-cyan-200">
+              <div className="sys-inset px-2 py-3">
+                <p className="label-caps text-frost-500">New level</p>
+                <p className="mt-1 font-display text-2xl font-bold text-system-200 sys-glow">
                   {levelUp.newLevel}
                 </p>
               </div>
-              <div>
-                <p className="label-caps text-slate-600">XP gained</p>
-                <p className="mt-2 font-mono text-xl text-amber-200">
+              <div className="sys-inset px-2 py-3">
+                <p className="label-caps text-frost-500">EXP gained</p>
+                <p className="mt-1 font-mono text-xl font-bold text-gold-300">
                   +{levelUp.gainedXp}
                 </p>
               </div>

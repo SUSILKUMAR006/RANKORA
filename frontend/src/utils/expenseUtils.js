@@ -1,28 +1,29 @@
 import { addNotification } from './notificationUtils.js'
+import { palette } from '../theme/palette.js'
 
 export const EXPENSES_STORAGE_KEY = 'rankora_expenses'
 export const BUDGET_STORAGE_KEY = 'rankora_budget'
 export const CURRENCY_STORAGE_KEY = 'rankora_currency'
 
 export const EXPENSE_CATEGORIES = [
-  { name: 'Food & Nutrition', color: '#38bdf8', icon: 'Utensils', desc: 'Fuel, meals & supplements' },
-  { name: 'Health & Fitness', color: '#4ade80', icon: 'Dumbbell', desc: 'Gym, gear & recovery' },
-  { name: 'Housing & Rent', color: '#818cf8', icon: 'Home', desc: 'Citadel base & living' },
-  { name: 'Education & Growth', color: '#a78bfa', icon: 'BookOpen', desc: 'Books, courses & intellect' },
-  { name: 'Tech & Gear', color: '#f472b6', icon: 'Cpu', desc: 'Software, hardware & tools' },
-  { name: 'Transport & Travel', color: '#fbbf24', icon: 'Car', desc: 'Transit & mobility' },
-  { name: 'Leisure & Social', color: '#fb7185', icon: 'Smile', desc: 'Recreation & entertainment' },
-  { name: 'Investments & Vault', color: '#34d399', icon: 'Vault', desc: 'Savings & compounding' },
-  { name: 'Utilities & Bills', color: '#94a3b8', icon: 'Zap', desc: 'Power, network & node fees' },
-  { name: 'Other Protocol', color: '#e2e8f0', icon: 'Package', desc: 'Miscellaneous operations' },
+  { name: 'Food & Nutrition', color: palette.system, icon: 'Utensils', desc: 'Fuel, meals & supplements' },
+  { name: 'Health & Fitness', color: palette.clear, icon: 'Dumbbell', desc: 'Gym, gear & recovery' },
+  { name: 'Housing & Rent', color: palette.systemDeep, icon: 'Home', desc: 'Citadel base & living' },
+  { name: 'Education & Growth', color: palette.shadow, icon: 'BookOpen', desc: 'Books, courses & intellect' },
+  { name: 'Tech & Gear', color: palette.systemSoft, icon: 'Cpu', desc: 'Software, hardware & tools' },
+  { name: 'Transport & Travel', color: palette.ember, icon: 'Car', desc: 'Transit & mobility' },
+  { name: 'Leisure & Social', color: palette.penalty, icon: 'Smile', desc: 'Recreation & entertainment' },
+  { name: 'Investments & Vault', color: palette.gold, icon: 'Vault', desc: 'Savings & compounding' },
+  { name: 'Utilities & Bills', color: palette.frost400, icon: 'Zap', desc: 'Power, network & node fees' },
+  { name: 'Other Protocol', color: palette.frost200, icon: 'Package', desc: 'Miscellaneous operations' },
 ]
 
 export const INCOME_CATEGORIES = [
-  { name: 'Salary / Main Yield', color: '#2dd4bf', icon: 'Briefcase', desc: 'Core compensation' },
-  { name: 'Freelance / Bounty', color: '#67e8f9', icon: 'Swords', desc: 'Contract objectives' },
-  { name: 'Investments / Dividends', color: '#34d399', icon: 'TrendingUp', desc: 'Capital returns' },
-  { name: 'Gifts & Rewards', color: '#f472b6', icon: 'Sparkles', desc: 'Bonus inflows' },
-  { name: 'Other Inflow', color: '#cbd5e1', icon: 'PlusCircle', desc: 'Uncategorized yield' },
+  { name: 'Salary / Main Yield', color: palette.clear, icon: 'Briefcase', desc: 'Core compensation' },
+  { name: 'Freelance / Bounty', color: palette.system, icon: 'Swords', desc: 'Contract objectives' },
+  { name: 'Investments / Dividends', color: palette.gold, icon: 'TrendingUp', desc: 'Capital returns' },
+  { name: 'Gifts & Rewards', color: palette.shadow, icon: 'Sparkles', desc: 'Bonus inflows' },
+  { name: 'Other Inflow', color: palette.frost200, icon: 'PlusCircle', desc: 'Uncategorized yield' },
 ]
 
 export const PAYMENT_METHODS = [
@@ -282,7 +283,7 @@ export function calculateExpenseStats(expenses = [], budget = DEFAULT_BUDGET) {
         name,
         amount,
         percentage: totalTargetExpense > 0 ? Math.round((amount / totalTargetExpense) * 100) : 0,
-        color: catObj ? catObj.color : '#94a3b8',
+        color: catObj ? catObj.color : palette.frost400,
       }
     })
     .sort((a, b) => b.amount - a.amount)

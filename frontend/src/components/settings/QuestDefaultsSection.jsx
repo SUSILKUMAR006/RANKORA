@@ -1,5 +1,30 @@
-import { Shield, Sparkles, Swords } from 'lucide-react'
-import Card from '../common/Card.jsx'
+import { Swords } from 'lucide-react'
+import SystemWindow from '../common/SystemWindow.jsx'
+
+const optionBase =
+  'relative flex items-start gap-3 rounded-xs border p-3.5 text-left transition-[border-color,background-color,box-shadow,color] duration-150'
+const optionActive =
+  'border-system-400 bg-system-500/15 shadow-[0_0_12px_-2px_rgba(30,144,255,0.6)]'
+const optionIdle = 'border-edge bg-void-950/50 hover:border-edge-strong hover:bg-void-850'
+
+function OptionMarker({ active }) {
+  return (
+    <span
+      className={`mt-1 h-2 w-2 shrink-0 rotate-45 border ${
+        active ? 'border-system-300 bg-system-400 shadow-[0_0_8px_rgba(74,174,255,0.9)]' : 'border-frost-600'
+      }`}
+    />
+  )
+}
+
+function SettingRow({ label, children }) {
+  return (
+    <div className="grid gap-3 py-4 first:pt-0 last:pb-0 lg:grid-cols-[13rem_1fr] lg:gap-6">
+      <p className="label-caps pt-1 text-frost-400">{label}</p>
+      {children}
+    </div>
+  )
+}
 
 function QuestDefaultsSection({ settings, onUpdate }) {
   const difficulties = [
@@ -19,97 +44,64 @@ function QuestDefaultsSection({ settings, onUpdate }) {
     { id: 'Photo + Reflection Note', label: 'Photo + Reflection Note', detail: 'Requires proof and brief notes' },
   ]
 
-  return (
-    <Card variant="glass" className="space-y-6">
-      <div className="flex items-center gap-2.5 border-b border-white/10 pb-4">
-        <span className="grid h-8 w-8 place-items-center rounded-lg border border-amber-300/30 bg-amber-400/10 text-amber-200">
-          <Swords size={17} />
+  const renderOption = (option, isSelected, onSelect, detailClass = 'text-frost-400') => (
+    <button
+      type="button"
+      key={option.id}
+      onClick={onSelect}
+      aria-pressed={isSelected}
+      className={`${optionBase} ${isSelected ? optionActive : optionIdle}`}
+    >
+      <OptionMarker active={isSelected} />
+      <span className="min-w-0">
+        <span className={`block font-display text-sm font-bold uppercase tracking-[0.08em] ${isSelected ? 'text-frost-50' : 'text-frost-200'}`}>
+          {option.label}
         </span>
-        <div>
-          <p className="label-caps text-amber-300/80">AUTOMATION & PRESETS</p>
-          <h2 className="font-display text-base font-semibold text-white">
-            QUEST DEFAULTS
-          </h2>
-        </div>
-      </div>
+        <span className={`mt-0.5 block text-xs ${detailClass}`}>{option.detail}</span>
+      </span>
+    </button>
+  )
 
-      <div className="space-y-5">
+  return (
+    <SystemWindow
+      title="Quest Defaults"
+      icon={<Swords size={13} />}
+      actions={<span className="label-caps hidden text-frost-600 sm:inline">Automation & presets</span>}
+    >
+      <div className="divide-y divide-edge/60">
         {/* Default Difficulty */}
-        <div>
-          <p className="label-caps text-slate-400">Default Quest Difficulty</p>
-          <div className="mt-2.5 grid gap-3 sm:grid-cols-3">
-            {difficulties.map((diff) => {
-              const isSelected = settings.defaultDifficulty === diff.id
-              return (
-                <button
-                  type="button"
-                  key={diff.id}
-                  onClick={() => onUpdate({ defaultDifficulty: diff.id })}
-                  className={`rounded-xl border p-3.5 text-left transition ${
-                    isSelected
-                      ? 'border-amber-300/60 bg-amber-400/10 shadow-[0_0_20px_rgba(251,191,36,0.12)]'
-                      : 'border-white/10 bg-white/[0.02] hover:border-white/20 hover:bg-white/[0.04]'
-                  }`}
-                >
-                  <p className="font-display text-xs font-semibold text-white">{diff.label}</p>
-                  <p className="mt-1 text-[0.68rem] text-slate-400">{diff.detail}</p>
-                </button>
+        <SettingRow label="Default quest difficulty">
+          <div className="grid gap-2.5 sm:grid-cols-3">
+            {difficulties.map((diff) =>
+              renderOption(
+                diff,
+                settings.defaultDifficulty === diff.id,
+                () => onUpdate({ defaultDifficulty: diff.id }),
+                'font-mono text-gold-300/80'
               )
-            })}
+            )}
           </div>
-        </div>
+        </SettingRow>
 
         {/* Default Quest Type */}
-        <div>
-          <p className="label-caps text-slate-400">Default Mission Classification</p>
-          <div className="mt-2.5 grid gap-3 sm:grid-cols-2">
-            {types.map((type) => {
-              const isSelected = settings.defaultQuestType === type.id
-              return (
-                <button
-                  type="button"
-                  key={type.id}
-                  onClick={() => onUpdate({ defaultQuestType: type.id })}
-                  className={`rounded-xl border p-3.5 text-left transition ${
-                    isSelected
-                      ? 'border-cyan-300/60 bg-cyan-400/10 shadow-[0_0_20px_rgba(103,232,249,0.12)]'
-                      : 'border-white/10 bg-white/[0.02] hover:border-white/20 hover:bg-white/[0.04]'
-                  }`}
-                >
-                  <p className="font-display text-xs font-semibold text-white">{type.label}</p>
-                  <p className="mt-1 text-[0.68rem] text-slate-400">{type.detail}</p>
-                </button>
-              )
-            })}
+        <SettingRow label="Default mission classification">
+          <div className="grid gap-2.5 sm:grid-cols-2">
+            {types.map((type) =>
+              renderOption(type, settings.defaultQuestType === type.id, () => onUpdate({ defaultQuestType: type.id }))
+            )}
           </div>
-        </div>
+        </SettingRow>
 
         {/* Default Verification Mode */}
-        <div>
-          <p className="label-caps text-slate-400">Default Verification Mode</p>
-          <div className="mt-2.5 grid gap-3 sm:grid-cols-3">
-            {verifications.map((v) => {
-              const isSelected = settings.defaultVerification === v.id
-              return (
-                <button
-                  type="button"
-                  key={v.id}
-                  onClick={() => onUpdate({ defaultVerification: v.id })}
-                  className={`rounded-xl border p-3.5 text-left transition ${
-                    isSelected
-                      ? 'border-violet-300/60 bg-violet-400/10 shadow-[0_0_20px_rgba(167,139,250,0.12)]'
-                      : 'border-white/10 bg-white/[0.02] hover:border-white/20 hover:bg-white/[0.04]'
-                  }`}
-                >
-                  <p className="font-display text-xs font-semibold text-white">{v.label}</p>
-                  <p className="mt-1 text-[0.68rem] text-slate-400">{v.detail}</p>
-                </button>
-              )
-            })}
+        <SettingRow label="Default verification mode">
+          <div className="grid gap-2.5 sm:grid-cols-3">
+            {verifications.map((v) =>
+              renderOption(v, settings.defaultVerification === v.id, () => onUpdate({ defaultVerification: v.id }))
+            )}
           </div>
-        </div>
+        </SettingRow>
       </div>
-    </Card>
+    </SystemWindow>
   )
 }
 

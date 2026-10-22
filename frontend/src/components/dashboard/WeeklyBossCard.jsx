@@ -1,7 +1,8 @@
 import { CheckCircle2, ChevronRight, Skull } from 'lucide-react'
 import { Link } from 'react-router-dom'
-import Card from '../common/Card.jsx'
+import Badge from '../common/Badge.jsx'
 import ProgressBar from '../common/ProgressBar.jsx'
+import SystemWindow from '../common/SystemWindow.jsx'
 import { getStoredWeeklyBoss } from '../../utils/bossUtils.js'
 
 function WeeklyBossCard({ boss }) {
@@ -19,48 +20,76 @@ function WeeklyBossCard({ boss }) {
   ]
 
   return (
-    <Card variant="standard" className="relative overflow-hidden border-rose-300/20 bg-linear-to-br from-rose-950/30 to-rankora-900">
-      <div className="pointer-events-none absolute -right-12 top-8 h-44 w-44 rounded-full bg-rose-400/10 blur-3xl" />
-      <div className="relative">
-        <div className="flex flex-col items-start gap-3 sm:flex-row sm:items-start sm:justify-between">
-          <div>
-            <div className="flex items-center gap-2">
-              <p className="label-caps text-rose-200/70">WEEKLY BOSS</p>
-              {isDefeated && (
-                <span className="rounded bg-emerald-400/20 px-1.5 py-0.2 font-mono text-[0.6rem] font-bold text-emerald-300 uppercase">
-                  Defeated
-                </span>
-              )}
-            </div>
-            <h2 className="mt-2 font-display text-xl font-semibold text-white">{current.name || 'THE PROCRASTINATOR'}</h2>
-          </div>
-          <div className={`grid h-14 w-14 place-items-center rounded-2xl border sm:shrink-0 ${isDefeated ? 'border-emerald-400/30 bg-emerald-400/10 text-emerald-300' : 'border-rose-300/25 bg-rose-400/10 text-rose-200'}`}>
-            {isDefeated ? <CheckCircle2 size={27} /> : <Skull size={27} />}
-          </div>
-        </div>
-        <div className="mt-6">
-          <div className="mb-2 flex justify-between font-mono text-xs">
-            <span className="text-slate-500">BOSS HP</span>
-            <span className={isDefeated ? 'text-emerald-300' : 'text-rose-200'}>{hp} / {maxHp}</span>
-          </div>
-          <ProgressBar value={hp} max={maxHp} tone="boss" />
-          <p className="mt-2 font-mono text-xs text-rose-200">
-            {isDefeated ? 'BOUNTY CLAIMED · +1,000 XP' : `${remaining} DAMAGE REMAINING`}
+    <SystemWindow
+      title="Weekly Boss"
+      tone={isDefeated ? 'clear' : 'penalty'}
+      icon={isDefeated ? <CheckCircle2 size={14} /> : <Skull size={14} />}
+      actions={isDefeated ? <Badge tone="success">Defeated</Badge> : <Badge tone="danger">Active</Badge>}
+      className="overflow-hidden"
+    >
+      <div className="flex items-start justify-between gap-4">
+        <div className="min-w-0">
+          <p className={`label-caps ${isDefeated ? 'text-clear-300' : 'text-penalty-300'}`}>
+            {isDefeated ? 'Target eliminated' : 'Target'}
           </p>
+          <h2
+            className={`sys-title mt-2 text-3xl leading-none break-words sm:text-4xl ${
+              isDefeated
+                ? 'text-clear-100 [text-shadow:0_0_18px_rgba(52,217,156,0.55)]'
+                : 'text-penalty-50 [text-shadow:0_0_18px_rgba(255,77,94,0.7)]'
+            }`}
+          >
+            {current.name || 'THE PROCRASTINATOR'}
+          </h2>
         </div>
-        <div className="mt-6 grid grid-cols-2 gap-2">
+        <span className="relative grid h-14 w-14 shrink-0 place-items-center">
+          <span
+            className={`absolute inset-1.5 rotate-45 border ${
+              isDefeated
+                ? 'border-clear-400/70 bg-clear-500/10 shadow-[0_0_18px_rgba(52,217,156,0.4)]'
+                : 'border-penalty-400/70 bg-penalty-500/10 shadow-[0_0_18px_rgba(240,42,62,0.5)]'
+            }`}
+          />
+          {isDefeated ? (
+            <CheckCircle2 size={24} className="relative text-clear-300" />
+          ) : (
+            <Skull size={24} className="relative text-penalty-200" />
+          )}
+        </span>
+      </div>
+
+      <div className="mt-6">
+        <div className="mb-2 flex items-baseline justify-between gap-3">
+          <span className="label-caps text-penalty-300">Boss HP</span>
+          <span className={`font-mono text-sm ${isDefeated ? 'text-clear-300' : 'text-penalty-100'}`}>
+            {hp} <span className="text-frost-500">/ {maxHp}</span>
+          </span>
+        </div>
+        <ProgressBar value={hp} max={maxHp} tone="boss" size="lg" />
+        <p className={`mt-2 font-mono text-xs ${isDefeated ? 'text-gold-300' : 'text-penalty-200'}`}>
+          {isDefeated ? 'BOUNTY CLAIMED · +1,000 XP' : `${remaining} DAMAGE REMAINING`}
+        </p>
+      </div>
+
+      <div className="mt-6">
+        <p className="label-caps mb-2 text-frost-500">Attack sources</p>
+        <div className="grid grid-cols-2 gap-2">
           {attacks.map((attack) => (
-            <div key={attack.label || attack.id} className="flex items-center justify-between rounded-lg bg-black/15 px-3 py-2 text-xs">
-              <span className="text-slate-400">{attack.label}</span>
-              <span className="font-mono text-rose-200">+{attack.damage} DMG</span>
+            <div key={attack.label || attack.id} className="sys-inset flex min-w-0 items-center justify-between gap-2 px-3 py-2 text-xs">
+              <span className="label-caps truncate text-frost-300">{attack.label}</span>
+              <span className="shrink-0 font-mono font-bold text-penalty-200">+{attack.damage} DMG</span>
             </div>
           ))}
         </div>
-        <Link to="/boss" className="mt-6 flex items-center justify-between rounded-xl border border-rose-300/20 bg-rose-400/10 px-4 py-3 text-sm text-rose-100 transition hover:bg-rose-400/20">
-          VIEW BOSS BATTLE <ChevronRight size={16} />
-        </Link>
       </div>
-    </Card>
+
+      <Link
+        to="/boss"
+        className="group mt-6 flex items-center justify-between border border-penalty-400/60 bg-penalty-500/10 px-4 py-3 font-display text-sm font-bold uppercase tracking-[0.16em] text-penalty-100 transition-[background-color,box-shadow] hover:bg-penalty-500/20 hover:shadow-[0_0_18px_-4px_rgba(240,42,62,0.6)]"
+      >
+        View boss battle <ChevronRight size={16} className="transition-transform group-hover:translate-x-0.5" />
+      </Link>
+    </SystemWindow>
   )
 }
 

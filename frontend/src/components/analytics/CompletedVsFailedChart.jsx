@@ -8,23 +8,25 @@ import {
   XAxis,
   YAxis,
 } from 'recharts'
-import Card from '../common/Card.jsx'
+import { Crosshair } from 'lucide-react'
+import SystemWindow from '../common/SystemWindow.jsx'
+import { chartTheme, palette } from '../../theme/palette.js'
 
 function CustomCompareTooltip({ active, payload, label }) {
   if (active && payload && payload.length) {
     const data = payload[0].payload
     return (
-      <div className="rounded-xl border border-white/15 bg-rankora-950/90 p-3 shadow-xl backdrop-blur-md">
-        <p className="font-display text-xs font-semibold text-white">{label}</p>
+      <div className="rounded-xs border border-system-400 bg-void-900/95 p-3 shadow-[0_0_20px_rgba(30,144,255,0.25)]">
+        <p className="font-display text-xs font-bold uppercase tracking-widest text-frost-50">{label}</p>
         <div className="mt-2 space-y-1 font-mono text-xs">
-          <p className="text-emerald-300">
-            Completed: <span className="font-bold text-white">{data.completed}</span>
+          <p className="text-clear-300">
+            Completed: <span className="font-bold text-frost-50">{data.completed}</span>
           </p>
-          <p className="text-rose-300">
-            Failed: <span className="font-bold text-white">{data.failed}</span>
+          <p className="text-penalty-300">
+            Failed: <span className="font-bold text-frost-50">{data.failed}</span>
           </p>
-          <p className="text-violet-300">
-            Success Rate: <span className="font-bold text-white">{data.rate}%</span>
+          <p className="text-system-300">
+            Success Rate: <span className="font-bold text-frost-50">{data.rate}%</span>
           </p>
         </div>
       </div>
@@ -35,20 +37,15 @@ function CustomCompareTooltip({ active, payload, label }) {
 
 function CompletedVsFailedChart({ data = [] }) {
   return (
-    <Card variant="glass" className="space-y-4">
-      <div className="flex flex-wrap items-center justify-between gap-2 border-b border-white/10 pb-3">
-        <div>
-          <p className="label-caps text-emerald-300/80">RELIABILITY ANALYSIS</p>
-          <h2 className="mt-1 font-display text-base font-semibold text-white">
-            COMPLETED VS FAILED
-          </h2>
-        </div>
-        <div className="flex items-center gap-3 font-mono text-xs">
-          <span className="flex items-center gap-1.5 text-emerald-300">
-            <span className="h-2.5 w-2.5 rounded-sm bg-emerald-400" /> Completed
+    <SystemWindow title="Completed vs Failed" icon={<Crosshair size={13} />}>
+      <div className="mb-4 flex flex-wrap items-baseline justify-between gap-x-4 gap-y-2">
+        <p className="text-sm text-frost-400">Reliability analysis: quests cleared against quests failed.</p>
+        <div className="flex items-center gap-3">
+          <span className="label-caps flex items-center gap-1.5 text-clear-300">
+            <span className="h-2.5 w-2.5 bg-clear-400 shadow-[0_0_6px_rgba(52,217,156,0.7)]" /> Completed
           </span>
-          <span className="flex items-center gap-1.5 text-rose-300">
-            <span className="h-2.5 w-2.5 rounded-sm bg-rose-400" /> Failed
+          <span className="label-caps flex items-center gap-1.5 text-penalty-300">
+            <span className="h-2.5 w-2.5 bg-penalty-400 shadow-[0_0_6px_rgba(255,77,94,0.7)]" /> Failed
           </span>
         </div>
       </div>
@@ -56,46 +53,30 @@ function CompletedVsFailedChart({ data = [] }) {
       <div className="h-64 w-full">
         <ResponsiveContainer width="100%" height="100%">
           <BarChart data={data} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-            <CartesianGrid
-              strokeDasharray="3 3"
-              stroke="rgba(255, 255, 255, 0.05)"
-              vertical={false}
-            />
-            <XAxis
-              dataKey="label"
-              stroke="#64748b"
-              fontSize={11}
-              fontFamily="var(--font-mono)"
-              tickLine={false}
-              axisLine={{ stroke: 'rgba(255, 255, 255, 0.1)' }}
-            />
-            <YAxis
-              stroke="#64748b"
-              fontSize={11}
-              fontFamily="var(--font-mono)"
-              tickLine={false}
-              axisLine={false}
-              allowDecimals={false}
-            />
-            <Tooltip content={<CustomCompareTooltip />} />
+            <CartesianGrid {...chartTheme.grid} />
+            <XAxis dataKey="label" {...chartTheme.axis} />
+            <YAxis {...chartTheme.axis} axisLine={false} allowDecimals={false} />
+            <Tooltip content={<CustomCompareTooltip />} cursor={chartTheme.tooltip.cursor} />
             <Bar
               dataKey="completed"
               name="Completed"
-              fill="#34d399"
-              radius={[4, 4, 0, 0]}
+              fill={palette.clear}
+              fillOpacity={0.85}
+              radius={[1, 1, 0, 0]}
               maxBarSize={28}
             />
             <Bar
               dataKey="failed"
               name="Failed"
-              fill="#fb7185"
-              radius={[4, 4, 0, 0]}
+              fill={palette.penalty}
+              fillOpacity={0.85}
+              radius={[1, 1, 0, 0]}
               maxBarSize={28}
             />
           </BarChart>
         </ResponsiveContainer>
       </div>
-    </Card>
+    </SystemWindow>
   )
 }
 

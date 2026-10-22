@@ -88,25 +88,25 @@ function ProgressPhotoModal({ open, initialPhoto, journeyStart, onClose, onSave 
     <Modal
       open={open}
       onClose={onClose}
-      title={initialPhoto ? 'EDIT CHECKPOINT' : 'ADD PROGRESS PHOTO'}
-      eyebrow="RANKORA SYSTEM"
+      title={initialPhoto ? 'Edit checkpoint' : 'Add progress photo'}
+      eyebrow="System / Growth record"
       footer={
         <>
           <Button variant="ghost" onClick={onClose}>
-            CANCEL
+            Cancel
           </Button>
           <Button onClick={save}>
-            {initialPhoto ? 'SAVE CHANGES' : 'SAVE CHECKPOINT'}
+            {initialPhoto ? 'Save changes' : 'Save checkpoint'}
           </Button>
         </>
       }
     >
       <div className="space-y-5">
-        <p className="text-sm leading-6 text-slate-400">
+        <p className="text-sm leading-6 text-frost-400">
           Record a private checkpoint in your progression timeline.
         </p>
         {activePhoto ? (
-          <div className="relative overflow-hidden rounded-xl border border-cyan-300/20 bg-black/20">
+          <div className="relative overflow-hidden rounded-xs border border-system-400/40 bg-void-950 shadow-[inset_0_0_24px_-8px_rgba(30,144,255,0.35)]">
             <motion.img
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -117,22 +117,24 @@ function ProgressPhotoModal({ open, initialPhoto, journeyStart, onClose, onSave 
             <button
               type="button"
               onClick={removePhoto}
-              className="absolute right-3 top-3 inline-flex items-center gap-2 rounded-lg bg-rankora-950/85 px-3 py-2 text-xs text-rose-200"
+              className="absolute right-2 top-2 inline-flex items-center gap-1.5 rounded-xs border border-penalty-400/60 bg-void-950/90 px-2.5 py-1.5 font-display text-xs font-bold uppercase tracking-[0.14em] text-penalty-200 transition-colors hover:bg-penalty-500/20"
             >
-              <Trash2 size={14} />
-              REMOVE
+              <Trash2 size={13} />
+              Remove
             </button>
           </div>
         ) : (
           <label
             htmlFor="progress-file"
-            className="flex min-h-40 cursor-pointer flex-col items-center justify-center rounded-xl border border-dashed border-cyan-300/25 bg-cyan-300/[0.03] text-center transition hover:border-cyan-300/50"
+            className="flex min-h-40 cursor-pointer flex-col items-center justify-center rounded-xs border border-dashed border-system-400/40 bg-system-500/5 px-4 text-center transition-[border-color,box-shadow] hover:border-system-400 hover:shadow-[inset_0_0_24px_-8px_rgba(30,144,255,0.45)]"
           >
-            <ImagePlus size={28} className="mb-3 text-cyan-200" />
-            <span className="font-mono text-xs tracking-wider text-cyan-100">
-              SELECT PROGRESS PHOTO
+            <span className="mb-3 grid h-11 w-11 place-items-center border border-system-400 bg-void-950 text-system-200 shadow-[0_0_14px_-2px_rgba(30,144,255,0.6)]">
+              <ImagePlus size={20} />
             </span>
-            <span className="mt-2 text-xs text-slate-600">
+            <span className="font-display text-sm font-bold uppercase tracking-[0.14em] text-frost-50">
+              Select progress photo
+            </span>
+            <span className="mt-1.5 font-mono text-xs text-frost-500">
               JPG, PNG, WEBP · max 10MB · private
             </span>
           </label>
@@ -149,15 +151,15 @@ function ProgressPhotoModal({ open, initialPhoto, journeyStart, onClose, onSave 
           <button
             type="button"
             onClick={() => document.getElementById('progress-file').click()}
-            className="flex items-center gap-2 text-xs text-cyan-200 hover:text-white"
+            className="label-caps flex items-center gap-2 text-system-300 transition-colors hover:text-frost-50"
           >
             <RotateCcw size={13} />
-            CHANGE PHOTO
+            Change photo
           </button>
         )}
         <div className="grid gap-4 sm:grid-cols-2">
-          <label>
-            <span className="label-caps text-slate-400">Date</span>
+          <label className="block">
+            <span className="label-caps mb-1.5 block text-frost-400">Date</span>
             <input
               type="date"
               value={date}
@@ -166,24 +168,24 @@ function ProgressPhotoModal({ open, initialPhoto, journeyStart, onClose, onSave 
                 setDate(event.target.value)
                 setError('')
               }}
-              className="mt-2 min-h-11 w-full rounded-xl border border-white/10 bg-white/4 px-3 text-sm text-white outline-none focus:border-cyan-300/50"
+              className="field font-mono"
             />
           </label>
-          <label>
-            <span className="label-caps text-slate-400">
-              Weight <span className="text-slate-600">(optional)</span>
+          <label className="block">
+            <span className="label-caps mb-1.5 block text-frost-400">
+              Weight <span className="text-frost-600">(optional)</span>
             </span>
             <input
               value={weight}
               onChange={(event) => setWeight(event.target.value)}
               placeholder="e.g. 72 kg"
-              className="mt-2 min-h-11 w-full rounded-xl border border-white/10 bg-white/4 px-3 text-sm text-white outline-none placeholder:text-slate-600 focus:border-cyan-300/50"
+              className="field font-mono"
             />
           </label>
         </div>
-        <label>
-          <span className="label-caps text-slate-400">
-            Note <span className="text-slate-600">(optional)</span>
+        <label className="block">
+          <span className="label-caps mb-1.5 block text-frost-400">
+            Note <span className="text-frost-600">(optional)</span>
           </span>
           <textarea
             value={note}
@@ -191,13 +193,18 @@ function ProgressPhotoModal({ open, initialPhoto, journeyStart, onClose, onSave 
             onChange={(event) => setNote(event.target.value)}
             placeholder="What changed since your last checkpoint?"
             rows={3}
-            className="mt-2 w-full resize-y rounded-xl border border-white/10 bg-white/4 px-3 py-3 text-sm text-white outline-none placeholder:text-slate-600 focus:border-cyan-300/50"
+            className="field resize-y leading-6"
           />
-          <span className="mt-1 block text-right font-mono text-[0.65rem] text-slate-600">
-            {note.length} / 500
+          <span className="mt-1 block text-right font-mono text-[0.65rem] text-frost-600">
+            [{note.length}/500]
           </span>
         </label>
-        {error && <p className="text-xs text-rose-300">{error}</p>}
+        {error && (
+          <p className="flex items-start gap-2 border border-penalty-400/50 bg-penalty-500/10 px-3 py-2 text-xs text-penalty-200">
+            <span className="font-display font-bold uppercase tracking-[0.14em] text-penalty-300">Error:</span>
+            <span>{error}</span>
+          </p>
+        )}
       </div>
     </Modal>
   )

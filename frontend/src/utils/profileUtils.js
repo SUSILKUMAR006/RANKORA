@@ -23,6 +23,7 @@ import { getStoredWeeklyBoss } from './bossUtils.js'
 import { getStoredFailures } from './failureUtils.js'
 import { getStoredProgressPhotos } from './progressUtils.js'
 import { requiredXpForLevel } from './xpUtils.js'
+import { palette } from '../theme/palette.js'
 
 export const STAT_METADATA = [
   {
@@ -32,7 +33,7 @@ export const STAT_METADATA = [
     description: 'Physical power, muscular resilience, and resistance training mastery.',
     icon: Dumbbell,
     tone: 'rose',
-    color: '#fb7185',
+    color: palette.penalty,
     maxThreshold: 25,
   },
   {
@@ -42,7 +43,7 @@ export const STAT_METADATA = [
     description: 'Biological endurance, cellular hydration, and restorative sleep recovery.',
     icon: HeartPulse,
     tone: 'emerald',
-    color: '#34d399',
+    color: palette.clear,
     maxThreshold: 25,
   },
   {
@@ -52,7 +53,7 @@ export const STAT_METADATA = [
     description: 'Deep software engineering, long-form reading, and cognitive speed.',
     icon: Brain,
     tone: 'violet',
-    color: '#a78bfa',
+    color: palette.shadow,
     maxThreshold: 25,
   },
   {
@@ -62,7 +63,7 @@ export const STAT_METADATA = [
     description: 'Execution promptness, swift reaction to resistance, and dynamic momentum.',
     icon: Zap,
     tone: 'cyan',
-    color: '#67e8f9',
+    color: palette.system,
     maxThreshold: 25,
   },
   {
@@ -72,7 +73,7 @@ export const STAT_METADATA = [
     description: 'Unbroken streak maintenance, impulse control, and focus shielding.',
     icon: Scale,
     tone: 'amber',
-    color: '#fbbf24',
+    color: palette.gold,
     maxThreshold: 25,
   },
 ]

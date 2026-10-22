@@ -1,3 +1,11 @@
-import Card from '../../common/Card.jsx'
-function QuestMissionBrief({ description }) { return <Card variant="glass"><p className="label-caps text-cyan-300/70">MISSION BRIEF</p><p className="mt-4 text-base leading-8 text-slate-300">{description}</p></Card> }
+import { ScrollText } from 'lucide-react'
+import SystemWindow from '../../common/SystemWindow.jsx'
+
+function QuestMissionBrief({ description }) {
+  return (
+    <SystemWindow title="Mission Brief" icon={<ScrollText size={13} />}>
+      <p className="text-sm leading-7 text-frost-300 sm:text-base sm:leading-8">{description}</p>
+    </SystemWindow>
+  )
+}
 export default QuestMissionBrief

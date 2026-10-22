@@ -159,6 +159,7 @@ function QuestVerificationModal({ quest, open, onClose, onVerified, onSubmitted 
       onClose={processing ? undefined : handleClose}
       title={submitted ? 'PROOF VERIFIED & COMPLETED' : 'PHOTO PROOF VERIFICATION'}
       eyebrow={isGymQuest ? 'GYM WORKOUT PROTOCOL' : 'RANKORA SYSTEM'}
+      tone={submitted ? 'gold' : 'system'}
       footer={
         submitted ? (
           <Button onClick={handleClose} variant="primary">
@@ -187,44 +188,51 @@ function QuestVerificationModal({ quest, open, onClose, onVerified, onSubmitted 
             key="submitted"
             initial={{ opacity: 0, scale: 0.96 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="text-center py-2"
+            className="py-2 text-center"
           >
-            <div className="mx-auto mb-4 grid h-16 w-16 place-items-center rounded-2xl border border-emerald-400/40 bg-emerald-400/15 text-emerald-300 shadow-[0_0_24px_rgba(52,211,153,0.3)]">
-              <CheckCircle2 size={36} />
-            </div>
-            <h3 className="font-display text-lg font-bold text-white">
-              WORKOUT EVIDENCE ACCEPTED
-            </h3>
-            <p className="mt-1 text-sm text-slate-300">
-              Quest verified. +{quest.xp} XP and {quest.statReward || '+2 STR'} applied to your profile.
+            <span className="mx-auto mb-4 grid h-16 w-16 place-items-center border border-clear-400/70 bg-clear-500/10 text-clear-300 shadow-[0_0_24px_-2px_rgba(52,217,156,0.5)]">
+              <CheckCircle2 size={34} />
+            </span>
+            <p className="label-caps text-clear-300">Quest clear</p>
+            <h3 className="sys-title mt-1 text-lg">Workout evidence accepted</h3>
+            <p className="mt-4 font-display text-4xl font-bold leading-none text-gold-300 sys-glow">
+              +<span className="font-mono">{quest.xp}</span> EXP
+            </p>
+            <p className="mt-3 text-sm text-frost-300">
+              Quest verified. +{quest.xp} XP and{' '}
+              <span className="font-mono text-shadow-200">{quest.statReward || '+2 STR'}</span> applied to your profile.
             </p>
 
-            <div className="mt-5 space-y-2.5 rounded-xl border border-white/10 bg-white/[0.03] p-4 text-left text-xs font-mono">
-              <div className="flex justify-between gap-3">
-                <span className="text-slate-500">Mission</span>
-                <span className="text-right text-white font-bold">{quest.title}</span>
+            <dl className="sys-inset mt-5 divide-y divide-edge/60 text-left text-xs">
+              <div className="flex items-baseline justify-between gap-3 px-4 py-2.5">
+                <dt className="label-caps text-frost-500">Mission</dt>
+                <dd className="text-right font-display text-sm font-bold uppercase tracking-[0.08em] text-frost-50">{quest.title}</dd>
               </div>
-              <div className="flex justify-between gap-3">
-                <span className="text-slate-500">Evidence Status</span>
-                <span className="text-emerald-300 font-bold">Photo Inscribed</span>
+              <div className="flex items-baseline justify-between gap-3 px-4 py-2.5">
+                <dt className="label-caps text-frost-500">Evidence status</dt>
+                <dd className="text-right font-mono font-bold text-clear-300">Photo Inscribed</dd>
               </div>
-              <div className="flex justify-between gap-3">
-                <span className="text-slate-500">Progress Timeline</span>
-                <span className="text-cyan-300">Saved to /progress</span>
+              <div className="flex items-baseline justify-between gap-3 px-4 py-2.5">
+                <dt className="label-caps text-frost-500">Progress timeline</dt>
+                <dd className="text-right font-mono text-system-300">Saved to /progress</dd>
               </div>
-            </div>
+            </dl>
           </motion.div>
         ) : (
           <motion.div key="form" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-4">
-            <div className="rounded-xl border border-cyan-300/20 bg-cyan-400/5 p-3.5 flex items-start gap-3">
-              <span className="grid h-8 w-8 shrink-0 place-items-center rounded-lg bg-cyan-400/10 text-cyan-300">
-                <Dumbbell size={18} />
+            <div className="sys-inset flex items-start gap-3 p-3.5">
+              <span className="grid h-8 w-8 shrink-0 place-items-center border border-gold-400/60 bg-gold-500/10 text-gold-300">
+                <Dumbbell size={17} />
               </span>
-              <div>
-                <p className="font-display text-xs font-bold text-white">
-                  MANDATORY WORKOUT EVIDENCE
+              <div className="min-w-0">
+                <p className="label-caps flex items-center gap-2 text-gold-300">
+                  <span className="h-1.5 w-1.5 rotate-45 animate-sys-pulse bg-gold-400 shadow-[0_0_8px_rgba(255,194,51,0.9)]" />
+                  {processing ? 'Verifying' : 'Verification required'}
                 </p>
-                <p className="mt-0.5 text-xs text-slate-300 leading-relaxed">
+                <p className="mt-1 font-display text-sm font-bold uppercase tracking-[0.08em] text-frost-50">
+                  Mandatory workout evidence
+                </p>
+                <p className="mt-0.5 text-xs leading-relaxed text-frost-300">
                   To prevent false completion and maintain real discipline, upload a photo at the gym or workout session to complete this quest.
                 </p>
               </div>
@@ -232,7 +240,7 @@ function QuestVerificationModal({ quest, open, onClose, onVerified, onSubmitted 
 
             {previewUrl ? (
               <div className="space-y-3">
-                <div className="relative overflow-hidden rounded-xl border border-cyan-300/30 bg-black/40 shadow-[0_0_20px_rgba(103,232,249,0.15)]">
+                <div className="relative overflow-hidden border border-system-400/50 bg-void-950 shadow-[0_0_20px_-4px_rgba(30,144,255,0.4)]">
                   <motion.img
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
@@ -244,35 +252,35 @@ function QuestVerificationModal({ quest, open, onClose, onVerified, onSubmitted 
                     type="button"
                     aria-label="Remove selected photo"
                     onClick={removeFile}
-                    className="absolute right-3 top-3 inline-flex items-center gap-1.5 rounded-lg bg-rankora-950/85 px-3 py-1.5 font-mono text-xs text-rose-300 backdrop-blur hover:bg-rose-400/20 transition"
+                    className="absolute right-3 top-3 inline-flex items-center gap-1.5 border border-penalty-400/60 bg-void-950/85 px-3 py-1.5 font-display text-xs font-bold uppercase tracking-[0.14em] text-penalty-300 backdrop-blur transition-colors hover:bg-penalty-500/20"
                   >
                     <Trash2 size={13} /> REMOVE
                   </button>
                 </div>
 
-                <div className="flex items-center justify-between gap-3 font-mono text-xs text-slate-400 px-1">
-                  <span className="flex min-w-0 items-center gap-1.5 truncate">
-                    <FileImage size={13} className="text-cyan-300" />
-                    {file?.name}
+                <div className="flex items-center justify-between gap-3 px-1 font-mono text-xs text-frost-400">
+                  <span className="flex min-w-0 items-center gap-1.5">
+                    <FileImage size={13} className="shrink-0 text-system-300" />
+                    <span className="truncate">{file?.name}</span>
                   </span>
-                  <span>{(file?.size ? file.size / 1024 / 1024 : 0).toFixed(2)} MB</span>
+                  <span className="shrink-0">{(file?.size ? file.size / 1024 / 1024 : 0).toFixed(2)} MB</span>
                 </div>
               </div>
             ) : (
               <label
                 htmlFor="verification-file-input"
-                className="flex min-h-48 cursor-pointer flex-col items-center justify-center rounded-xl border border-dashed border-cyan-300/30 bg-cyan-300/[0.03] p-6 text-center transition hover:border-cyan-300/60 hover:bg-cyan-300/[0.06]"
+                className="flex min-h-48 cursor-pointer flex-col items-center justify-center border border-dashed border-system-400/40 bg-system-500/5 p-6 text-center transition-colors hover:border-system-400/80 hover:bg-system-500/10"
               >
-                <div className="mb-3 grid h-12 w-12 place-items-center rounded-2xl border border-cyan-300/30 bg-cyan-400/10 text-cyan-200">
-                  <Camera size={24} />
-                </div>
-                <span className="font-mono text-xs font-bold tracking-wider text-cyan-100">
-                  UPLOAD GYM PROOF PHOTO
+                <span className="mb-3 grid h-12 w-12 place-items-center border border-system-400/60 bg-system-500/10 text-system-200 shadow-[0_0_14px_-2px_rgba(30,144,255,0.5)]">
+                  <Camera size={22} />
                 </span>
-                <span className="mt-1.5 text-xs text-slate-400">
+                <span className="font-display text-sm font-bold uppercase tracking-[0.14em] text-frost-50">
+                  Upload gym proof photo
+                </span>
+                <span className="mt-1.5 text-xs text-frost-400">
                   Click to select workout photo or capture snapshot
                 </span>
-                <span className="mt-1 font-mono text-[0.65rem] text-slate-500">
+                <span className="mt-1 font-mono text-[0.65rem] text-frost-500">
                   JPG, PNG, WEBP · Max 10MB
                 </span>
               </label>
@@ -288,19 +296,21 @@ function QuestVerificationModal({ quest, open, onClose, onVerified, onSubmitted 
             />
 
             <label className="block">
-              <span className="label-caps text-slate-400">
-                WORKOUT NOTE <span className="text-slate-600">(optional)</span>
+              <span className="label-caps mb-1.5 block text-frost-400">
+                Workout note <span className="text-frost-600">(optional)</span>
               </span>
               <textarea
                 value={note}
                 onChange={(e) => setNote(e.target.value)}
                 placeholder="e.g. Completed Push Day: 4x8 Bench Press, Shoulder Press..."
                 rows={2}
-                className="mt-1 w-full rounded-xl border border-white/10 bg-white/[0.03] p-3 text-xs text-white placeholder:text-slate-600 outline-none focus:border-cyan-300/50 focus:bg-white/[0.06]"
+                className="field text-xs"
               />
             </label>
 
-            {error && <p className="text-xs text-rose-300 font-mono">{error}</p>}
+            {error && (
+              <p className="border border-penalty-500/40 bg-penalty-500/10 px-3 py-2 font-mono text-xs text-penalty-200">{error}</p>
+            )}
           </motion.div>
         )}
       </AnimatePresence>

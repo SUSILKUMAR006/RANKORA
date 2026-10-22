@@ -1,22 +1,10 @@
 import { useEffect, useState } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
-import {
-  Activity,
-  Camera,
-  Check,
-  CheckCircle2,
-  ChevronRight,
-  Clock,
-  Dumbbell,
-  Flame,
-  Info,
-  Sparkles,
-  Zap,
-} from 'lucide-react'
+import { motion } from 'framer-motion'
+import { AlertTriangle, Camera, Check, CheckCircle2, Dumbbell } from 'lucide-react'
 import Badge from '../common/Badge.jsx'
 import Button from '../common/Button.jsx'
-import Card from '../common/Card.jsx'
 import ProgressBar from '../common/ProgressBar.jsx'
+import SystemWindow from '../common/SystemWindow.jsx'
 import QuestVerificationModal from '../quests/QuestVerificationModal.jsx'
 import {
   WEEKLY_WORKOUT_SPLIT,
@@ -107,183 +95,196 @@ function DailyWorkoutCard({ onQuestCompleted }) {
   const dayOrder = [1, 2, 3, 4, 5, 6, 0] // Mon -> Sun
 
   return (
-    <Card variant="highlighted" className="space-y-6">
-      {/* Card Header */}
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between border-b border-white/10 pb-5">
-        <div className="flex items-center gap-3">
-          <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl border border-cyan-300/30 bg-cyan-400/10 text-cyan-200 shadow-[0_0_20px_rgba(103,232,249,0.15)]">
-            <Dumbbell size={20} />
-          </span>
-          <div>
-            <div className="flex items-center gap-2">
-              <p className="label-caps text-cyan-300/80">DAILY WORKOUT SPLIT</p>
-              {isToday && (
-                <span className="rounded-md bg-cyan-400/20 border border-cyan-300/30 px-2 py-0.5 font-mono text-[0.6rem] font-bold text-cyan-100 uppercase animate-pulse">
-                  TODAY'S TARGET
-                </span>
-              )}
-            </div>
-            <h2 className="font-display text-xl font-bold tracking-tight text-white sm:text-2xl mt-0.5">
-              {workoutPlan.dayName.toUpperCase()} — {workoutPlan.focus}
-            </h2>
+    <SystemWindow
+      title="Daily Workout"
+      icon={<Dumbbell size={14} />}
+      bodyClassName="p-0"
+      actions={
+        <span className="font-mono text-sm text-frost-200">
+          [<span className={allCompleted ? 'text-clear-300' : 'text-system-300'}>{completedCount}</span>/{totalExercises}]
+        </span>
+      }
+    >
+      {/* Quest header */}
+      <div className="flex flex-col gap-3 border-b border-edge/70 px-5 py-4 sm:flex-row sm:items-end sm:justify-between">
+        <div className="min-w-0">
+          <div className="flex flex-wrap items-center gap-2">
+            <p className="label-caps text-system-300">Training quest · Workout split</p>
+            {isToday && (
+              <Badge tone="status" className="animate-sys-pulse">
+                Today&apos;s target
+              </Badge>
+            )}
           </div>
+          <h3 className="sys-title mt-1.5 text-xl leading-tight sm:text-2xl">
+            {workoutPlan.dayName} <span className="text-system-400">—</span> {workoutPlan.focus}
+          </h3>
         </div>
-
-        {/* Quick stats pill */}
-        <div className="flex items-center gap-2">
-          <span className="rounded-xl border border-white/10 bg-white/[0.03] px-3 py-1.5 font-mono text-xs text-slate-300">
-            {completedCount} / {totalExercises} Done ({progressPercentage}%)
-          </span>
-        </div>
+        <p className="shrink-0 font-mono text-xs text-frost-400">
+          {completedCount} / {totalExercises} done <span className="text-system-300">({progressPercentage}%)</span>
+        </p>
       </div>
 
-      {/* Day Selector Pills */}
-      <div className="flex flex-wrap items-center gap-2">
-        {dayOrder.map((dayIdx) => {
-          const split = WEEKLY_WORKOUT_SPLIT[dayIdx]
-          const isSelected = selectedDay === dayIdx
-          const isCurrentToday = currentDayIndex === dayIdx
-
-          return (
-            <button
-              type="button"
-              key={dayIdx}
-              onClick={() => setSelectedDay(dayIdx)}
-              className={`relative rounded-xl px-3.5 py-2 font-mono text-xs font-semibold transition ${
-                isSelected
-                  ? 'border border-cyan-300/50 bg-cyan-400/15 text-white shadow-[0_0_16px_rgba(103,232,249,0.2)]'
-                  : 'border border-white/5 bg-white/[0.02] text-slate-400 hover:border-white/20 hover:text-white'
-              }`}
-            >
-              <span>{split.shortDay}</span>
-              {isCurrentToday && (
-                <span className="ml-1.5 inline-block h-1.5 w-1.5 rounded-full bg-cyan-300 shadow-[0_0_6px_#67e8f9]" />
-              )}
-            </button>
-          )
-        })}
-      </div>
-
-      {/* Focus Description & Muscle Target */}
-      <div className="rounded-xl border border-white/5 bg-white/[0.02] p-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between text-xs">
-        <div>
-          <p className="font-display font-medium text-slate-200">{workoutPlan.subtitle}</p>
-          <p className="mt-0.5 font-mono text-[0.68rem] text-slate-400">
-            Target: {workoutPlan.targetMuscles.join(' · ')}
-          </p>
-        </div>
-
-        <div className="w-full sm:w-48">
-          <ProgressBar
-            value={progressPercentage}
-            max={100}
-            tone="cyan"
-            label="Workout Execution"
-          />
-        </div>
-      </div>
-
-      {/* Interactive Exercises Checklist */}
-      <div className="space-y-3">
-        <p className="label-caps text-slate-400">EXERCISE CHECKLIST (ONE BY ONE)</p>
-
-        <div className="grid gap-2.5">
-          {workoutPlan.exercises.map((exercise, index) => {
-            const isDone = Boolean(completedExercises[exercise.id])
+      <div className="space-y-5 p-5">
+        {/* Day selector */}
+        <div className="grid grid-cols-7 gap-1 sm:gap-1.5" role="tablist" aria-label="Workout day">
+          {dayOrder.map((dayIdx) => {
+            const split = WEEKLY_WORKOUT_SPLIT[dayIdx]
+            const isSelected = selectedDay === dayIdx
+            const isCurrentToday = currentDayIndex === dayIdx
 
             return (
-              <motion.div
-                key={exercise.id}
-                initial={{ opacity: 0, y: 6 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: index * 0.04 }}
-                className={`flex items-start justify-between gap-3.5 rounded-xl border p-3.5 transition cursor-pointer ${
-                  isDone
-                    ? 'border-emerald-400/30 bg-emerald-950/15'
-                    : 'border-white/10 bg-white/[0.02] hover:border-white/20 hover:bg-white/[0.04]'
+              <button
+                type="button"
+                key={dayIdx}
+                role="tab"
+                aria-selected={isSelected}
+                onClick={() => setSelectedDay(dayIdx)}
+                className={`relative min-w-0 border px-0.5 py-2 font-mono text-[0.68rem] font-semibold transition-[border-color,background-color,box-shadow,color] sm:text-xs ${
+                  isSelected
+                    ? 'border-system-400 bg-system-500/15 text-frost-50 shadow-[0_0_12px_-2px_rgba(30,144,255,0.6)]'
+                    : 'border-edge text-frost-400 hover:border-edge-strong hover:text-frost-100'
                 }`}
-                onClick={() => handleToggleExercise(exercise.id)}
               >
-                <div className="flex items-start gap-3 min-w-0">
-                  {/* Custom Checkbox */}
-                  <button
-                    type="button"
-                    aria-label={`Toggle ${exercise.name}`}
-                    className={`mt-0.5 grid h-5 w-5 shrink-0 place-items-center rounded-lg border transition ${
-                      isDone
-                        ? 'border-emerald-400 bg-emerald-400 text-rankora-950 shadow-[0_0_10px_rgba(52,211,153,0.4)]'
-                        : 'border-white/20 bg-white/5 text-transparent hover:border-cyan-300/60'
-                    }`}
-                  >
-                    <Check size={13} strokeWidth={3} />
-                  </button>
-
-                  {/* Exercise Title and Sets/Reps */}
-                  <div className="min-w-0">
-                    <div className="flex flex-wrap items-center gap-2">
-                      <span className="font-mono text-xs text-slate-500 font-bold">
-                        {index + 1}.
-                      </span>
-                      <h4
-                        className={`font-display text-sm font-semibold transition ${
-                          isDone ? 'line-through text-slate-400' : 'text-white'
-                        }`}
-                      >
-                        {exercise.name}
-                      </h4>
-                    </div>
-
-                    <p className="mt-1 font-mono text-[0.68rem] text-slate-400">
-                      {exercise.notes}
-                    </p>
-                  </div>
-                </div>
-
-                {/* Sets & Reps Pill */}
-                <div className="shrink-0 text-right font-mono text-xs">
-                  <span className="rounded-md border border-white/10 bg-white/5 px-2 py-1 text-cyan-200 font-semibold block">
-                    {exercise.sets}
-                  </span>
-                  <span className="mt-1 block text-[0.62rem] text-slate-400">
-                    {exercise.reps}
-                  </span>
-                </div>
-              </motion.div>
+                <span>{split.shortDay}</span>
+                {isCurrentToday && (
+                  <span className="absolute right-1 top-1 h-1.5 w-1.5 rotate-45 bg-system-300 shadow-[0_0_6px_rgba(124,196,255,1)]" />
+                )}
+              </button>
             )
           })}
         </div>
+
+        {/* Focus description & muscle target */}
+        <div className="sys-inset flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between">
+          <div className="min-w-0">
+            <p className="font-display text-sm font-bold uppercase tracking-[0.08em] text-frost-100">{workoutPlan.subtitle}</p>
+            <p className="mt-1 font-mono text-[0.68rem] text-frost-500">
+              <span className="text-system-300">Target:</span> {workoutPlan.targetMuscles.join(' · ')}
+            </p>
+          </div>
+
+          <div className="w-full sm:w-52">
+            <ProgressBar
+              value={progressPercentage}
+              max={100}
+              tone={allCompleted ? 'quest' : 'xp'}
+              label="Workout execution"
+              showValue
+            />
+          </div>
+        </div>
+
+        {/* Exercise checklist */}
+        <div>
+          <div className="mb-2 flex items-center justify-between gap-3">
+            <p className="label-caps text-frost-400">Exercise checklist</p>
+            <p className="label-caps text-frost-600">One by one</p>
+          </div>
+
+          <div className="sys-inset divide-y divide-edge/60">
+            {workoutPlan.exercises.map((exercise, index) => {
+              const isDone = Boolean(completedExercises[exercise.id])
+
+              return (
+                <motion.div
+                  key={exercise.id}
+                  initial={{ opacity: 0, x: -8 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: index * 0.04 }}
+                  className={`flex cursor-pointer items-start justify-between gap-3 px-3.5 py-3 transition-colors sm:px-4 ${
+                    isDone ? 'bg-clear-500/5' : 'hover:bg-system-500/5'
+                  }`}
+                  onClick={() => handleToggleExercise(exercise.id)}
+                >
+                  <div className="flex min-w-0 items-start gap-3">
+                    {/* Square checkbox */}
+                    <button
+                      type="button"
+                      aria-label={`Toggle ${exercise.name}`}
+                      className={`mt-0.5 grid h-5 w-5 shrink-0 place-items-center border transition-[border-color,background-color,box-shadow] ${
+                        isDone
+                          ? 'border-clear-400 bg-clear-400 text-void-950 shadow-[0_0_10px_rgba(52,217,156,0.6)]'
+                          : 'border-edge-strong bg-void-950 text-transparent hover:border-system-400'
+                      }`}
+                    >
+                      <Check size={13} strokeWidth={3} />
+                    </button>
+
+                    <div className="min-w-0">
+                      <div className="flex flex-wrap items-baseline gap-2">
+                        <span className="font-mono text-xs font-bold text-frost-600">
+                          {String(index + 1).padStart(2, '0')}
+                        </span>
+                        <h4
+                          className={`font-display text-sm font-bold uppercase tracking-[0.08em] transition-colors sm:text-base ${
+                            isDone ? 'text-frost-500 line-through decoration-clear-400/60' : 'text-frost-50'
+                          }`}
+                        >
+                          {exercise.name}
+                        </h4>
+                      </div>
+                      <p className="mt-1 font-mono text-[0.68rem] text-frost-500">{exercise.notes}</p>
+                    </div>
+                  </div>
+
+                  {/* Sets & reps */}
+                  <div className="shrink-0 text-right font-mono text-xs">
+                    <span
+                      className={`block border px-2 py-0.5 font-semibold ${
+                        isDone ? 'border-clear-400/50 text-clear-200' : 'border-edge bg-void-950 text-system-200'
+                      }`}
+                    >
+                      {exercise.sets}
+                    </span>
+                    <span className="mt-1 block text-[0.62rem] text-frost-500">{exercise.reps}</span>
+                  </div>
+                </motion.div>
+              )
+            })}
+          </div>
+        </div>
       </div>
 
-      {/* Sync Error Banner */}
+      {/* Sync error */}
       {syncError && (
-        <div className="rounded-xl border border-rose-400/30 bg-rose-950/20 p-3 text-xs text-rose-200">
-          {syncError}
-        </div>
+        <p className="flex items-start gap-2 border-t border-penalty-500/30 bg-penalty-500/5 px-5 py-3 text-xs text-penalty-200">
+          <AlertTriangle size={14} className="mt-0.5 shrink-0 text-penalty-400" />
+          <span>
+            <span className="font-display font-bold uppercase tracking-[0.14em] text-penalty-300">Sync error:</span> {syncError}
+          </span>
+        </p>
       )}
 
-      {/* Completion & Gym Photo Proof Upload Footer */}
-      <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-4.5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div>
+      {/* Completion & gym photo proof footer */}
+      <div
+        className={`flex flex-col gap-3 border-t px-5 py-4 sm:flex-row sm:items-center sm:justify-between ${
+          gymQuestCompleted || allCompleted ? 'border-clear-500/30 bg-clear-500/5' : 'border-edge/70 bg-void-950/40'
+        }`}
+      >
+        <div className="min-w-0">
           {gymQuestCompleted ? (
-            <div className="flex items-center gap-2 text-emerald-300 font-display text-sm font-semibold">
-              <CheckCircle2 size={16} />
-              <span>TODAY'S WORKOUT QUEST VERIFIED & COMPLETED (+50 XP, +2 STR)</span>
+            <div className="flex items-start gap-2">
+              <CheckCircle2 size={16} className="mt-0.5 shrink-0 text-clear-300" />
+              <p className="font-display text-sm font-bold uppercase tracking-widest text-clear-200">
+                Today&apos;s workout quest verified &amp; completed{' '}
+                <span className="font-mono text-xs normal-case tracking-normal text-gold-300">(+50 XP, +2 STR)</span>
+              </p>
             </div>
           ) : allCompleted ? (
             <div>
-              <p className="font-display text-sm font-bold text-emerald-300">
-                ALL EXERCISES COMPLETED!
+              <p className="font-display text-sm font-bold uppercase tracking-[0.12em] text-clear-300 sys-glow">
+                All exercises completed!
               </p>
-              <p className="text-xs text-slate-300">
-                Upload your gym proof photo to verify and claim +50 XP and +2 STR.
+              <p className="mt-0.5 text-xs text-frost-300">
+                Upload your gym proof photo to verify and claim <span className="font-mono text-gold-300">+50 XP</span> and{' '}
+                <span className="font-mono text-gold-300">+2 STR</span>.
               </p>
             </div>
           ) : (
             <div>
-              <p className="font-display text-sm font-semibold text-white">
-                Workout in Progress
-              </p>
-              <p className="text-xs text-slate-400">
+              <p className="font-display text-sm font-bold uppercase tracking-[0.12em] text-frost-50">Workout in progress</p>
+              <p className="mt-0.5 text-xs text-frost-400">
                 Complete your exercises and upload photo proof to finish the Gym quest.
               </p>
             </div>
@@ -295,9 +296,9 @@ function DailyWorkoutCard({ onQuestCompleted }) {
             type="button"
             variant={allCompleted ? 'primary' : 'secondary'}
             onClick={() => setVerificationOpen(true)}
-            className="min-w-48 text-xs"
+            className="w-full shrink-0 text-xs sm:w-auto sm:min-w-48"
           >
-            <Camera size={15} /> UPLOAD GYM PROOF PHOTO
+            <Camera size={15} /> Upload gym proof photo
           </Button>
         )}
       </div>
@@ -312,7 +313,7 @@ function DailyWorkoutCard({ onQuestCompleted }) {
           onSubmitted={handleVerificationSuccess}
         />
       )}
-    </Card>
+    </SystemWindow>
   )
 }
 

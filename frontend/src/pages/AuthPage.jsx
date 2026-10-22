@@ -12,11 +12,15 @@ const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
 function getStrength(password) {
   if (password.length < 6)
-    return { label: 'Weak', tone: 'bg-rose-300', text: 'text-rose-200', width: 'w-1/3' }
+    return { label: 'Weak', tone: 'bg-penalty-400 shadow-[0_0_8px_rgba(255,77,94,0.8)]', text: 'text-penalty-300', width: 'w-1/3' }
   if (password.length < 10 || !/[A-Z]/.test(password) || !/[0-9]/.test(password))
-    return { label: 'Medium', tone: 'bg-amber-300', text: 'text-amber-200', width: 'w-2/3' }
-  return { label: 'Strong', tone: 'bg-emerald-300', text: 'text-emerald-200', width: 'w-full' }
+    return { label: 'Medium', tone: 'bg-gold-400 shadow-[0_0_8px_rgba(255,194,51,0.7)]', text: 'text-gold-300', width: 'w-2/3' }
+  return { label: 'Strong', tone: 'bg-clear-400 shadow-[0_0_8px_rgba(52,217,156,0.7)]', text: 'text-clear-300', width: 'w-full' }
 }
+
+// Square System checkbox: hollow frame, fills with glowing blue when checked.
+const checkboxClass =
+  'h-4 w-4 shrink-0 cursor-pointer appearance-none border border-edge-strong bg-void-950 transition-[border-color,background-color,box-shadow] hover:border-system-400 checked:border-system-400 checked:bg-system-400 checked:shadow-[0_0_10px_rgba(30,144,255,0.7),inset_0_0_0_3px_var(--color-void-950)]'
 
 function AuthPage({ mode = 'login' }) {
   const isRegister = mode === 'register'
@@ -90,21 +94,30 @@ function AuthPage({ mode = 'login' }) {
   return (
     <AuthLayout mode={mode}>
       <AuthCard>
-        <div className="mb-8">
-          <p className="label-caps text-cyan-300/70">
-            {isRegister ? 'Initialize player' : 'System access'}
+        <div className="mb-7 text-center">
+          <p className="label-caps flex items-center justify-center gap-2 text-system-300">
+            <span className="h-1.5 w-1.5 rotate-45 bg-system-400 shadow-[0_0_8px_rgba(74,174,255,0.9)]" />
+            {isRegister ? 'Player registration' : 'System access'}
+            <span className="h-1.5 w-1.5 rotate-45 bg-system-400 shadow-[0_0_8px_rgba(74,174,255,0.9)]" />
           </p>
-          <h2 className="mt-3 font-display text-2xl font-semibold text-white sm:text-3xl">
-            {isRegister ? 'Create Your Player' : 'Welcome Back, Player'}
+          <h2 className="sys-title mt-3 text-2xl leading-tight sm:text-3xl">
+            {isRegister ? 'Create your Player' : 'Welcome back, Player'}
           </h2>
-          <p className="mt-2 text-sm text-slate-500">
+          <p className="mt-2 text-sm text-frost-400">
             {isRegister ? 'Your progression begins today.' : 'Continue your progression.'}
           </p>
+          <div className="mx-auto mt-5 h-px w-2/3 bg-linear-to-r from-transparent via-system-400/70 to-transparent" />
         </div>
 
         {apiError && (
-          <div className="mb-5 rounded-xl border border-rose-400/30 bg-rose-400/10 p-3 text-xs text-rose-300 font-mono">
-            {apiError}
+          <div
+            role="alert"
+            className="mb-5 flex items-start gap-3 border border-penalty-400/60 bg-penalty-500/10 px-3 py-2.5 shadow-[0_0_16px_-6px_rgba(240,42,62,0.6)]"
+          >
+            <span className="grid h-5 w-5 shrink-0 place-items-center border border-penalty-400 font-display text-xs font-bold text-penalty-200">
+              !
+            </span>
+            <p className="min-w-0 font-mono text-xs leading-5 text-penalty-200">{apiError}</p>
           </div>
         )}
 
@@ -151,14 +164,13 @@ function AuthPage({ mode = 'login' }) {
                   autoComplete="new-password"
                 />
                 <div className="mt-3">
-                  <div className="flex items-center justify-between label-caps text-slate-600">
+                  <div className="label-caps flex items-center justify-between text-frost-600">
                     <span>Password strength</span>
                     <span className={strength.text}>{strength.label}</span>
                   </div>
-                  <div className="mt-2 h-1 overflow-hidden rounded-full bg-white/10">
-                    <div
-                      className={`h-full rounded-full transition-all duration-300 ${strength.tone} ${strength.width}`}
-                    />
+                  <div className="relative mt-2 h-1.5 overflow-hidden border border-edge bg-void-950">
+                    <div className={`h-full transition-all duration-300 ${strength.tone} ${strength.width}`} />
+                    <div className="pointer-events-none absolute inset-0 bg-[repeating-linear-gradient(90deg,transparent_0_calc(33.333%-1px),rgba(3,5,10,0.9)_calc(33.333%-1px)_33.333%)]" />
                   </div>
                 </div>
               </div>
@@ -172,40 +184,42 @@ function AuthPage({ mode = 'login' }) {
           )}
 
           {isRegister ? (
-            <label className="flex items-start gap-3 text-xs leading-5 text-slate-500">
+            <label className="flex cursor-pointer items-start gap-3 text-xs leading-5 text-frost-400">
               <input
                 type="checkbox"
                 name="terms"
                 checked={form.terms}
                 onChange={updateField}
-                className="mt-1 h-4 w-4 accent-cyan-300"
+                className={`mt-0.5 ${checkboxClass}`}
               />
               <span>
                 I accept the{' '}
-                <button type="button" className="text-cyan-200 hover:text-white">
+                <button
+                  type="button"
+                  className="text-system-300 underline decoration-system-500/40 underline-offset-4 transition-colors hover:text-frost-50"
+                >
                   RANKORA terms
                 </button>
                 .{errors.terms && (
-                  <span className="mt-1 block text-rose-300">{errors.terms}</span>
+                  <span className="mt-1 block font-mono text-penalty-300">
+                    <span className="font-display font-bold">[!]</span> {errors.terms}
+                  </span>
                 )}
               </span>
             </label>
           ) : (
-            <div className="flex items-center justify-between gap-3 text-xs">
-              <label className="flex items-center gap-2 text-slate-500">
+            <div className="flex flex-wrap items-center justify-between gap-3 text-xs">
+              <label className="flex cursor-pointer items-center gap-2.5 text-frost-400">
                 <input
                   type="checkbox"
                   name="remember"
                   checked={form.remember}
                   onChange={updateField}
-                  className="h-4 w-4 accent-cyan-300"
+                  className={checkboxClass}
                 />
                 Remember me
               </label>
-              <button
-                type="button"
-                className="text-cyan-200 transition hover:text-white"
-              >
+              <button type="button" className="text-system-300 transition-colors hover:text-frost-50">
                 Forgot password?
               </button>
             </div>
@@ -215,10 +229,10 @@ function AuthPage({ mode = 'login' }) {
             type="submit"
             loading={status === 'loading'}
             variant={status === 'success' ? 'success' : 'primary'}
-            className="min-h-12 w-full"
+            className="min-h-12 w-full text-base tracking-[0.24em]"
           >
             {status === 'loading' ? (
-              'Authenticating with system...'
+              'Authenticating with System...'
             ) : status === 'success' ? (
               <>
                 <Check size={16} /> Access granted
@@ -226,19 +240,19 @@ function AuthPage({ mode = 'login' }) {
             ) : (
               <>
                 <LockKeyhole size={16} />
-                {isRegister ? 'BEGIN AWAKENING' : 'ENTER RANKORA'}
+                {isRegister ? 'Accept' : 'Enter'}
               </>
             )}
           </Button>
         </form>
 
-        <div className="mt-7 border-t border-white/10 pt-5 text-center text-sm text-slate-500">
-          {isRegister ? 'Already have an account?' : 'New player?'}{' '}
+        <div className="mt-7 border-t border-edge pt-5 text-center text-sm text-frost-500">
+          {isRegister ? 'Already a Player?' : 'New player?'}{' '}
           <Link
             to={isRegister ? '/login' : '/register'}
-            className="font-medium text-cyan-200 transition hover:text-white"
+            className="label-caps ml-1 text-system-300 transition-colors hover:text-frost-50"
           >
-            {isRegister ? 'Login' : 'Create your account'}
+            {isRegister ? 'Log in' : 'Create your account'}
           </Link>
         </div>
       </AuthCard>

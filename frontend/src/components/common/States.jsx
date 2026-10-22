@@ -1,14 +1,35 @@
-import { AlertTriangle, Inbox, LoaderCircle } from 'lucide-react'
+import { AlertTriangle, LoaderCircle, ScanLine } from 'lucide-react'
 import { motion } from './motion.js'
 
-export function EmptyState({ title = 'Nothing here yet', description = 'Your next chapter has not been recorded.' }) {
-  return <div className="grid place-items-center rounded-2xl border border-dashed border-white/15 px-6 py-12 text-center"><Inbox className="mb-4 text-slate-500" size={26} /><h3 className="font-display text-base font-semibold text-slate-200">{title}</h3><p className="mt-2 max-w-sm text-sm text-slate-500">{description}</p></div>
+export function EmptyState({ title = 'No records found', description = 'Your next chapter has not been recorded.' }) {
+  return (
+    <div className="sys-inset grid place-items-center border-dashed px-6 py-12 text-center">
+      <ScanLine className="mb-3 text-system-400/60" size={24} />
+      <h3 className="font-display text-base font-bold uppercase tracking-[0.14em] text-frost-100">{title}</h3>
+      <p className="mt-2 max-w-sm text-sm text-frost-500">{description}</p>
+    </div>
+  )
 }
 
-export function LoadingState({ label = 'Loading system' }) {
-  return <div className="flex items-center justify-center gap-3 py-12 text-sm text-slate-400"><LoaderCircle size={18} className="animate-spin text-cyan-300" />{label}</div>
+export function LoadingState({ label = 'Loading' }) {
+  return (
+    <div className="flex items-center justify-center gap-3 py-12">
+      <LoaderCircle size={16} className="animate-spin text-system-400" />
+      <span className="label-caps animate-sys-pulse text-frost-400">{label}…</span>
+    </div>
+  )
 }
 
-export function ErrorState({ title = 'System interruption', description = 'Something prevented this module from loading.' }) {
-  return <motion.div initial="hidden" animate="visible" variants={{ hidden: { opacity: 0, y: 8 }, visible: { opacity: 1, y: 0 } }} className="rounded-2xl border border-rose-300/20 bg-rose-400/5 px-6 py-8 text-center"><AlertTriangle className="mx-auto mb-3 text-rose-300" size={24} /><h3 className="font-display font-semibold text-rose-100">{title}</h3><p className="mt-2 text-sm text-rose-200/60">{description}</p></motion.div>
+export function ErrorState({ title = 'System error', description = 'Something prevented this module from loading.' }) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 6 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="sys-panel tone-penalty px-6 py-8 text-center"
+    >
+      <AlertTriangle className="mx-auto mb-3 text-penalty-400" size={22} />
+      <h3 className="sys-title text-base [text-shadow:0_0_14px_rgba(255,77,94,0.6)]">{title}</h3>
+      <p className="mt-2 text-sm text-penalty-200/80">{description}</p>
+    </motion.div>
+  )
 }

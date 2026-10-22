@@ -1,23 +1,13 @@
 import { useEffect, useState } from 'react'
-import { motion } from 'framer-motion'
 import {
-  AlertCircle,
-  AlertTriangle,
   Award,
   Brain,
-  Calendar,
-  CheckCircle2,
-  Flame,
-  Lightbulb,
-  Shield,
   ShieldAlert,
-  Sparkles,
   TrendingDown,
   TrendingUp,
-  Zap,
 } from 'lucide-react'
 import Badge from '../common/Badge.jsx'
-import Card from '../common/Card.jsx'
+import SystemWindow from '../common/SystemWindow.jsx'
 import InsightMetricCard from './InsightMetricCard.jsx'
 import RecommendationBanner from './RecommendationBanner.jsx'
 import { generateSystemAnalysis } from '../../utils/systemAnalysisUtils.js'
@@ -49,18 +39,23 @@ function SystemAnalysisPanel({ className = '', analysis: initialAnalysis }) {
   // Handle Insufficient Data
   if (!analysis || !analysis.hasSufficientData) {
     return (
-      <Card variant="glass" className={`p-6 sm:p-8 text-center ${className}`}>
-        <div className="mx-auto grid h-12 w-12 place-items-center rounded-2xl border border-white/10 bg-white/[0.03] text-slate-500">
-          <Brain size={24} />
-        </div>
-        <h3 className="mt-4 font-display text-sm font-semibold tracking-wider text-slate-300 uppercase">
-          TELEMETRY OFFLINE
+      <SystemWindow title="Analysis" icon={<Brain size={14} />} className={className} bodyClassName="px-6 py-10 text-center sm:px-8">
+        <span className="relative mx-auto grid h-12 w-12 place-items-center">
+          <span className="absolute inset-1.5 rotate-45 border border-edge-strong bg-void-950" />
+          <Brain size={20} className="relative text-frost-500" />
+        </span>
+        <h3 className="mt-4 font-display text-base font-bold uppercase tracking-[0.16em] text-frost-200">
+          Telemetry offline
         </h3>
-        <p className="mt-2 font-mono text-xs text-slate-500 max-w-md mx-auto">
+        <p className="mx-auto mt-2 max-w-md font-mono text-xs leading-5 text-frost-500">
           {analysis?.emptyMessage ||
             'INSUFFICIENT DATA — COMPLETE MORE QUESTS TO UNLOCK SYSTEM ANALYSIS.'}
         </p>
-      </Card>
+        <p className="label-caps mt-4 flex items-center justify-center gap-2 text-frost-600">
+          <span className="h-1.5 w-1.5 rotate-45 animate-sys-pulse bg-system-400/70" />
+          Awaiting data
+        </p>
+      </SystemWindow>
     )
   }
 
@@ -82,37 +77,32 @@ function SystemAnalysisPanel({ className = '', analysis: initialAnalysis }) {
     `Telemetry active. Strongest execution observed on ${metrics.bestPerformingDay}.`
 
   return (
-    <Card variant="glass" className={`space-y-6 ${className}`}>
-      {/* Header */}
-      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-white/10 pb-4">
-        <div className="flex items-center gap-3">
-          <span className="grid h-10 w-10 place-items-center rounded-xl border border-violet-300/30 bg-violet-400/10 text-violet-200">
-            <Brain size={20} />
-          </span>
-          <div>
-            <p className="label-caps text-violet-300/80">RANKORA SYSTEM TELEMETRY</p>
-            <h2 className="font-display text-base font-semibold text-white">
-              PATTERN & RELIABILITY ANALYSIS
-            </h2>
-          </div>
-        </div>
-
-        <Badge tone="category" className="gap-1.5 font-mono text-[0.62rem]">
-          <span className="h-1.5 w-1.5 rounded-full bg-cyan-300 animate-pulse" />
-          {confidenceScore}% CONFIDENCE
+    <SystemWindow
+      title="Analysis"
+      icon={<Brain size={14} />}
+      className={className}
+      bodyClassName="space-y-5"
+      actions={
+        <Badge tone="status" className="gap-1.5 font-mono">
+          <span className="h-1.5 w-1.5 animate-sys-pulse rounded-full bg-system-300" />
+          {confidenceScore}% confidence
         </Badge>
-      </div>
-
-      {/* Primary System Analysis Diagnostic Bar */}
-      <div className="rounded-xl border border-white/10 bg-white/[0.02] p-4 font-mono text-xs leading-relaxed text-slate-300">
-        <p className="label-caps text-[0.6rem] text-violet-300">SYSTEM ANALYSIS</p>
-        <p className="mt-1 text-slate-200 font-sans text-sm">
-          {primaryInsight}
+      }
+    >
+      {/* Primary System Analysis Diagnostic Readout */}
+      <div className="sys-inset px-4 py-3.5">
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <p className="label-caps text-system-300">Pattern &amp; reliability analysis</p>
+          <p className="label-caps text-[0.62rem] text-frost-600">Rankora system telemetry</p>
+        </div>
+        <p className="mt-2 flex gap-2 text-sm leading-6 text-frost-100">
+          <span className="shrink-0 font-mono text-system-400">&gt;</span>
+          <span>{primaryInsight}</span>
         </p>
       </div>
 
       {/* 4-Metric Diagnostic Grid */}
-      <div className="grid gap-3.5 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         <InsightMetricCard
           icon={TrendingUp}
           label="BEST PERFORMING DAY"
@@ -154,7 +144,7 @@ function SystemAnalysisPanel({ className = '', analysis: initialAnalysis }) {
           tone={primaryRec.tone || 'cyan'}
         />
       )}
-    </Card>
+    </SystemWindow>
   )
 }
 

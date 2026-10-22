@@ -3,18 +3,19 @@ import { Calendar } from 'lucide-react'
 function AnalyticsPeriodFilter({ periods, activePeriod, onSelectPeriod }) {
   return (
     <div className="flex flex-wrap items-center gap-2">
-      <span className="hidden items-center gap-1.5 font-mono text-xs text-slate-500 sm:flex">
-        <Calendar size={13} /> Timeframe:
+      <span className="label-caps hidden items-center gap-1.5 text-frost-500 sm:flex">
+        <Calendar size={13} className="text-system-400" /> Timeframe
       </span>
       {periods.map((p) => (
         <button
           key={p.id}
           type="button"
+          aria-pressed={activePeriod === p.id}
           onClick={() => onSelectPeriod?.(p.id)}
-          className={`rounded-xl border px-3.5 py-1.5 font-mono text-xs font-semibold uppercase tracking-wider transition ${
+          className={`min-h-9 rounded-xs border px-3 py-1.5 font-display text-xs font-bold uppercase tracking-[0.14em] transition-[background-color,border-color,box-shadow,color] duration-150 sm:px-3.5 ${
             activePeriod === p.id
-              ? 'border-cyan-300/60 bg-cyan-300/15 text-cyan-100 shadow-[0_0_20px_rgba(103,232,249,0.15)]'
-              : 'border-white/10 bg-white/[0.03] text-slate-400 hover:border-white/20 hover:text-white'
+              ? 'border-system-400 bg-system-500/15 text-frost-50 shadow-[0_0_12px_-2px_rgba(30,144,255,0.6)]'
+              : 'border-edge bg-void-900/60 text-frost-400 hover:border-edge-strong hover:text-frost-100'
           }`}
         >
           {p.label}
